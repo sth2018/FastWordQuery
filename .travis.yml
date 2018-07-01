@@ -9,22 +9,22 @@ before_install:
   - sudo apt-get install qt4-dev-tools qt4-doc qt4-qtconfig qt4-demos qt4-designer 
   - sudo apt-get install libqwt5-qt4 libqwt5-qt4-dev
   - cd ..
-  - curl -L -O http://sourceforge.net/projects/pyqt/files/sip/sip-4.14.1/sip-4.14.1.tar.gz
-  - tar -xvf sip-4.14.1.tar.gz
-  - cd sip-4.14.1
+  - curl -L -O http://sourceforge.net/projects/pyqt/files/sip/sip-4.19.10/sip-4.19.10.tar.gz
+  - tar -xvf sip-4.19.10.tar.gz
+  - cd sip-4.19.10
   - python configure.py
   - make -j 2
   - sudo make install
   - cd ..
-  - curl -L -O http://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.9.5/PyQt-x11-gpl-4.9.5.tar.gz
-  - tar -xvf PyQt-x11-gpl-4.9.5.tar.gz
-  - cd PyQt-x11-gpl-4.9.5
+  - curl -L -O http://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.12.1/PyQt4_gpl_x11-4.12.1.tar.gz
+  - tar -xvf PyQt4_gpl_x11-4.12.1.tar.gz
+  - cd PyQt4_gpl_x11-4.12.1
   - python configure.py --confirm-license
   - make -j 2
   - sudo make install
   - cd ..
-  - curl -L -O https://apps.ankiweb.net/downloads/current/anki-2.0.52-source.tgz
-  - tar -xvf current/anki-2.0.52-source.tgz
+  - curl -L -O http://apps.ankiweb.net/downloads/current/anki-2.0.52-source.tgz
+  - tar -xvf anki-2.0.52-source.tgz
   
 before_script:
   - "export DISPLAY=:99.0"
