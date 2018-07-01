@@ -5,7 +5,6 @@ python:
   - "2.7"
 
 before_install:
-  - mv src addons
   - sudo apt-get install python-pip python2.7-dev libxext-dev python-qt4 qt4-dev-tools build-essential 
   - sudo apt-get install qt4-dev-tools qt4-doc qt4-qtconfig qt4-demos qt4-designer 
   - sudo apt-get install libqwt5-qt4 libqwt5-qt4-dev
@@ -22,8 +21,8 @@ before_install:
   - cd PyQt-x11-gpl-4.9.5
   - python configure.py --confirm-license
   - make -j 2
-  - cd ..
   - sudo make install
+  - cd ..
   - curl -L -O https://apps.ankiweb.net/downloads/current/anki-2.0.52-source.tgz
   - tar -xvf current/anki-2.0.52-source.tgz
   
@@ -31,4 +30,6 @@ before_script:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
   
-script: python runanki -b .
+script:
+  - mv src addons
+  - python runanki -b .
