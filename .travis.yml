@@ -6,6 +6,9 @@ python:
 
 before_install:
   - mv src addons
+  - sudo apt-get install python-pip python2.7-dev libxext-dev python-qt4 qt4-dev-tools build-essential 
+  - sudo apt-get install qt4-dev-tools qt4-doc qt4-qtconfig qt4-demos qt4-designer 
+  - sudo apt-get install libqwt5-qt4 libqwt5-qt4-dev
   - cd ..
   - curl -L -O http://sourceforge.net/projects/pyqt/files/sip/sip-4.14.1/sip-4.14.1.tar.gz
   - tar -xvf sip-4.14.1.tar.gz
