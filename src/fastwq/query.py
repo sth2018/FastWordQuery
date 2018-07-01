@@ -31,7 +31,7 @@ from aqt.utils import showInfo, showText, tooltip
 from .constants import Endpoint, Template
 from .context import config
 from .lang import _, _sl
-from .progress import ProgressManager
+from .progress import ProgressWindow
 from .service import service_manager, QueryResult, copy_static_file
 from .utils import Empty, MapDict, Queue, wrap_css
 
@@ -66,8 +66,7 @@ class QueryThread(QThread):
     """
     Query Worker Thread
     """
-    
-    progress_update = pyqtSignal(dict)
+
     note_flush = pyqtSignal(object)
     
     def __init__(self, manager):
@@ -75,12 +74,11 @@ class QueryThread(QThread):
         self.index = 0
         self.exit = False
         self.manager = manager
-        self.progress_update.connect(progress.update_labels)
-        self.note_flush.connect(handle_flush)
+        self.note_flush.connect(manager.handle_flush)
 
     def run(self):
         while True:
-            if progress.abort() or self.exit or self.manager == None:
+            if self.exit or not self.manager:
                 break
             try:
                 note = self.manager.queue.get(True, timeout=0.1)
@@ -90,20 +88,14 @@ class QueryThread(QThread):
                 
             try:
                 results, success_num = query_all_flds(note)
-                if self.manager:
+                if not self.exit and self.manager:
                     if self.manager.update(note, results, success_num):
-                        self.note_flush.emit(note)
-                    # Update progress window infomation
-                    self.progress_update.emit(
-                        MapDict(
-                            type='count',
-                            words_number = self.manager.counter,
-                            fails_number = self.manager.fails,
-                            fields_number = self.manager.fields)
-                        )
-                    
+                        self.note_flush.emit(note)        
             except InvalidWordException:
                 showInfo(_("NO_QUERY_WORD"))
+
+            if self.manager:
+                self.manager.queue.task_done()
                 
 
 class QueryWorkerManager(object):
@@ -115,8 +107,10 @@ class QueryWorkerManager(object):
         self.workers = []
         self.queue = Queue()
         self.mutex = QMutex()
+        self.progress = ProgressWindow(mw)
         self.total = 0
         self.counter = 0
+        self.fails = 0
         self.fields = 0
 
     def get_worker(self):
@@ -126,29 +120,13 @@ class QueryWorkerManager(object):
         return worker
 
     def start(self):
-        for x in range(0, min(config.thread_number, self.queue.qsize())):
+        self.total = self.queue.qsize()
+        self.progress.start(self.total, min=0)
+        for x in range(0, min(config.thread_number, self.total)):
             self.get_worker()
             
-        self.total = self.queue.qsize()
         for worker in self.workers:
             worker.start()
-
-    def reset(self):
-        for worker in self.workers:
-            worker.exit = True
-            worker.manager = None
-            worker.terminate()
-        
-        self.mutex.unlock()
-        self.workers = []
-        self.queue = Queue()
-        self.total = 0
-        self.counter = 0
-        self.fails = 0
-        self.fields = 0
-    
-    def clean(self):
-        self.reset()
         
     def update(self, note, results, success_num):
         self.mutex.lock()
@@ -164,16 +142,23 @@ class QueryWorkerManager(object):
     def join(self):
         for worker in self.workers:
             while not worker.isFinished():
-                if progress.abort():
+                if self.progress.abort():
+                    worker.exit = True
                     break
+                else:
+                    self.progress.update_labels(MapDict(
+                                type='count',
+                                words_number = self.counter,
+                                fails_number = self.fails,
+                                fields_number = self.fields))
                 mw.app.processEvents()
                 worker.wait(100)
-        
-
-@pyqtSlot(object)
-def handle_flush(note):
-    if note:
-        note.flush()
+        self.progress.finish()
+    
+    @pyqtSlot(object)
+    def handle_flush(self, note):
+        if note:
+            note.flush()
     
 
 def query_from_browser(browser):
@@ -192,7 +177,7 @@ def query_from_browser(browser):
         return
     
     query_all(notes)
-    browser.model.reset()
+    # browser.model.reset()
  
 
 def query_from_editor_all_fields(editor):
@@ -204,7 +189,7 @@ def query_from_editor_all_fields(editor):
         return
     
     query_all([editor.note])
-    editor.setNote(editor.note, focus=True)
+    #editor.setNote(editor.note, focus=True)
     editor.saveNow()
     
    
@@ -216,8 +201,9 @@ def query_all(notes):
     if len(notes) == 0:
         return
     
-    work_manager.reset()
-    progress.start(max=len(notes), min=0, immediate=True)
+    work_manager = QueryWorkerManager()
+    #work_manager.reset()
+    #progress.start(max=len(notes), min=0, immediate=True)
     queue = work_manager.queue
     
     for i, note in enumerate(notes):
@@ -226,11 +212,11 @@ def query_all(notes):
     work_manager.start()
     work_manager.join()
     
-    progress.finish()
+    #progress.finish()
     promot_choose_css()
     tooltip(u'{0} {1} {2}, {3} {4}'.format(_('UPDATED'), work_manager.counter, _('CARDS'), work_manager.fields, _('FIELDS')))
-    work_manager.clean()
-    service_pool.clean();
+    #work_manager.clean()
+    service_pool.clean()
     
 
 def update_note_fields(note, results):
@@ -322,7 +308,7 @@ def query_all_flds(note):
     if not word:
         raise InvalidWordException
     
-    progress.update_title(u'Querying [[ %s ]]' % word)
+    # progress.update_title(u'Querying [[ %s ]]' % word)
 
     services = {}
     tasks = []
@@ -387,8 +373,6 @@ class ServicePool(object):
         
     def clean(self):
         self.pools = {}
-        
 
-progress = ProgressManager(mw)                  # progress window
-work_manager = QueryWorkerManager()             # Query Worker Thread Manager
+
 service_pool = ServicePool()                    # Service Instance Pool Manager
