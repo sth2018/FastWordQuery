@@ -5,7 +5,23 @@ python:
   - "2.7"
 
 before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y anki python-sip
+  - mv src addons
+  - cd ..
+  - curl -L -O http://sourceforge.net/projects/pyqt/files/sip/sip-4.14.1/sip-4.14.1.tar.gz
+  - tar -xvf sip-4.14.1.tar.gz
+  - cd sip-4.14.1
+  - python configure.py
+  - make -j 2
+  - sudo make install
+  - cd ..
+  - curl -L -O http://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.9.5/PyQt-x11-gpl-4.9.5.tar.gz
+  - tar -xvf PyQt-x11-gpl-4.9.5.tar.gz
+  - cd PyQt-x11-gpl-4.9.5
+  - python configure.py --confirm-license
+  - make -j 2
+  - cd ..
+  - sudo make install
+  - curl -L -O https://apps.ankiweb.net/downloads/current/anki-2.0.52-source.tgz
+  - tar -xvf current/anki-2.0.52-source.tgz
 
-script: python runanki
+script: python runanki -b .
