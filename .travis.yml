@@ -9,9 +9,9 @@ before_install:
   - sudo apt-get install qt4-dev-tools qt4-doc qt4-qtconfig qt4-demos qt4-designer 
   - sudo apt-get install libqwt5-qt4 libqwt5-qt4-dev
   - cd ..
-  - curl -L -O http://sourceforge.net/projects/pyqt/files/sip/sip-4.19.10/sip-4.19.10.tar.gz
-  - tar -xvf sip-4.19.10.tar.gz
-  - cd sip-4.19.10
+  - curl -L -O http://sourceforge.net/projects/pyqt/files/sip/sip-4.14.1/sip-4.14.1.tar.gz
+  - tar -xvf sip-4.14.1.tar.gz
+  - cd sip-4.14.1
   - python configure.py
   - make -j 2
   - sudo make install
