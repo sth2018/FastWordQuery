@@ -15,7 +15,7 @@ It forks from WordQuery, add multi-thread feature, and some other features.
 
   - Place src folder of this repository to anki addon folder.
   OR
-  - Use the installation code: xxxxxxxx
+  - Use the installation code: 1807206748
 
 ## Other Projects Used
   - [mdict-query](https://github.com/mmjang/mdict-query)
