@@ -58,7 +58,7 @@ def browser_menu():
         浏览窗口菜单钩子
         """
         # main menu
-        menu = QMenu("Fast Word Query", browser.form.menubar)
+        menu = QMenu("FastWQ", browser.form.menubar)
         browser.form.menubar.addMenu(menu)
         # Query Selected
         action = QAction("Query Selected", browser)
@@ -85,7 +85,7 @@ def config_menu():
     """
     添加菜单项至工具下拉菜单中
     """
-    action = QAction(APP_ICON, "Fast Word Query...", mw)
+    action = QAction(APP_ICON, "FastWQ...", mw)
     action.triggered.connect(show_options)
     mw.form.menuTools.addAction(action)
     global have_setup
