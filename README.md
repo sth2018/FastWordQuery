@@ -1,5 +1,4 @@
 # FastWordQuery Addon For Anki
-[![Build Status](https://travis-ci.org/sth2018/FastWordQuery.svg?branch=master)](https://travis-ci.org/sth2018/FastWordQuery)
 
 ## Features
 
