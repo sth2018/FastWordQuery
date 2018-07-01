@@ -31,5 +31,6 @@ before_script:
   - "sh -e /etc/init.d/xvfb start"
   
 script:
+  - pwd
   - mv src addons
-  - python runanki -b .
+  - python anki-2.0.52/runanki -b .
