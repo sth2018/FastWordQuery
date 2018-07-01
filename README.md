@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/lk-geimfari/expynent.svg?branch=master)](https://travis-ci.org/lk-geimfari/expynent)
+
 # FastWordQuery Addon For Anki
 
 ## Features
@@ -13,9 +15,11 @@ It forks from WordQuery, **multi-thread feature**, and some other features.
 
 ## Install
 
-  1.Place src folder of this repository to anki addon folder.
-  **OR**
-  2.Use the installation code: 1807206748
+```zsh
+➜ Place src folder of this repository to anki addon folder.
+**OR**
+```zsh
+➜ Use the installation code: 1807206748
 
 ## Other Projects Used
   - [mdict-query](https://github.com/mmjang/mdict-query)
