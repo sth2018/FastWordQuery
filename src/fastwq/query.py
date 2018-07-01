@@ -90,7 +90,7 @@ class QueryThread(QThread):
                 results, success_num = query_all_flds(note)
                 if not self.exit and self.manager:
                     if self.manager.update(note, results, success_num):
-                        self.note_flush.emit(note)        
+                        self.note_flush.emit(note)
             except InvalidWordException:
                 showInfo(_("NO_QUERY_WORD"))
 
@@ -189,7 +189,7 @@ def query_from_editor_all_fields(editor):
         return
     
     query_all([editor.note])
-    #editor.setNote(editor.note, focus=True)
+    editor.setNote(editor.note, focus=True)
     editor.saveNow()
     
    
