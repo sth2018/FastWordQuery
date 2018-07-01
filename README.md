@@ -1,6 +1,5 @@
-[![Build Status](https://travis-ci.org/lk-geimfari/expynent.svg?branch=master)](https://travis-ci.org/lk-geimfari/expynent)
-
 # FastWordQuery Addon For Anki
+[![Build Status](https://travis-ci.org/sth2018/FastWordQuery.svg?branch=master)](https://travis-ci.org/sth2018/FastWordQuery)
 
 ## Features
 
