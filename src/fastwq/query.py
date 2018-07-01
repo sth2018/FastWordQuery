@@ -35,13 +35,16 @@ from .progress import ProgressManager
 from .service import service_manager, QueryResult, copy_static_file
 from .utils import Empty, MapDict, Queue, wrap_css
 
+
+
 def inspect_note(note):
-    '''
+    """
     inspect the note, and get necessary input parameters
     return word_ord: field index of the word in current note
     return word: the word
     return maps: dicts map of current note
-    '''
+    """
+
     maps = config.get_maps(note.model()['id'])
     for i, m in enumerate(maps):
         if m.get('word_checked', False):
@@ -58,8 +61,11 @@ def inspect_note(note):
     word = purify_word(note.fields[word_ord])
     return word_ord, word, maps
 
-# 工作线程
+
 class QueryThread(QThread):
+    """
+    Query Worker Thread
+    """
     
     progress_update = pyqtSignal(dict)
     note_flush = pyqtSignal(object)
@@ -87,7 +93,7 @@ class QueryThread(QThread):
                 if self.manager:
                     if self.manager.update(note, results, success_num):
                         self.note_flush.emit(note)
-                    # 更新进度
+                    # Update progress window infomation
                     self.progress_update.emit(
                         MapDict(
                             type='count',
@@ -99,9 +105,11 @@ class QueryThread(QThread):
             except InvalidWordException:
                 showInfo(_("NO_QUERY_WORD"))
                 
-            
 
 class QueryWorkerManager(object):
+    """
+    Query Worker Thread Manager
+    """
     
     def __init__(self):
         self.workers = []
@@ -122,7 +130,6 @@ class QueryWorkerManager(object):
             self.get_worker()
             
         self.total = self.queue.qsize()
-        progress.update_rows(len(self.workers))
         for worker in self.workers:
             worker.start()
 
@@ -169,8 +176,11 @@ def handle_flush(note):
         note.flush()
     
 
-# 浏览界面查找
 def query_from_browser(browser):
+    """
+    Query word from Browser
+    """
+
     if not browser:
         return
     
@@ -184,8 +194,12 @@ def query_from_browser(browser):
     query_all(notes)
     browser.model.reset()
  
-# 编辑界面查找
+
 def query_from_editor_all_fields(editor):
+    """
+    Query word fileds from Editor
+    """
+
     if not editor or not editor.note:
         return
     
@@ -193,9 +207,12 @@ def query_from_editor_all_fields(editor):
     editor.setNote(editor.note, focus=True)
     editor.saveNow()
     
+   
+def query_all(notes):
+    """
+    Query maps word fileds
+    """
 
-# 查找所有    
-def query_all(notes):   
     if len(notes) == 0:
         return
     
@@ -215,7 +232,12 @@ def query_all(notes):
     work_manager.clean()
     service_pool.clean();
     
+
 def update_note_fields(note, results):
+    """
+    Update query result to note fields, return updated fields count.
+    """
+
     if not results or not note or len(results) == 0:
         return
     count = 0
@@ -227,6 +249,10 @@ def update_note_fields(note, results):
     
 
 def update_note_field(note, fld_index, fld_result):
+    """
+    Update single field, if result is valid then return 1, else return 0
+    """
+
     result, js, jsfile = fld_result.result, fld_result.js, fld_result.jsfile
     # js process: add to template of the note model
     add_to_tmpl(note, js=js, jsfile=jsfile)
@@ -287,7 +313,11 @@ def add_to_tmpl(note, **kwargs):
 class InvalidWordException(Exception):
     """Invalid word exception"""
 
-def query_all_flds(note, progress_update=None):
+def query_all_flds(note):
+    """
+    Query all fields of single note
+    """
+
     word_ord, word, maps = inspect_note(note)
     if not word:
         raise InvalidWordException
@@ -315,7 +345,6 @@ def query_all_flds(note, progress_update=None):
     for task in tasks:
         try:
             service = services.get(task['k'], None)
-            service.set_notifier(progress_update, task['i'])
             qr = service.active(task['f'], task['w'])
             if qr:
                 result.update({task['i']: qr})
@@ -329,9 +358,11 @@ def query_all_flds(note, progress_update=None):
     
     return result, success_num
 
-# 服务实例对象池
+
 class ServicePool(object):
-    
+    """
+    Service instance pool
+    """
     def __init__(self):
         self.pools = {}
         
@@ -358,6 +389,6 @@ class ServicePool(object):
         self.pools = {}
         
 
-progress = ProgressManager(mw)
-work_manager = QueryWorkerManager()
-service_pool = ServicePool()
+progress = ProgressManager(mw)                  # progress window
+work_manager = QueryWorkerManager()             # Query Worker Thread Manager
+service_pool = ServicePool()                    # Service Instance Pool Manager

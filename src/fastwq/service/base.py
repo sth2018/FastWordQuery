@@ -159,32 +159,13 @@ class Service(object):
         # if the service instance is LocalService,
         # then have to build then index.
         if isinstance(self, LocalService):
-            self.notify(MapDict(type='text', index=self.work_id,
-                                text=u'Building %s...' % self._filename))
             if isinstance(self, MdxService) or isinstance(self, StardictService):
                 self.builder.check_build()
 
         for each in self.exporters:
             if action_label == each[0]:
-                self.notify(MapDict(type='info', index=self.work_id,
-                                    service_name=self.title,
-                                    field_name=action_label,
-                                    flag=u'->'))
-                result = each[1]()
-                self.notify(MapDict(type='info', index=self.work_id,
-                                    service_name=self.title,
-                                    field_name=action_label,
-                                    flag=u'√'))
-                return result
+                return each[1]()
         return QueryResult.default()
-
-    def set_notifier(self, progress_update, index):
-        self.notify_signal = progress_update
-        self.work_id = index
-
-    def notify(self, data):
-        if self.notify_signal:
-            self.notify_signal.emit(data)
 
     @staticmethod
     def get_anki_label(filename, type_):

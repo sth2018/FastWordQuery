@@ -25,40 +25,25 @@ class ProgressManager(object):
         self.blockUpdates = False
         self._win = None
         self._levels = 0
-        self.aborted = False
-        self.rows_number = 0
-        self._msg_info = defaultdict(dict)
         self._msg_count = defaultdict(int)
     # Creating progress dialogs
     ##########################################################################
 
-    @pyqtSlot(dict)
     def update_labels(self, data):
         if self.abort():
             return
-        
+
         if data.type == 'count':
             self._msg_count.update(data)
         else:
-            self._msg_info[data.index] = data
-
-        lst = []
-        for index in range(self.rows_number):
-            info = self._msg_info.get(index, None)
-            if not info:
-                continue
-            if info.type == 'text':
-                lst.append(info.text)
-            else:
-                lst.append(u"{2} [{0}] {1}".format(
-                    info.service_name, info.field_name, info.flag))
+            return
 
         number_info = ''
         words_number, fields_number, fails_number = (
-            self._msg_count['words_number'],  
+            self._msg_count['words_number'],
             self._msg_count['fields_number'],
             self._msg_count['fails_number']
-            )
+        )
         if words_number or fields_number:
             number_info += _('QUERIED') + '<br>' + 45 * '-'
             number_info += u'<br>{0}: {1}{2}'.format(
@@ -68,24 +53,17 @@ class ProgressManager(object):
             number_info += u'<br>{0}: {1}{2}'.format(
                 _('FAILURE'), fails_number, _('WORDS'))
 
-        self.update('<br>'.join(lst) + number_info, value=words_number)
+        self.update(label=number_info, value=words_number)
         self._win.adjustSize()
 
     def update_title(self, title):
         self._win.setWindowTitle(title)
 
-    def update_rows(self, number):
-        self.rows_number = number
-        self._msg_info.clear()
-
     def reset_count(self):
         self._msg_count.clear()
 
     def start(self, max=0, min=0, label=None, parent=None, immediate=False, rows=0):
-        self._msg_info.clear()
         self._msg_count.clear()
-        self.rows_number = rows
-        self.aborted = False
         self._levels += 1
         if self._levels > 1:
             return
