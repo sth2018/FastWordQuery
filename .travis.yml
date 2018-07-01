@@ -26,5 +26,9 @@ before_install:
   - sudo make install
   - curl -L -O https://apps.ankiweb.net/downloads/current/anki-2.0.52-source.tgz
   - tar -xvf current/anki-2.0.52-source.tgz
-
+  
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  
 script: python runanki -b .
