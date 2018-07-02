@@ -94,4 +94,7 @@ class Baicizhan(WebService):
 
     @export(u'单词tv', 7)
     def fld_tv_url(self):
-        return self.get_anki_label(self._get_field('tv'), 'video')
+        video = self._get_field('tv')
+        if video:
+            return self.get_anki_label(video, 'video')
+        return ''
