@@ -91,6 +91,7 @@ It forks from WordQuery, **multi-thread feature**, and some other features.
   ![](screenshots/use_02.png)
   
   2. Edit key field and click Query button
+  
   ![](screenshots/use_03.png)
 
 ## Other Projects Used
