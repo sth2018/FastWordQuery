@@ -49,8 +49,8 @@ shortcut = 'Ctrl+Q'
 
 ![](screenshots/setting_config_02.png)
 
-  - Force Update : Update all fields even if it's None
-  - Thread : The number of threads running at the same time
+  > - Force Update : Update all fields even if it's None
+  > - Thread : The number of threads running at the same time
   
   
 ## Use
