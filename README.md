@@ -5,11 +5,11 @@
 This addon looks up words in local dictionary or web dictionary and pasting the explanations to anki.
 It forks from WordQuery, **multi-thread feature**, and some other features.
 
-  - See [WordQuery](https://github.com/finalion/WordQuery) Addon Project.
-  - Querying Words and Making Cards, IMMEDIATELY!
-  - Support querying in mdx and stardict dictionaries.
-  - Support querying in web dictionaries.
-  - Support Multi-thread to query faster.
+  > - See [WordQuery](https://github.com/finalion/WordQuery) Addon Project.
+  > - Querying Words and Making Cards, IMMEDIATELY!
+  > - Support querying in mdx and stardict dictionaries.
+  > - Support querying in web dictionaries.
+  > - Support Multi-thread to query faster.
 
 ## Install
 
@@ -49,8 +49,8 @@ shortcut = 'Ctrl+Q'
 
 ![](screenshots/setting_config_02.png)
 
-  > - Force Update : Update all fields even if it's None
-  > - Thread : The number of threads running at the same time
+  > - **Force Update : Update all fields even if it's None**
+  > - **Thread : The number of threads running at the same time**
   
   
 ## Use
