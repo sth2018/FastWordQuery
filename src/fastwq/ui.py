@@ -463,8 +463,10 @@ class OptionsDialog(QDialog):
 def check_updates():
     try:
         from .libs import ankihub
-        ankihub.update(['sth2018/FastWordQuery'])
+        if not ankihub.update(['sth2018/FastWordQuery']):
+            showInfo(_('LATEST_VERSION'))
     except:
+        showInfo(_('CHECK_FAILURE'))
         pass
 
 

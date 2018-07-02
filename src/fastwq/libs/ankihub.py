@@ -10,11 +10,14 @@ import io
 from AnkiHub.updates import Ui_DialogUpdates
 from AnkiHub.markdown2 import markdown
 import aqt
+from aqt import mw
 from anki.hooks import addHook
 from anki.utils import isMac, isWin
 
+'''
 # taken from Anki's aqt/profiles.py
 def defaultBase():
+    print(mw.pm.addonFolder())
     if isWin:
         loc = QtGui.QDesktopServices.storageLocation(QtGui.QDesktopServices.DocumentsLocation)
         return os.path.join(loc, "Anki")
@@ -31,9 +34,10 @@ def defaultBase():
                 return os.path.expanduser("~/Documents/Anki")
             else:
                 return os.path.join(loc, "Anki")
+'''
 
 headers = {"User-Agent": "AnkiHub"}
-dataPath = os.path.join(defaultBase(),'.ankihub.json')
+dataPath = '.ankihub.json' #os.path.join(defaultBase(),'.ankihub.json')
 
 
 class DialogUpdates(QtGui.QDialog, Ui_DialogUpdates):
@@ -43,7 +47,11 @@ class DialogUpdates(QtGui.QDialog, Ui_DialogUpdates):
         totalSize = sum(map(lambda x:x['size'],data['assets']))
 
         def answer(doUpdate,answ):
-            callback(doUpdate,answ,self.appendHtml,self.close,install)
+            self.update.setEnabled(False)
+            self.dont.setEnabled(False)
+            self.always.setEnabled(False)
+            self.never.setEnabled(False)
+            callback(doUpdate,answ,self.appendHtml,self.finish,install)
 
         self.html = u''
         self.appendHtml(markdown(data['body']))
@@ -58,10 +66,10 @@ class DialogUpdates(QtGui.QDialog, Ui_DialogUpdates):
             self.connect(self.never,QtCore.SIGNAL('clicked()'),
                      lambda:answer(False,'never'))
         else:
-            self.update.setEnabled(False)
-            self.dont.setEnabled(False)
-            self.always.setEnabled(False)
-            self.never.setEnabled(False)
+            #self.update.setEnabled(False)
+            #self.dont.setEnabled(False)
+            #self.always.setEnabled(False)
+            #self.never.setEnabled(False)
             answer(True,automaticAnswer)
 
         fromVersion = ''
@@ -78,10 +86,13 @@ class DialogUpdates(QtGui.QDialog, Ui_DialogUpdates):
         self.html += html
         self.textBrowser.setHtml(u'<html><body>{0}{1}</body></html>'.format(self.html,temp))
 
+    def finish(self):
+
+        pass
 
 
 def installZipFile(data, fname):
-    base = os.path.join(defaultBase(),'addons')
+    base = mw.pm.addonFolder()#os.path.join(defaultBase(),'addons')
     if fname.endswith(".py"):
         path = os.path.join(base, fname)
         open(path, "wb").write(data)
@@ -140,6 +151,7 @@ def updateSingle(repositories,path,data):
                     if install:
                         filesBefore = aqt.mw.addonManager.files()
                         #directoriesBefore = aqt.mw.addonManager.directories()
+                    appendHtml('Installing ...<br/>')
                     if not installZipFile(d,fname):
                         appendHtml('Corrupt file<br/>')
                     else:
@@ -151,7 +163,6 @@ def updateSingle(repositories,path,data):
                             appendHtml('Executing new scripts...<br/>')
                             newFiles = set(aqt.mw.addonManager.files()) - set(filesBefore)
                             #newDirectories = set(aqt.mw.addonManager.directories()) - set(directoriesBefore)
-                            onReady() # close the AnkiHub update window
                             for file in newFiles:
                                 try:
                                     __import__(file.replace(".py", ""))
@@ -162,8 +173,11 @@ def updateSingle(repositories,path,data):
                             #        __import__(directory)
                             #    except:
                             #        traceback.print_exc()
-                            aqt.mw.addonManager.rebuildAddonsMenu()                        
+                            aqt.mw.addonManager.rebuildAddonsMenu()
+                            appendHtml('Done.<br/>')
+                            onReady() # close the AnkiHub update window       
                         else:
+                            appendHtml('Done.<br/>Please restart Anki.<br/>')
                             onReady() # close the AnkiHub update window
                         
                 installData()
@@ -196,6 +210,7 @@ def update(add=[],install=False):
                 'update': 'ask'
             }
 
+    ret = False
     for path,repository in repositories.items():
         username,repositoryName = path.split('/')
         if repository['update'] != 'never':
@@ -261,8 +276,11 @@ def update(add=[],install=False):
                     else:
                         dialog = DialogUpdates(None,data,repository,updateSingle(repositories,path,data))
                     dialog.exec_()
+                    ret = True
+    
     with open(dataPath,'w') as file:
         json.dump(repositories,file,indent=2)
+    return ret
 
 #update()
 
