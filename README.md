@@ -13,13 +13,10 @@ It forks from WordQuery, **multi-thread feature**, and some other features.
 
 ## Install
 
-```zsh
-➜ Place src folder of this repository to anki addon folder.
-```
+> 1.Place src folder of this repository to anki addon folder.
 **OR**
-```zsh
-➜ Use the installation code: 1807206748
-```
+> 2.Use the installation code: 1807206748
+
 
 ## Setting
 
