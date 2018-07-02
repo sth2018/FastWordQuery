@@ -15,7 +15,7 @@ It forks from WordQuery, **multi-thread feature**, and some other features.
 
 1. Place src folder of this repository to anki addon folder.
 
-  **OR**
+    **OR**
 
 2. Use the installation code: 1807206748
 
@@ -48,8 +48,8 @@ It forks from WordQuery, **multi-thread feature**, and some other features.
 
   ![](screenshots/setting_config_02.png)
 
-   - **Force Update : Update all fields even if it's None**
-   - **Thread : The number of threads running at the same time**
+   - **Force Update** : Update all fields even if it's None
+   - **Thread** : The number of threads running at the same time
   
   
 ## Use
