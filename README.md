@@ -75,7 +75,7 @@ It forks from WordQuery, **multi-thread feature**, and some other features.
 
 ### 'Browser' Window
 
-  1. Select single or multiple words, click menu **"FastWQ -> Query Selected"** or press shortcut Default is Ctrl+Q.
+  1. Select single or multiple words, click menu **"FastWQ -> Query Selected"** or press shortcut Default is **Ctrl+Q**.
 
   ![](screenshots/options_04.png)
   
@@ -90,7 +90,7 @@ It forks from WordQuery, **multi-thread feature**, and some other features.
   
   ![](screenshots/use_02.png)
   
-  2. Edit key field and click query button
+  2. Edit key field and click Query button
   
 
 ## Other Projects Used
