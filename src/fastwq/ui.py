@@ -19,6 +19,7 @@
 
 import os
 import sys
+import json
 from collections import namedtuple
 
 import anki
@@ -206,7 +207,7 @@ class OptionsDialog(QDialog):
         about_btn.clicked.connect(self.show_about)
         # about_btn.clicked.connect(self.show_paras)
         chk_update_btn = QPushButton(_('UPDATE'))
-        chk_update_btn.clicked.connect(self.check_updates)
+        chk_update_btn.clicked.connect(check_updates)
         home_label = QLabel(
             '<a href="{url}">User Guide</a>'.format(url=Endpoint.user_guide))
         home_label.setOpenExternalLinks(True)
@@ -458,45 +459,13 @@ class OptionsDialog(QDialog):
         data['last_model'] = self.current_model['id']
         config.update(data)
 
-    def check_updates(self):
 
-        self.updater = Updater()
-        self.updater.chk_finish_signal.connect(self._show_update_result)
-        self.updater.start()
-
-    @pyqtSlot(dict)
-    def _show_update_result(self, data):
-        if data['result'] == 'ok':
-            version = data['version']
-            if version > VERSION:
-                showInfo(Template.new_version.format(version=version))
-            elif version == VERSION:
-                showInfo(Template.latest_version)
-            else:
-                showInfo(Template.abnormal_version)
-        else:
-            showInfo(Template.check_failure.format(msg=data['msg']))
-
-
-class Updater(QThread):
-    chk_finish_signal = pyqtSignal(dict)
-
-    def __init__(self):
-        super(QThread, self).__init__()
-
-    def run(self):
-        import urllib2
-        try:
-            req = urllib2.Request(Endpoint.check_version)
-            req.add_header('Pragma', 'no-cache')
-            resp = urllib2.urlopen(req, timeout=10)
-            version = resp.read().strip()
-            data = {'result': 'ok', 'version': version}
-        except:
-            info = _('CHECK_FAILURE')
-            data = {'result': 'error', 'msg': info}
-
-        self.chk_finish_signal.emit(data)
+def check_updates():
+    try:
+        from .libs import ankihub
+        ankihub.update(['sth2018/FastWordQuery'])
+    except:
+        pass
 
 
 def show_options():
@@ -505,4 +474,3 @@ def show_options():
     opt_dialog.exec_()
     opt_dialog.activateWindow()
     opt_dialog.raise_()
-    # service_manager.fetch_headers()

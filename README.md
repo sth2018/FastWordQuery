@@ -98,3 +98,4 @@ It forks from WordQuery, **multi-thread feature**, and some other features.
   - [mdict-query](https://github.com/mmjang/mdict-query)
   - [pystardict](https://github.com/lig/pystardict)
   - [WordQuery](https://github.com/finalion/WordQuery)
+  - [AnkiHub](https://github.com/dayjaby/AnkiHub)
