@@ -15,7 +15,7 @@ It forks from WordQuery, **multi-thread feature**, and some other features.
 
 1. Place src folder of this repository to anki addon folder.
 
-**OR**
+  **OR**
 
 2. Use the installation code: 1807206748
 
@@ -75,7 +75,7 @@ It forks from WordQuery, **multi-thread feature**, and some other features.
 
 ### 'Browser' Window
 
-  Select single word or multiple words, click menu **"FastWQ -> Query Selected"**.
+  1. Select single word or multiple words, click menu **"FastWQ -> Query Selected"**.
 
   ![](screenshots/options_04.png)
 
