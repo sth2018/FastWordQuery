@@ -98,9 +98,4 @@ def window_shortcut(key_sequence):
     """
     global my_shortcut
     my_shortcut = key_sequence
-    try:
-        from .ui import check_updates
-        check_updates()
-    except:
-        pass
         
