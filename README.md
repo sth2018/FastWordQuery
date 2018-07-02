@@ -75,10 +75,23 @@ It forks from WordQuery, **multi-thread feature**, and some other features.
 
 ### 'Browser' Window
 
-  1. Select single word or multiple words, click menu **"FastWQ -> Query Selected"**.
+  1. Select single or multiple words, click menu **"FastWQ -> Query Selected"** or press shortcut Default is Ctrl+Q.
 
   ![](screenshots/options_04.png)
+  
+  2. Waiting query finished
+  
+  ![](screenshots/use_01.png)
+  
+  
+### 'Add' Window
 
+  1. Click Add button in Browser window, open Add window
+  
+  ![](screenshots/use_02.png)
+  
+  2. Edit key field and click query button
+  
 
 ## Other Projects Used
   - [mdict-query](https://github.com/mmjang/mdict-query)
