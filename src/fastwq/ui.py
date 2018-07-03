@@ -462,8 +462,8 @@ class OptionsDialog(QDialog):
 
 def check_updates():
     try:
-        from .libs import ankihub
-        if not ankihub.update([Endpoint.check_version]):
+        import libs.ankihub
+        if not libs.ankihub.update([Endpoint.check_version]):
             showInfo(_('LATEST_VERSION'))
     except:
         showInfo(_('CHECK_FAILURE'))
