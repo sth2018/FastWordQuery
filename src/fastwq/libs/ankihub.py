@@ -267,7 +267,7 @@ def update(add=[],install=False):
                             responseData = response.read()
                             major = json.loads(responseData)
                             data['body'] += '\n\n### {0}\n'.format(major['name']) + major['body']
-                            data['assets'] += map(asset,major['assets'])
+                            #data['assets'] += map(asset,major['assets'])
                         
                     if repository['update'] == 'always':
                         dialog = DialogUpdates(None,data,repository,updateSingle(repositories,path,data),'always')
