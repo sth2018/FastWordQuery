@@ -32,7 +32,7 @@ from aqt.utils import shortcut, showInfo
 from .constants import VERSION, Endpoint, Template
 from .context import APP_ICON, config
 from .lang import _, _sl
-from .service import service_manager
+from .service import service_manager, service_pool
 from .utils import MapDict, get_icon, get_model_byId, get_ord_from_fldname
 
 DICT_COMBOS, DICT_FILED_COMBOS, ALL_COMBOS = [0, 1, 2]
@@ -340,15 +340,21 @@ class OptionsDialog(QDialog):
     def fill_dict_combo_options(self, dict_combo, current_text):
         dict_combo.clear()
         dict_combo.addItem(_('NOT_DICT_FIELD'))
+        
         dict_combo.insertSeparator(dict_combo.count())
-        for service in service_manager.local_services:
+        for cls in service_manager.local_services:
             # combo_data.insert("data", each.label)
+            service = service_pool.get(cls.__unique__)
             dict_combo.addItem(
                 service.title, userData=service.unique)
+            service_pool.put(service)
+
         dict_combo.insertSeparator(dict_combo.count())
-        for service in service_manager.web_services:
+        for cls in service_manager.web_services:
+            service = service_pool.get(cls.__unique__)
             dict_combo.addItem(
                 service.title, userData=service.unique)
+            service_pool.put(service)
 
         def set_dict_combo_index():
             dict_combo.setCurrentIndex(-1)
@@ -371,13 +377,14 @@ class OptionsDialog(QDialog):
         else:
             field_text = field_combo.currentText()
             service_unique = dict_combo_itemdata
-            current_service = service_manager.get_service(service_unique)
+            current_service = service_pool.get(service_unique)
             # problem
             if current_service and current_service.fields:
                 for each in current_service.fields:
                     field_combo.addItem(each)
                     if each == field_text:
                         field_combo.setEditText(field_text)
+            service_pool.put(current_service)
 
     def radio_btn_checked(self):
         rbs = self.findChildren(QRadioButton)

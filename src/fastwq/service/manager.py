@@ -1,8 +1,8 @@
 #-*- coding:utf-8 -*-
 #
-# Copyright © 2016–2017 Liang Feng <finalion@gmail.com>
+# Copyright © 2016–2017 ST.Huang <wenhonghuang@gmail.com>
 #
-# Support: Report an issue at https://github.com/finalion/WordQuery/issues
+# Support: Report an issue at https://github.com/sth2018/FastWordQuery/issues
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,7 +29,18 @@ from ..context import config
 from ..utils import MapDict, importlib
 
 
+def service_wrap(service, *args):
+    """
+    wrap the service class constructor
+    """
+    def _service():
+        return service(*args)
+    return _service
+
 class ServiceManager(object):
+    """
+    Query service class manager
+    """
 
     def __init__(self):
         self.update_services()
@@ -52,13 +63,13 @@ class ServiceManager(object):
         # combine the customized local services into local services
         self.local_services.update(self.local_custom_services)
 
-    def get_service(self, unique, *args):
+    def get_service(self, unique):
         # webservice unique: class name
         # mdxservice unique: dict filepath
         for each in self.services:
-            if each.unique == unique:
-                cls = getattr(each,"__class__")
-                return cls(*args)
+            if each.__unique__ == unique:
+                #cls = getattr(each,"__class__")
+                return each()
 
     def get_service_action(self, service, label):
         for each in service.fields:
@@ -73,7 +84,7 @@ class ServiceManager(object):
         web_services, local_custom_services = set(), set()
         mypath = os.path.dirname(os.path.realpath(__file__))
         files = [f for f in os.listdir(mypath)
-                 if f not in ('__init__.py', 'base.py', 'manager.py') and not f.endswith('.pyc')]
+                 if f not in ('__init__.py', 'base.py', 'manager.py', 'pool.py') and not f.endswith('.pyc')]
         base_class = (WebService, LocalService,
                       MdxService, StardictService)
 
@@ -84,29 +95,36 @@ class ServiceManager(object):
                 for name, cls in inspect.getmembers(module, predicate=inspect.isclass):
                     if cls in base_class:
                         continue
-                    try:
-                        service = cls(*args)
-                        if issubclass(cls, WebService):
-                            web_services.add(service)
-                         # get the customized local services
-                        if issubclass(cls, LocalService):
-                            local_custom_services.add(service)
-                    except Exception:
+                    #try:
+                    #service = cls(*args)
+                    service = service_wrap(cls, *args)
+                    service.__unique__ = name
+                    if issubclass(cls, WebService):
+                        web_services.add(service)
+                        # get the customized local services
+                    if issubclass(cls, LocalService):
+                        local_custom_services.add(service)
+                    #except Exception:
                         # exclude the local service whose path has error.
-                        pass
+                    #    pass
             except ImportError:
                 continue
         return web_services, local_custom_services
 
     def _get_available_local_services(self):
+
         services = set()
         for each in config.dirs:
             for dirpath, dirnames, filenames in os.walk(each):
                 for filename in filenames:
+                    service = None
                     dict_path = os.path.join(dirpath, filename)
                     if MdxService.support(dict_path):
-                        services.add(MdxService(dict_path))
+                        service = service_wrap(MdxService, dict_path)
                     if StardictService.support(dict_path):
-                        services.add(StardictService(dict_path))
+                        service = service_wrap(StardictService, dict_path)
+                    if service:
+                        service.__unique__ = dict_path
+                        services.add(service)
                 # support mdx dictionary and stardict format dictionary
         return services

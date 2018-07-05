@@ -17,9 +17,35 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from .manager import ServiceManager
-from .pool import ServicePool
-from .base import QueryResult, copy_static_file
+from ..utils import Empty, Queue
 
-service_manager = ServiceManager()                             # Service Manager
-service_pool = ServicePool(service_manager)                    # Service Instance Pool Manager
+
+class ServicePool(object):
+    """
+    Service instance pool
+    """
+    def __init__(self, manager):
+        self.pools = {}
+        self.manager = manager
+        
+    def get(self, unique):
+        queue = self.pools.get(unique, None)
+        if queue:
+            try:
+                return queue.get(True, timeout=0.1)
+            except Empty:
+                pass
+        
+        return self.manager.get_service(unique)
+    
+    def put(self, service):
+        unique = service.unique
+        queue = self.pools.get(unique, None)
+        if queue == None:
+            queue = Queue()
+            self.pools[unique] = queue
+            
+        queue.put(service)
+        
+    def clean(self):
+        self.pools = {}

@@ -32,7 +32,7 @@ from .constants import Endpoint, Template
 from .context import config
 from .lang import _, _sl
 from .progress import ProgressWindow
-from .service import service_manager, QueryResult, copy_static_file
+from .service import service_manager, service_pool, QueryResult, copy_static_file
 from .utils import Empty, MapDict, Queue, wrap_css
 
 
@@ -257,15 +257,16 @@ def update_note_field(note, fld_index, fld_result):
 def promot_choose_css():
     for local_service in service_manager.local_services:
         try:
-            missed_css = local_service.missed_css.pop()
+            service = service_pool.get(local_service.__unique__)
+            missed_css = service.missed_css.pop()
             showInfo(Template.miss_css.format(
-                dict=local_service.title, css=missed_css))
+                dict=service.title, css=missed_css))
             filepath = QFileDialog.getOpenFileName(
                 caption=u'Choose css file', filter=u'CSS (*.css)')
             if filepath:
                 shutil.copy(filepath, u'_' + missed_css)
                 wrap_css(u'_' + missed_css)
-                local_service.missed_css.clear()
+                service.missed_css.clear()
 
         except KeyError as e:
             pass
@@ -343,36 +344,3 @@ def query_all_flds(note):
         service_pool.put(service)
     
     return result, success_num
-
-
-class ServicePool(object):
-    """
-    Service instance pool
-    """
-    def __init__(self):
-        self.pools = {}
-        
-    def get(self, unique):
-        queue = self.pools.get(unique, None)
-        if queue:
-            try:
-                return queue.get(True, timeout=0.1)
-            except Empty:
-                pass
-        
-        return service_manager.get_service(unique)
-    
-    def put(self, service):
-        unique = service.unique
-        queue = self.pools.get(unique, None)
-        if queue == None:
-            queue = Queue()
-            self.pools[unique] = queue
-            
-        queue.put(service)
-        
-    def clean(self):
-        self.pools = {}
-
-
-service_pool = ServicePool()                    # Service Instance Pool Manager
