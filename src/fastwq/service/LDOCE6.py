@@ -10,7 +10,7 @@ path = u'D:\\mdx_server\\mdx\\LDOCE6.mdx'
 @register(u'本地词典-LDOCE6')
 class Ldoce6(MdxService):
 
-    def __init__(self, dict_path):
+    def __init__(self):
         super(Ldoce6, self).__init__(path)
 
     @property
