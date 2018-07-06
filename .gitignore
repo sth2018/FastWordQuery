@@ -112,4 +112,5 @@ addons/
 .vscode/
 .pylintrc
 *.pyc
+release.zip
 README.txt
