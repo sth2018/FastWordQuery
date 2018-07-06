@@ -253,7 +253,7 @@ def update(add=[],install=False):
                         responseData = response.read()
                         minor = json.loads(responseData)
                         data['body'] += '\n\n### {0}\n'.format(minor['name']) + minor['body']
-                        data['assets'] += map(asset,minor['assets'])
+                        #data['assets'] += map(asset,minor['assets'])
                     
                         i += 1
                     if oldVersion[0]<newVersion[0] or oldVersion[1]<newVersion[1]:
