@@ -39,6 +39,8 @@ class ServicePool(object):
         return self.manager.get_service(unique)
     
     def put(self, service):
+        if service is None:
+            return
         unique = service.unique
         queue = self.pools.get(unique, None)
         if queue == None:

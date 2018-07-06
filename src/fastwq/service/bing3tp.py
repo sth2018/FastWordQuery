@@ -1,9 +1,5 @@
 #-*- coding:utf-8 -*-
 import json
-import re
-import urllib2
-
-from aqt.utils import showInfo, showText
 from .base import WebService, export, register, with_styles
 
 bing_download_mp3 = True
@@ -21,13 +17,15 @@ class BingXtk(WebService):
             'Accept-Language': 'en-US,zh-CN;q=0.8,zh;q=0.6,en;q=0.4',
             'User-Agent': 'WordQuery Addon (Anki)',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'}
+        word = self.word.replace(' ', '_')
+        url = u'http://xtk.azurewebsites.net/BingDictService.aspx?Word={}'.format(word.encode('utf-8'))
         try:
-            word = self.word.replace(' ', '_')
-            request = urllib2.Request(u'http://xtk.azurewebsites.net/BingDictService.aspx?Word=' +\
-                                       word.encode('utf-8'), headers=headers)
-            resp = json.loads(urllib2.urlopen(request).read())
+            #request = urllib2.Request(u'http://xtk.azurewebsites.net/BingDictService.aspx?Word=' +\
+            #                           word.encode('utf-8'), headers=headers)
+            #resp = json.loads(urllib2.urlopen(request).read())
+            resp = json.loads(self.get_response(url, headers=headers, timeout=10))
             return self.cache_this(resp)
-        except Exception as e:
+        except:
             return resp
 
     def _get_field(self, key, default=u''):
@@ -41,17 +39,17 @@ class BingXtk(WebService):
                 subfield = default
         return subfield
 
-    @export(u'美式音标', 1)
+    @export('AME_PHON', 1)
     def fld_phonetic_us(self):
         seg = self._get_field('pronunciation')
         return self._get_subfield(seg, 'AmE')
 
-    @export(u'英式音标', 2)
+    @export('BRE_PHON', 2)
     def fld_phonetic_uk(self):
         seg = self._get_field('pronunciation')
         return self._get_subfield(seg, 'BrE')
 
-    @export(u'美式发音', 3)
+    @export('AME_PRON', 3)
     def fld_mp3_us(self):
         seg = audio_url = self._get_field('pronunciation')
         audio_url = self._get_subfield(seg, 'AmEmp3')
@@ -61,7 +59,7 @@ class BingXtk(WebService):
                 return self.get_anki_label(filename, 'audio')
         return audio_url
 
-    @export(u'英式发音', 4)
+    @export('BRE_PRON', 4)
     def fld_mp3_uk(self):
         seg = self._get_field('pronunciation')
         audio_url = self._get_subfield(seg, 'BrEmp3')
@@ -75,15 +73,16 @@ class BingXtk(WebService):
     def _css(self, val):
         return val
 
-    @export(u'释义', 5)
+    @export('DEF', 5)
     def fld_definition(self):
         segs = self._get_field('defs')
         if isinstance(segs, list) and len(segs) > 0:
-            val = u'<br>'.join([u'<span class="pos"><b>{0}</b> </span><span class="def"><span>{1}</span></span>'.format(seg['pos'], seg['def']) for seg in segs])
+            val = u'<br>'.join([u'''<span class="pos"><b>{0}</b></span>
+                                    <span class="def">{1}</span>'''.format(seg['pos'], seg['def']) for seg in segs])
             return self._css(val)
         return ''
     
-    @export(u'例句', 6)
+    @export('EXAMPLE', 6)
     # @with_styles(cssfile='_bing2.css', need_wrap_css=True, wrap_class=u'bing')
     def fld_samples(self):
         max_numbers = 10
@@ -92,11 +91,9 @@ class BingXtk(WebService):
         for i, seg in enumerate(segs):
             sentences = sentences +\
                 u"""<li><div class="se_li1">
-                        <div class="se_li1">
                             <div class="sen_en">{0}</div>
                             <div class="sen_cn">{1}</div>
-                        </div>
-                    </div></li>""".format(seg['eng'], seg['chn'], i + 1)
+                        </div></li>""".format(seg['eng'], seg['chn'])#, i + 1)
             if i == 9:
                 break
         return u"""<div class="se_div">

@@ -12,7 +12,7 @@ MAPPINGS = [
 LANG_TO_REGEXPS = {lang: regexps for lang, regexps in MAPPINGS}
 
 
-@register(u'本地词典-LDOCE6')
+@register([u'本地词典-LDOCE6', u'MDX-LDOCE6'])
 class Ldoce6(MdxService):
 
     def __init__(self):
@@ -26,7 +26,7 @@ class Ldoce6(MdxService):
     def title(self):
         return self.__register_label__
 
-    @export(u'音标', 1)
+    @export('PHON', 1)
     def fld_phonetic(self):
         html = self.get_html()
         m = re.search(r'<span class="pron">(.*?)</span>', html)
@@ -59,15 +59,15 @@ class Ldoce6(MdxService):
                     return self.get_anki_label(name, 'audio')
         return ''
 
-    @export(u'英式发音', 2)
+    @export('BRE_PRON', 2)
     def fld_voicebre(self):
         return self._fld_voice(self.get_html(), 'br')
 
-    @export(u'美式发音', 3)
+    @export('AME_PRON', 3)
     def fld_voiceame(self):
         return self._fld_voice(self.get_html(), 'us')
 
-    @export(u'例句', 4)
+    @export('EXAMPLE', 4)
     def fld_sentence(self):
         m = re.findall(r'<span class="example"\s*.*>\s*.*<\/span>', self.get_html())
         if m:
@@ -84,7 +84,7 @@ class Ldoce6(MdxService):
             return self._css(my_str)
         return ''
 
-    @export(u'释义', 5)
+    @export('DEF', 5)
     def fld_definate(self):
         m = m = re.findall(r'<span class="def"\s*.*>\s*.*<\/span>', self.get_html())
         if m:

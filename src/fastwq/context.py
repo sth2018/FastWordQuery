@@ -51,7 +51,7 @@ class Config(object):
         data['%s_last' % self.pmname] = data.get('last_model', self.last_model_id)
         self.data.update(data)
         with open(self.path, 'wb') as f:
-            json.dump(self.data, f)
+            json.dump(self.data, f, indent=4, sort_keys=True)
             f.close()
 
     def read(self):

@@ -18,53 +18,79 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from anki.lang import currentLang
-trans = {
-    'CHECK_FILENAME_LABEL': {'zh_CN': u'使用文件名作为标签', 'en': u'Use filename as dict label', 'fr': r"Utiliser le nom de fichier en tant qu'étiquette de dico"},
-    'EXPORT_MEDIA': {'zh_CN': u'导出媒体文件', 'en': u'Export media files', 'fr': u'Exporter les fichiers multimédias'},
-    'DICTS_FOLDERS': {'zh_CN': u'字典文件夹', 'en': u'Dict folders', 'fr': u'Dossiers dico'},
-    'CHOOSE_NOTE_TYPES': {'zh_CN': u'选择笔记类型', 'en': u'Choose note types', 'fr': u'Choisir le type de note '},
-    'CURRENT_NOTE_TYPE': {'zh_CN': u'当前类型', 'en': u'Current type', 'fr': u'Type utilisé en cours'},
-    'MDX_SERVER': {'zh_CN': u'MDX服务器', 'en': u'MDX server', 'fr': u'serveur MDX'},
-    'USE_DICTIONARY': {'zh_CN': u'使用字典', 'en': u'Use dict', 'fr': u'Utilisé un dico'},
-    'UPDATED': {'zh_CN': u'更新', 'en': u'Updated', 'fr': u'Mettre à jour'},
-    'CARDS': {'zh_CN': u'卡片', 'en': u'Cards', 'fr': u'Cartes'},
-    'FAILURE': {'zh_CN': u'失败', 'en': u'Failure', 'fr': u'Échec'},
-    'SUCCESS': {'zh_CN': u'成功', 'en': u'Success', 'fr': u'Succès'},
-    'QUERIED': {'zh_CN': u'查询', 'en': u'Queried', 'fr': u'Quêté'},
-    'FIELDS': {'zh_CN': u'字段', 'en': u'Fields', 'fr': u'Champs'},
-    'WORDS': {'zh_CN': u'单词', 'en': u'Words', 'fr': u'Mots'},
-    'NOT_DICT_FIELD': {'zh_CN': u'不是字典字段', 'en': u'Not dict field', 'fr': u'Pas un champ de dico'},
-    'NOTE_TYPE_FIELDS': {'zh_CN': u'<b>笔记字段</b>', 'en': u'<b>Note fields</b>', 'fr': u'<b>Champ de note</b>'},
-    'DICTS': {'zh_CN': u'<b>字典</b>', 'en': u'<b>Dict</b>', 'fr': u'<b>Dico</b>'},
-    'DICT_FIELDS': {'zh_CN': u'<b>字典字段</b>', 'en': u'<b>Dict fields</b>', 'fr': u'<b>Champ de dico</b>'},
-    'RADIOS_DESC': {'zh_CN': u'<b>单选框选中为待查询单词字段</b>', 'en': u'<b>Word field needs to be selected.</b>', 'fr': u'<b>Champ de mot doit d\'être sélectionné. </b>'},
-    'NO_QUERY_WORD': {'zh_CN': u'查询字段无单词', 'en': u'No word is found in the query field', 'fr': u'Aucun est trouvé dans le champ'},
-    'CSS_NOT_FOUND': {'zh_CN': u'没有找到CSS文件，请手动选择', 'en': u'No valid css stylesheets found, please choose the file', 'fr': u'Aucun fichier de style CSS est valide, veuillez choisir le fichier'},
-    'ABOUT': {'zh_CN': u'关于', 'en': u'About', 'fr': u'À propos'},
-    'REPOSITORY': {'zh_CN': u'项目地址', 'en': u'Project homepage', 'fr': u'Accueil du projet'},
-    'FEEDBACK': {'zh_CN': u'反馈', 'en': u'Feedback', 'fr': u'Retourner de l\'information'},
-    'VERSION': {'zh_CN': u'版本', 'en': u'Version', 'fr': u'Version'},
-    'LATEST_VERSION': {'zh_CN': u'无更新版本.', 'en': u'No update version.', 'fr': u'Pas de mise à jour.'},
-    'ABNORMAL_VERSION': {'zh_CN': u'当前版本异常.', 'en': u'The current version is abnormal.', 'fr': u'La version actuelle est anormale.'},
-    'CHECK_FAILURE': {'zh_CN': u'版本检查失败.', 'en': u'Version check failure.', 'fr': u'Erreur de vérifier la version.'},
-    'NEW_VERSION': {'zh_CN': u'检查到新版本:', 'en': u'New version:', 'fr': u'Nouvelle version:'},
-    'UPDATE': {'zh_CN': u'更新', 'en': u'Update', 'fr': u'Mise à jour'},
-    'FORCE_UPDATE': {'zh_CN': u'强制更新字段', 'en': u'Force update'},
-    'SETTINGS': {'zh_CN': u'参数', 'en': u'Settings'},
-    'THREAD_NUMBER': {'zh_CN': u'线程数', 'en': u'Thread'},
-}
 
+
+__all__ = ['_', '_cl', '_sl']
+
+
+#Language Define, [Key, zh_CN, en]
+arr = [
+    ['CHECK_FILENAME_LABEL', u'使用文件名作为标签', u'Use filename as dict label'],
+    ['EXPORT_MEDIA', u'导出媒体文件', u'Export media files'],
+    ['DICTS_FOLDERS', u'字典文件夹', u'Dict folders'],
+    ['CHOOSE_NOTE_TYPES', u'选择笔记类型', u'Choose note types'],
+    ['CURRENT_NOTE_TYPE', u'当前类型', u'Current type'],
+    ['MDX_SERVER', u'MDX服务器', u'MDX server'],
+    ['USE_DICTIONARY', u'使用字典', u'Use dict'],
+    ['UPDATED', u'更新', u'Updated'],
+    ['CARDS', u'卡片', u'Cards'],
+    ['FAILURE', u'失败', u'Failure'],
+    ['SUCCESS', u'成功', u'Success'],
+    ['QUERIED', u'查询', u'Queried'],
+    ['FIELDS', u'字段', u'Fields'],
+    ['WORDS', u'单词', u'Words'],
+    ['NOT_DICT_FIELD', u'忽略', u'Ignore'],   #不是字典字段
+    ['NOTE_TYPE_FIELDS', u'<b>笔记字段</b>', u'<b>Note fields</b>'],
+    ['DICTS', u'<b>字典</b>', u'<b>Dict</b>'],
+    ['DICT_FIELDS', u'<b>字典字段</b>', u'<b>Dict fields</b>'],
+    ['RADIOS_DESC', u'<b>单选框选中为待查询单词字段</b>', u'<b>Word field needs to be selected.</b>'],
+    ['NO_QUERY_WORD', u'查询字段无单词', u'No word is found in the query field'],
+    ['CSS_NOT_FOUND', u'没有找到CSS文件，请手动选择', u'No valid css stylesheets found, please choose the file'],
+    ['ABOUT', u'关于', u'About'],
+    ['REPOSITORY', u'项目地址', u'Project homepage'],
+    ['FEEDBACK', u'反馈', u'Feedback'],
+    ['VERSION', u'版本', u'Version'],
+    ['LATEST_VERSION', u'已经是最新版本.', u'It\'s the lastest version.'],
+    ['ABNORMAL_VERSION', u'当前版本异常.', u'The current version is abnormal.'],
+    ['CHECK_FAILURE', u'版本检查失败.', u'Version check failure.'],
+    ['NEW_VERSION', u'检查到新版本:', u'New version:'],
+    ['UPDATE', u'更新', u'Update'],
+    ['FORCE_UPDATE', u'强制更新字段', u'Force update'],
+    ['SETTINGS', u'参数', u'Settings'],
+    ['THREAD_NUMBER', u'线程数', u'Thread'],
+
+    ['BRE_PRON', u'英式发音', u'British Pronunciation'],
+    ['AME_PRON', u'美式发音', u'American Pronunciation'],
+    ['PRON', u'发音', u'Pronunciation'],
+    ['EXAMPLE', u'例句', u'Example'],
+    ['TRANS', u'翻译', u'Translation'],
+    ['DEF', u'释义', u'Definition'],
+    ['PHON', u'音标', u'Phonetic'],
+    ['BRE_PHON', u'英式音标', u'British Phonetic'],
+    ['AME_PHON', u'美式音标', u'American Phonetic'],
+    ['IMAGE', u'图片', u'Image'],
+]
+
+trans = {item[0]: {'zh_CN': item[1], 'en': item[2]} for item in arr}
 
 def _(key, lang=currentLang):
-    if lang != 'zh_CN' and lang != 'en' and lang != 'fr':
-        lang = 'en'  # fallback
+    if lang != 'zh_CN' and lang != 'en':
+        lang = 'en'
 
     def disp(s):
         return s.lower().capitalize()
-
+    
     if key not in trans or lang not in trans[key]:
         return disp(key)
     return trans[key][lang]
+
+
+def _cl(labels, lang=currentLang):
+    if isinstance(labels, basestring):
+        return _(labels)
+    if lang != 'zh_CN' and lang != 'en':
+        lang = 'en'
+    return labels[0] if lang == 'zh_CN' else labels[1]
 
 
 def _sl(key):

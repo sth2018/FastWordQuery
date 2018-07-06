@@ -5,7 +5,7 @@ from aqt.utils import showInfo, showText
 from .base import WebService, export, register, with_styles, parseHtml
 
 
-@register(u'Bing')
+@register([u'必应', u'Bing'])
 class Bing(WebService):
 
     def __init__(self):
@@ -40,15 +40,15 @@ class Bing(WebService):
     def _get_field(self, key, default=u''):
         return self.cache_result(key) if self.cached(key) else self._get_content().get(key, default)
 
-    @export(u'美式音标', 1)
+    @export('AME_PHON', 1)
     def fld_phonetic_us(self):
         return self._get_field('phonitic_us')
 
-    @export(u'英式音标', 2)
+    @export('BRE_PHON', 2)
     def fld_phonetic_uk(self):
         return self._get_field('phonitic_uk')
 
-    @export(u'词语时态', 3)
+    @export([u'词语时态', u'Participle'], 3)
     def fld_participle(self):
         return self._get_field('participle')
 
@@ -56,7 +56,7 @@ class Bing(WebService):
     def _css(self, val):
         return val
     
-    @export(u'释义', 4)
+    @export('DEF', 4)
     def fld_definition(self):
         val = self._get_field('def')
         if val == None or val == '':

@@ -52,12 +52,12 @@ class ProgressWindow(object):
             self._msg_count['fails_number']
         )
         if words_number or fields_number:
-            number_info += _('QUERIED') + '<br>' + 45 * '-'
-            number_info += u'<br>{0}: {1}{2}'.format(
+            number_info += _('QUERIED') + u'<br>' + 45 * u'-'
+            number_info += u'<br>{0}: {1} {2}'.format(
                 _('SUCCESS'), words_number, _('WORDS'))
-            number_info += u'<br>{0}: {1}{2}'.format(
+            number_info += u'<br>{0}: {1} {2}'.format(
                 _('UPDATE'), fields_number, _('FIELDS'))
-            number_info += u'<br>{0}: {1}{2}'.format(
+            number_info += u'<br>{0}: {1} {2}'.format(
                 _('FAILURE'), fails_number, _('WORDS'))
 
         self._update(label=number_info, value=words_number)

@@ -309,6 +309,7 @@ class OptionsDialog(QDialog):
         self.setLayout(self.main_layout)
         self.resize(widget_size.dialog_width,
                     (i + 1) * widget_size.map_max_height + widget_size.dialog_height_margin)
+        self.save()
 
     def show_models(self):
         edit = QPushButton(anki.lang._("Manage"),
@@ -384,13 +385,13 @@ class OptionsDialog(QDialog):
             unique = dict_combo_itemdata
             service = service_pool.get(unique)
             # problem
+            field_combo.setEditText(u'')
             if service and service.support and service.fields:
                 for each in service.fields:
                     field_combo.addItem(each)
                     if each == field_text:
                         field_combo.setEditText(field_text)
-
-            field_combo.setEnabled(service.support)
+            field_combo.setEnabled(service != None and service.support)
             service_pool.put(service)
 
     def radio_btn_checked(self):

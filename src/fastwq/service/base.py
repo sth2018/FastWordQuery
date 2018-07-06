@@ -38,6 +38,7 @@ from ..context import config
 from ..libs import MdxBuilder, StardictBuilder
 from ..utils import MapDict, wrap_css
 from ..libs.bs4 import BeautifulSoup
+from ..lang import _cl
 
 try:
     import threading as _threading
@@ -45,22 +46,26 @@ except ImportError:
     import dummy_threading as _threading
 
 
-def register(label):
-    """register the dict service with a label, which will be shown in the dicts list."""
+def register(labels):
+    """
+    register the dict service with a labels, which will be shown in the dicts list.
+    """
     def _deco(cls):
-        cls.__register_label__ = label
+        cls.__register_label__ = _cl(labels)
         return cls
     return _deco
 
 
-def export(label, index):
-    """export dict field function with a label, which will be shown in the fields list."""
+def export(labels, index):
+    """
+    export dict field function with a labels, which will be shown in the fields list.
+    """
     def _with(fld_func):
         @wraps(fld_func)
         def _deco(cls, *args, **kwargs):
             res = fld_func(cls, *args, **kwargs)
             return QueryResult(result=res) if not isinstance(res, QueryResult) else res
-        _deco.__export_attrs__ = (label, index)
+        _deco.__export_attrs__ = (_cl(labels), index)
         return _deco
     return _with
 
@@ -123,12 +128,12 @@ def with_styles(**styles):
         return _deco
     return _with
 
-# BS4资源锁，防止程序卡死
+# bs4 threading lock, overload protection
 BS_LOCKS = [_threading.Lock(), _threading.Lock()]
 
 def parseHtml(html):
     '''
-    使用BS4解析html
+    use bs4 lib parse HTML, run only 2 BS at the same time
     '''
     lock = BS_LOCKS[random.randrange(0, len(BS_LOCKS) - 1, 1)]
     lock.acquire()
@@ -138,7 +143,9 @@ def parseHtml(html):
 
 
 class Service(object):
-    '''service base class'''
+    '''
+    Dictionary Service Abstract Class
+    '''
 
     def __init__(self):
         self.cache = defaultdict(defaultdict)
@@ -207,7 +214,9 @@ class Service(object):
 
 
 class WebService(Service):
-    '''web service class'''
+    """
+    Web Dictionary Service
+    """
 
     def __init__(self):
         super(WebService, self).__init__()
@@ -250,7 +259,7 @@ class WebService(Service):
 
 class LocalService(Service):
     """
-    本地词典
+    Local Dictionary Service
     """
 
     def __init__(self, dict_path):
@@ -275,12 +284,12 @@ class LocalService(Service):
     def _filename(self):
         return os.path.splitext(os.path.basename(self.dict_path))[0]
 
-# mdx字典实例集
+# MdxBuilder instances map
 mdx_builders = defaultdict(dict)
 
 class MdxService(LocalService):
     """
-    Mdx本地词典
+    MDX Local Dictionary Service
     """
 
     def __init__(self, dict_path):
@@ -304,14 +313,14 @@ class MdxService(LocalService):
         else:
             return self.builder['_title']
 
-    @export(u"default", 0)
+    @export([u'默认', u'Default'], 0)
     def fld_whole(self):
         html = self.get_html()
         js = re.findall(r'<script.*?>.*?</script>', html, re.DOTALL)
         return QueryResult(result=html, js=u'\n'.join(js))
 
     def _get_definition_mdx(self):
-        """根据关键字得到MDX词典的解释"""
+        """according to the word return mdx dictionary page"""
         content = self.builder.mdx_lookup(self.word)
         str_content = ""
         if len(content) > 0:
@@ -321,7 +330,7 @@ class MdxService(LocalService):
         return str_content
 
     def _get_definition_mdd(self, word):
-        """根据关键字得到MDX词典的媒体"""
+        """according to the keyword(param word) return the media file contents"""
         word = word.replace('/', '\\')
         content = self.builder.mdd_lookup(word)
         if len(content) > 0:
@@ -330,7 +339,7 @@ class MdxService(LocalService):
             return []
 
     def get_html(self):
-        """取得self.word对应的html页面"""
+        """get self.word's html page from MDX"""
         if not self.html_cache[self.word]:
             html = self._get_definition_mdx()
             if html:
@@ -338,7 +347,7 @@ class MdxService(LocalService):
         return self.html_cache[self.word]
 
     def save_file(self, filepath_in_mdx, savepath):
-        """从mmd中取出filepath_in_mdx媒体文件并保存到savepath"""
+        """according to filepath_in_mdx to get media file and save it to savepath"""
         try:
             bytes_list = self._get_definition_mdd(filepath_in_mdx)
             if bytes_list:
@@ -372,7 +381,7 @@ class StardictService(LocalService):
         else:
             return self.builder.ifo.bookname.decode('utf-8')
 
-    @export(u"default", 0)
+    @export([u'默认', u'Default'], 0)
     def fld_whole(self):
         #self.builder.check_build()
         try:
