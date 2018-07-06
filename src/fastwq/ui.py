@@ -383,16 +383,14 @@ class OptionsDialog(QDialog):
             field_text = field_combo.currentText()
             unique = dict_combo_itemdata
             service = service_pool.get(unique)
-            text = ''
             # problem
             if service and service.support and service.fields:
                 for each in service.fields:
                     field_combo.addItem(each)
                     if each == field_text:
-                        text = each
+                        field_combo.setEditText(field_text)
 
-            field_combo.setEditText(text)
-            field_combo.setEnabled(text != '')
+            field_combo.setEnabled(service.support)
             service_pool.put(service)
 
     def radio_btn_checked(self):
