@@ -84,31 +84,31 @@ class ServiceManager(object):
         web_services, local_custom_services = set(), set()
         mypath = os.path.dirname(os.path.realpath(__file__))
         files = [f for f in os.listdir(mypath)
-                 if f not in ('__init__.py', 'base.py', 'manager.py', 'pool.py') and not f.endswith('.pyc')]
+                 if f not in ('__init__.py', 'base.py', 'manager.py', 'pool.py') and not f.endswith('.pyc') and not os.path.isdir(mypath+os.sep+f)]
         base_class = (WebService, LocalService,
                       MdxService, StardictService)
 
         for f in files:
-            try:
-                module = importlib.import_module(
-                    '.%s' % os.path.splitext(f)[0], __package__)
-                for name, cls in inspect.getmembers(module, predicate=inspect.isclass):
-                    if cls in base_class:
-                        continue
-                    #try:
-                    #service = cls(*args)
-                    service = service_wrap(cls, *args)
-                    service.__unique__ = name
-                    if issubclass(cls, WebService):
-                        web_services.add(service)
-                        # get the customized local services
-                    if issubclass(cls, LocalService):
-                        local_custom_services.add(service)
-                    #except Exception:
-                        # exclude the local service whose path has error.
-                    #    pass
-            except ImportError:
-                continue
+            #try:
+            module = importlib.import_module(
+                '.%s' % os.path.splitext(f)[0], __package__)
+            for name, cls in inspect.getmembers(module, predicate=inspect.isclass):
+                if cls in base_class:
+                    continue
+                #try:
+                #service = cls(*args)
+                service = service_wrap(cls, *args)
+                service.__unique__ = name
+                if issubclass(cls, WebService):
+                    web_services.add(service)
+                    # get the customized local services
+                if issubclass(cls, LocalService):
+                    local_custom_services.add(service)
+                #except Exception:
+                    # exclude the local service whose path has error.
+                #    pass
+            #except ImportError:
+            #   continue
         return web_services, local_custom_services
 
     def _get_available_local_services(self):

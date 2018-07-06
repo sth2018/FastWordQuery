@@ -73,6 +73,7 @@ class QueryThread(QThread):
         super(QueryThread, self).__init__()
         self.index = 0
         self.exit = False
+        self.finished = False
         self.manager = manager
         self.note_flush.connect(manager.handle_flush)
 
@@ -96,6 +97,8 @@ class QueryThread(QThread):
 
             if self.manager:
                 self.manager.queue.task_done()
+
+        self.finished = True
                 
 
 class QueryWorkerManager(object):
@@ -122,11 +125,15 @@ class QueryWorkerManager(object):
     def start(self):
         self.total = self.queue.qsize()
         self.progress.start(self.total, min=0)
-        for x in range(0, min(config.thread_number, self.total)):
-            self.get_worker()
-            
-        for worker in self.workers:
-            worker.start()
+        if self.total > 1:
+            for x in range(0, min(config.thread_number, self.total)):
+                self.get_worker()
+                
+            for worker in self.workers:
+                worker.start()
+        else:
+            worker = self.get_worker()
+            worker.run()
         
     def update(self, note, results, success_num):
         self.mutex.lock()
@@ -137,11 +144,15 @@ class QueryWorkerManager(object):
         val = update_note_fields(note, results)
         self.fields += val
         self.mutex.unlock()
-        return val > 0
+        if self.total > 1:
+            return val > 0
+        else:
+            self.handle_flush(note)
+            return False
         
     def join(self):
         for worker in self.workers:
-            while not worker.isFinished():
+            while not worker.finished:
                 if self.progress.abort():
                     worker.exit = True
                     break
@@ -323,22 +334,25 @@ def query_all_flds(note):
         dict_unique = each.get('dict_unique', '').strip()
         if dict_name and dict_name not in _sl('NOT_DICT_FIELD') and dict_field:
             s = services.get(dict_unique, None)
-            if s == None:
-                services[dict_unique] = service_pool.get(dict_unique)#service_manager.get_service(dict_unique)
-            tasks.append({'k': dict_unique, 'w': word, 'f': dict_field, 'i': i})
+            if s is None:
+                s = service_pool.get(dict_unique)
+                if s.support:
+                    services[dict_unique] = s
+            if s and s.support:
+                tasks.append({'k': dict_unique, 'w': word, 'f': dict_field, 'i': i})
     
     success_num = 0
     result = defaultdict(QueryResult)
     for task in tasks:
-        try:
-            service = services.get(task['k'], None)
-            qr = service.active(task['f'], task['w'])
-            if qr:
-                result.update({task['i']: qr})
-                success_num += 1
-        except:
-            showInfo(_("NO_QUERY_WORD"))
-            pass
+        #try:
+        service = services.get(task['k'], None)
+        qr = service.active(task['f'], task['w'])
+        if qr:
+            result.update({task['i']: qr})
+            success_num += 1
+        #except:
+        #    showInfo(_("NO_QUERY_WORD"))
+        #    pass
         
     for service in services.values():
         service_pool.put(service)

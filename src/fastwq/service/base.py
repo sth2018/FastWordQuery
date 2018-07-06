@@ -1,8 +1,8 @@
 #-*- coding:utf-8 -*-
 #
-# Copyright © 2016–2017 Liang Feng <finalion@gmail.com>
+# Copyright © 2016–2017 ST.Huang <wenhonghuang@gmail.com>
 #
-# Support: Report an issue at https://github.com/finalion/WordQuery/issues
+# Support: Report an issue at https://github.com/sth2018/FastWordQuery/issues
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,17 +29,20 @@ import sqlite3
 import urllib
 import urllib2
 import zlib
+import random
 from collections import defaultdict
 from functools import wraps
 
 import cookielib
-from aqt import mw
-from aqt.qt import QFileDialog
-from aqt.utils import showInfo, showText
 from ..context import config
-from ..lang import _
 from ..libs import MdxBuilder, StardictBuilder
 from ..utils import MapDict, wrap_css
+from ..libs.bs4 import BeautifulSoup
+
+try:
+    import threading as _threading
+except ImportError:
+    import dummy_threading as _threading
 
 
 def register(label):
@@ -120,17 +123,45 @@ def with_styles(**styles):
         return _deco
     return _with
 
+# BS4资源锁，防止程序卡死
+BS_LOCKS = [_threading.Lock(), _threading.Lock()]
+
+def parseHtml(html):
+    '''
+    使用BS4解析html
+    '''
+    lock = BS_LOCKS[random.randrange(0, len(BS_LOCKS) - 1, 1)]
+    lock.acquire()
+    soup = BeautifulSoup(html, 'html.parser')
+    lock.release()
+    return soup
+
 
 class Service(object):
     '''service base class'''
 
     def __init__(self):
+        self.cache = defaultdict(defaultdict)
         self._exporters = self.get_exporters()
         self._fields, self._actions = zip(*self._exporters) \
             if self._exporters else (None, None)
         # query interval: default 500ms
         self.query_interval = 0.5
 
+    def cache_this(self, result):
+        self.cache[self.word].update(result)
+        return result
+
+    def cached(self, key):
+        return (self.word in self.cache) and self.cache[self.word].has_key(key)
+
+    def cache_result(self, key):
+        return self.cache[self.word].get(key, u'')
+
+    @property
+    def support(self):
+        return True
+        
     @property
     def fields(self):
         return self._fields
@@ -158,9 +189,9 @@ class Service(object):
         self.word = word
         # if the service instance is LocalService,
         # then have to build then index.
-        if isinstance(self, LocalService):
-            if isinstance(self, MdxService) or isinstance(self, StardictService):
-                self.builder.check_build()
+        #if isinstance(self, LocalService):
+        #    if isinstance(self, MdxService) or isinstance(self, StardictService):
+        #        self.builder.check_build()
 
         for each in self.exporters:
             if action_label == each[0]:
@@ -180,21 +211,10 @@ class WebService(Service):
 
     def __init__(self):
         super(WebService, self).__init__()
-        self.cache = defaultdict(defaultdict)
         self._cookie = cookielib.CookieJar()
         self._opener = urllib2.build_opener(
             urllib2.HTTPCookieProcessor(self._cookie))
-        self.query_interval = 1
-
-    def cache_this(self, result):
-        self.cache[self.word].update(result)
-        return result
-
-    def cached(self, key):
-        return (self.word in self.cache) and self.cache[self.word].has_key(key)
-
-    def cache_result(self, key):
-        return self.cache[self.word].get(key, u'')
+        self.query_interval = 1.0
 
     @property
     def title(self):
@@ -229,12 +249,19 @@ class WebService(Service):
 
 
 class LocalService(Service):
+    """
+    本地词典
+    """
 
     def __init__(self, dict_path):
         super(LocalService, self).__init__()
         self.dict_path = dict_path
         self.builder = None
         self.missed_css = set()
+
+    @property
+    def support(self):
+        return os.path.isfile(self.dict_path)
 
     @property
     def unique(self):
@@ -248,28 +275,34 @@ class LocalService(Service):
     def _filename(self):
         return os.path.splitext(os.path.basename(self.dict_path))[0]
 
+# mdx字典实例集
+mdx_builders = defaultdict(dict)
 
 class MdxService(LocalService):
+    """
+    Mdx本地词典
+    """
 
     def __init__(self, dict_path):
         super(MdxService, self).__init__(dict_path)
-        self.media_cache = defaultdict(set)
-        self.cache = defaultdict(str)
+        self.html_cache = defaultdict(str)
         self.query_interval = 0.01
         self.styles = []
-        self.builder = MdxBuilder(dict_path)
-        self.builder.get_header()
+        if self.support:
+            if not mdx_builders.has_key(dict_path) or not mdx_builders[dict_path]:
+                mdx_builders[dict_path] = MdxBuilder(dict_path)
+            self.builder = mdx_builders[dict_path]
 
-    @staticmethod
-    def support(dict_path):
-        return os.path.isfile(dict_path) and dict_path.lower().endswith('.mdx')
+    @property
+    def support(self):
+        return os.path.isfile(self.dict_path) and self.dict_path.lower().endswith('.mdx')
 
     @property
     def title(self):
         if config.use_filename or not self.builder._title or self.builder._title.startswith('Title'):
             return self._filename
         else:
-            return self.builder.meta['title']
+            return self.builder['_title']
 
     @export(u"default", 0)
     def fld_whole(self):
@@ -277,94 +310,46 @@ class MdxService(LocalService):
         js = re.findall(r'<script.*?>.*?</script>', html, re.DOTALL)
         return QueryResult(result=html, js=u'\n'.join(js))
 
+    def _get_definition_mdx(self):
+        """根据关键字得到MDX词典的解释"""
+        content = self.builder.mdx_lookup(self.word)
+        str_content = ""
+        if len(content) > 0:
+            for c in content:
+                str_content += c.replace("\r\n","").replace("entry:/","")
+
+        return str_content
+
+    def _get_definition_mdd(self, word):
+        """根据关键字得到MDX词典的媒体"""
+        word = word.replace('/', '\\')
+        content = self.builder.mdd_lookup(word)
+        if len(content) > 0:
+            return [content[0]]
+        else:
+            return []
+
     def get_html(self):
-        if not self.cache[self.word]:
-            html = ''
-            result = self.builder.mdx_lookup(self.word)  # self.word: unicode
-            if result:
-                if result[0].upper().find(u"@@@LINK=") > -1:
-                    # redirect to a new word behind the equal symol.
-                    self.word = result[0][len(u"@@@LINK="):].strip()
-                    return self.get_html()
-                else:
-                    html = self.adapt_to_anki(result[0])
-                    self.cache[self.word] = html
-        return self.cache[self.word]
+        """取得self.word对应的html页面"""
+        if not self.html_cache[self.word]:
+            html = self._get_definition_mdx()
+            if html:
+                self.html_cache[self.word] = html
+        return self.html_cache[self.word]
 
-    def adapt_to_anki(self, html):
-        """
-        1. convert the media path to actual path in anki's collection media folder.
-        2. remove the js codes (js inside will expires.)
-        """
-        # convert media path, save media files
-        media_files_set = set()
-        mcss = re.findall(r'href="(\S+?\.css)"', html)
-        media_files_set.update(set(mcss))
-        mjs = re.findall(r'src="([\w\./]\S+?\.js)"', html)
-        media_files_set.update(set(mjs))
-        msrc = re.findall(r'<img.*?src="([\w\./]\S+?)".*?>', html)
-        media_files_set.update(set(msrc))
-        msound = re.findall(r'href="sound:(.*?\.(?:mp3|wav))"', html)
-        if config.export_media:
-            media_files_set.update(set(msound))
-        for each in media_files_set:
-            html = html.replace(each, u'_' + each.split('/')[-1])
-        # find sounds
-        p = re.compile(
-            r'<a[^>]+?href=\"(sound:_.*?\.(?:mp3|wav))\"[^>]*?>(.*?)</a>')
-        html = p.sub(u"[\\1]\\2", html)
-        self.save_media_files(media_files_set)
-        for cssfile in mcss:
-            cssfile = '_' + \
-                os.path.basename(cssfile.replace('\\', os.path.sep))
-            # if not exists the css file, the user can place the file to media
-            # folder first, and it will also execute the wrap process to generate
-            # the desired file.
-            if not os.path.exists(cssfile):
-                self.missed_css.add(cssfile[1:])
-            new_css_file, wrap_class_name = wrap_css(cssfile)
-            html = html.replace(cssfile, new_css_file)
-            # add global div to the result html
-            html = u'<div class="{0}">{1}</div>'.format(
-                wrap_class_name, html)
-
-        return html
-
-    def save_file(self, filepath_in_mdx, savepath=None):
-        basename = os.path.basename(filepath_in_mdx.replace('\\', os.path.sep))
-        if savepath is None:
-            savepath = '_' + basename
+    def save_file(self, filepath_in_mdx, savepath):
+        """从mmd中取出filepath_in_mdx媒体文件并保存到savepath"""
         try:
-            bytes_list = self.builder.mdd_lookup(filepath_in_mdx)
-            if bytes_list and not os.path.exists(savepath):
-                with open(savepath, 'wb') as f:
-                    f.write(bytes_list[0])
-                    return savepath
+            bytes_list = self._get_definition_mdd(filepath_in_mdx)
+            if bytes_list:
+                if not os.path.exists(savepath):
+                    with open(savepath, 'wb') as f:
+                        f.write(bytes_list[0])
+                return savepath
         except sqlite3.OperationalError as e:
-            showInfo(str(e))
-
-    def save_media_files(self, data):
-        """
-        get the necessary static files from local mdx dictionary
-        ** kwargs: data = list
-        """
-        diff = data.difference(self.media_cache['files'])
-        self.media_cache['files'].update(diff)
-        lst, errors = list(), list()
-        wild = [
-            '*' + os.path.basename(each.replace('\\', os.path.sep)) for each in diff]
-        try:
-            for each in wild:
-                keys = self.builder.get_mdd_keys(each)
-                if not keys:
-                    errors.append(each)
-                lst.extend(keys)
-            for each in lst:
-                self.save_file(each)
-        except AttributeError:
+            #showInfo(str(e))
             pass
-
-        return errors
+        return ''
 
 
 class StardictService(LocalService):
@@ -372,12 +357,13 @@ class StardictService(LocalService):
     def __init__(self, dict_path):
         super(StardictService, self).__init__(dict_path)
         self.query_interval = 0.05
-        self.builder = StardictBuilder(self.dict_path, in_memory=False)
-        self.builder.get_header()
+        if self.support:
+            self.builder = StardictBuilder(self.dict_path, in_memory=False)
+            self.builder.get_header()
 
-    @staticmethod
-    def support(dict_path):
-        return os.path.isfile(dict_path) and dict_path.lower().endswith('.ifo')
+    @property
+    def support(self):
+        return os.path.isfile(self.dict_path) and self.dict_path.lower().endswith('.ifo')
 
     @property
     def title(self):
@@ -388,7 +374,7 @@ class StardictService(LocalService):
 
     @export(u"default", 0)
     def fld_whole(self):
-        self.builder.check_build()
+        #self.builder.check_build()
         try:
             result = self.builder[self.word]
             result = result.strip().replace('\r\n', '<br />')\

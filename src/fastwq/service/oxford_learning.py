@@ -1,47 +1,36 @@
 # coding=utf-8
-from warnings import filterwarnings
+#from warnings import filterwarnings
+from ..libs.bs4 import Tag
+from .base import WebService, export, register, with_styles, parseHtml
 
-from bs4 import BeautifulSoup, Tag
-from requests import Session
-
-from .base import WebService, export, register, with_styles
-
-filterwarnings('ignore')
+#filterwarnings('ignore')
 
 import sys
 
-reload(sys)
-sys.setdefaultencoding('utf8')
+#reload(sys)
+#sys.setdefaultencoding('utf8')
 
+BASE_URL = u'https://www.oxfordlearnersdictionaries.com/definition/english/{word}'
 
 @register(u'牛津学习词典')
 class OxfordLearning(WebService):
-    _base_url = 'https://www.oxfordlearnersdictionaries.com/definition/english/'
-
+    
     def __init__(self):
         super(OxfordLearning, self).__init__()
 
-        self.s = Session()
-        self.s.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 '
-                          '(KHTML, like Gecko) Chrome/31.0.1623.0 Safari/537.36'
-        }
-        self.s.get(self._base_url)
-
     def query(self, word):
         """
-
         :param word:
         :rtype:  WebWord
         """
-        _qry_url = self._base_url + word
+        qry_url = BASE_URL.format(word=word)
 
         retried = 10
         while retried:
             try:
-                rsp = self.s.get(_qry_url, )
-                if rsp.status_code == 200:
-                    return OxfordLearningDictWord(rsp.content.decode('utf-8'))
+                rsp = self.get_response(qry_url, timeout=15)
+                if rsp:
+                    return OxfordLearningDictWord(rsp.decode('utf-8'))
                 break
             except:
                 retried -= 1
@@ -121,7 +110,7 @@ class OxfordLearningDictWord:
         if not markups:
             return
         self.markups = markups
-        self.bs = BeautifulSoup(self.markups, from_encoding="utf-8")
+        self.bs = parseHtml(self.markups)
         self._defs = []
         self._defs_html = []
 

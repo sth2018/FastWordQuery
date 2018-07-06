@@ -1,17 +1,22 @@
 #-*- coding:utf-8 -*-
 import re
+from .base import MdxService, export, register, with_styles, parseHtml
 
-from aqt.utils import showInfo, showText
-from .base import MdxService, export, register, with_styles
+PATH = u'D:\\mdx_server\\mdx\\LDOCE6.mdx'
 
-path = u'D:\\mdx_server\\mdx\\LDOCE6.mdx'
+VOICE_PATTERN = r'<a href="sound://([\w/]+\w*\.mp3)"><img src="img/spkr_%s.png"></a>'
+MAPPINGS = [
+    ['br', [re.compile(VOICE_PATTERN % r'r')]],
+    ['us', [re.compile(VOICE_PATTERN % r'b')]]
+]
+LANG_TO_REGEXPS = {lang: regexps for lang, regexps in MAPPINGS}
 
 
 @register(u'本地词典-LDOCE6')
 class Ldoce6(MdxService):
 
     def __init__(self):
-        super(Ldoce6, self).__init__(path)
+        super(Ldoce6, self).__init__(PATH)
 
     @property
     def unique(self):
@@ -27,58 +32,74 @@ class Ldoce6(MdxService):
         m = re.search(r'<span class="pron">(.*?)</span>', html)
         if m:
             return m.groups()[0]
+        return ''
 
-    @export(u'Bre单词发音', 2)
+    def _fld_voice(self, html, voice):
+        """获取发音字段"""
+        from hashlib import sha1
+        for regexp in LANG_TO_REGEXPS[voice]:
+            match = regexp.search(html)
+            if match:
+                val = '/' + match.group(1)
+                hex_digest = sha1(
+                    val.encode('utf-8') if isinstance(val, unicode)
+                    else val
+                ).hexdigest().lower()
+
+                assert len(hex_digest) == 40, "unexpected output from hash library"
+                name = '.'.join([
+                        '-'.join([
+                            'mdx', self.unique.lower(), hex_digest[:8], hex_digest[8:16],
+                            hex_digest[16:24], hex_digest[24:32], hex_digest[32:],
+                        ]),
+                        'mp3',
+                    ])
+                name = self.save_file(val, name)
+                if name:
+                    return self.get_anki_label(name, 'audio')
+        return ''
+
+    @export(u'英式发音', 2)
     def fld_voicebre(self):
-        html = self.get_html()
-        m = re.search(r'<span class="brevoice">(.*?)</span brevoice>', html)
-        if m:
-            return m.groups()[0]
-        return ''
+        return self._fld_voice(self.get_html(), 'br')
 
-    @export(u'Ame单词发音', 3)
+    @export(u'美式发音', 3)
     def fld_voiceame(self):
-        html = self.get_html()
-        m = re.search(r'<span class="amevoice">(.*?)</span amevoice>', html)
-        if m:
-            return m.groups()[0]
-        return ''
+        return self._fld_voice(self.get_html(), 'us')
 
-    @export(u'sentence', 4)
+    @export(u'例句', 4)
     def fld_sentence(self):
-        html = self.get_html()
-        m = re.search(r'<span class="example">(.*?)</span example>', html)
+        m = re.findall(r'<span class="example"\s*.*>\s*.*<\/span>', self.get_html())
         if m:
-            return re.sub('<img.*?png">', '', m.groups()[0])
-        return ''
-
-    @export(u'def', 5)
-    def fld_definate(self):
-        html = self.get_html()
-        m = re.search(r'<span class="def">(.*?)</span def>', html)
-        if m:
-            return m.groups()[0]
-        return ''
-
-    @export(u'random_sentence', 6)
-    def fld_random_sentence(self):
-        html = self.get_html()
-        m = re.findall(r'<span class="example">(.*?)</span example>', html)
-        if m:
-            number = len(m)
-            index = random.randrange(0, number - 1, 1)
-            return re.sub('<img.*?png">', '', m[index])
-        return ''
-
-    @export(u'all sentence', 7)
-    def fld_allsentence(self):
-        html = self.get_html()
-        m = re.findall(
-            r'(<span class="example">.+?</span example><span class="example_c">.+?</span example_c>)', html)
-        if m:
-            items = 0
+            soup = parseHtml(m[0])
+            el_list = soup.findAll('span', {'class':'example'})
+            if el_list:
+                maps = [u''.join(str(content).decode('utf-8') for content in element.contents) 
+                                    for element in el_list]
             my_str = ''
-            for items in range(len(m)):
-                my_str = my_str + m[items]
-            return my_str
+            for i_str in maps:
+                i_str = re.sub(r'<a[^>]+?href=\"sound\:.*\.mp3\".*</a>', '', i_str)
+                i_str = i_str.replace('&nbsp;', '')
+                my_str = my_str + '<li>' + i_str + '</li>'
+            return self._css(my_str)
         return ''
+
+    @export(u'释义', 5)
+    def fld_definate(self):
+        m = m = re.findall(r'<span class="def"\s*.*>\s*.*<\/span>', self.get_html())
+        if m:
+            soup = parseHtml(m[0])
+            el_list = soup.findAll('span', {'class':'def'})
+            if el_list:
+                maps = [u''.join(str(content).decode('utf-8') for content in element.contents) 
+                                    for element in el_list]
+            my_str = ''
+            for i_str in maps:
+                my_str = my_str + '<li>' + i_str + '</li>'
+            return self._css(my_str)
+        return ''
+
+    @with_styles(cssfile='_ldoce6.css')
+    def _css(self, val):
+        return val
+    

@@ -8,9 +8,7 @@ Created: 12/20/2017
 """
 import os
 from warnings import filterwarnings
-
-import requests as rq
-from bs4 import BeautifulSoup, Tag
+from ..libs.bs4 import BeautifulSoup, Tag
 
 from .base import WebService, export, register, with_styles
 

@@ -345,24 +345,29 @@ class OptionsDialog(QDialog):
         for cls in service_manager.local_services:
             # combo_data.insert("data", each.label)
             service = service_pool.get(cls.__unique__)
-            dict_combo.addItem(
-                service.title, userData=service.unique)
-            service_pool.put(service)
+            if service and service.support:
+                dict_combo.addItem(
+                    service.title, userData=service.unique)
+                service_pool.put(service)
 
         dict_combo.insertSeparator(dict_combo.count())
         for cls in service_manager.web_services:
             service = service_pool.get(cls.__unique__)
-            dict_combo.addItem(
-                service.title, userData=service.unique)
-            service_pool.put(service)
+            if service and service.support:
+                dict_combo.addItem(
+                    service.title, userData=service.unique)
+                service_pool.put(service)
 
         def set_dict_combo_index():
-            dict_combo.setCurrentIndex(-1)
+            #dict_combo.setCurrentIndex(-1)
             for i in range(dict_combo.count()):
                 if current_text in _sl('NOT_DICT_FIELD'):
                     dict_combo.setCurrentIndex(0)
+                    return
                 if dict_combo.itemText(i) == current_text:
                     dict_combo.setCurrentIndex(i)
+                    return
+            dict_combo.setCurrentIndex(0)
 
         set_dict_combo_index()
 
@@ -376,15 +381,19 @@ class OptionsDialog(QDialog):
             field_combo.setFocus(Qt.MouseFocusReason)  # MouseFocusReason
         else:
             field_text = field_combo.currentText()
-            service_unique = dict_combo_itemdata
-            current_service = service_pool.get(service_unique)
+            unique = dict_combo_itemdata
+            service = service_pool.get(unique)
+            text = ''
             # problem
-            if current_service and current_service.fields:
-                for each in current_service.fields:
+            if service and service.support and service.fields:
+                for each in service.fields:
                     field_combo.addItem(each)
                     if each == field_text:
-                        field_combo.setEditText(field_text)
-            service_pool.put(current_service)
+                        text = each
+
+            field_combo.setEditText(text)
+            field_combo.setEnabled(text != '')
+            service_pool.put(service)
 
     def radio_btn_checked(self):
         rbs = self.findChildren(QRadioButton)
