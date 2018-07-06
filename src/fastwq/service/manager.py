@@ -121,14 +121,14 @@ class ServiceManager(object):
                 for filename in filenames:
                     service = None
                     dict_path = os.path.join(dirpath, filename)
-                    #if MdxService.support(dict_path):
-                    service = service_wrap(MdxService, dict_path)
-                    if not service is None:
+                    #MDX
+                    if MdxService.check(dict_path):
+                        service = service_wrap(MdxService, dict_path)
                         service.__unique__ = dict_path
                         local_services.add(service)
-                    #if StardictService.support(dict_path):
-                    service = service_wrap(StardictService, dict_path)
-                    if not service is None:
+                    #Stardict    
+                    if StardictService.check(dict_path):
+                        service = service_wrap(StardictService, dict_path)
                         service.__unique__ = dict_path
                         local_services.add(service)
                 # support mdx dictionary and stardict format dictionary

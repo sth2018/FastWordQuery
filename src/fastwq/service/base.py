@@ -294,6 +294,8 @@ class MdxService(LocalService):
 
     def __init__(self, dict_path):
         super(MdxService, self).__init__(dict_path)
+        self.media_cache = defaultdict(set)
+        self.cache = defaultdict(str)
         self.html_cache = defaultdict(str)
         self.query_interval = 0.01
         self.styles = []
@@ -302,9 +304,13 @@ class MdxService(LocalService):
                 mdx_builders[dict_path] = MdxBuilder(dict_path)
             self.builder = mdx_builders[dict_path]
 
+    @staticmethod
+    def check(dict_path):
+        return os.path.isfile(dict_path) and dict_path.lower().endswith('.mdx')
+
     @property
     def support(self):
-        return os.path.isfile(self.dict_path) and self.dict_path.lower().endswith('.mdx')
+        return MdxService.check(self.dict_path)
 
     @property
     def title(self):
@@ -315,7 +321,7 @@ class MdxService(LocalService):
 
     @export([u'默认', u'Default'], 0)
     def fld_whole(self):
-        html = self.get_html()
+        html = self.get_default_html()
         js = re.findall(r'<script.*?>.*?</script>', html, re.DOTALL)
         return QueryResult(result=html, js=u'\n'.join(js))
 
@@ -360,6 +366,101 @@ class MdxService(LocalService):
             pass
         return ''
 
+    def get_default_html(self):
+        '''
+        default get html from mdx interface
+        '''
+        if not self.cache[self.word]:
+            html = ''
+            result = self.builder.mdx_lookup(self.word)  # self.word: unicode
+            if result:
+                if result[0].upper().find(u"@@@LINK=") > -1:
+                    # redirect to a new word behind the equal symol.
+                    self.word = result[0][len(u"@@@LINK="):].strip()
+                    return self.get_default_html()
+                else:
+                    html = self.adapt_to_anki(result[0])
+                    self.cache[self.word] = html
+        return self.cache[self.word]
+
+    def adapt_to_anki(self, html):
+        """
+        1. convert the media path to actual path in anki's collection media folder.
+        2. remove the js codes (js inside will expires.)
+        """
+        # convert media path, save media files
+        media_files_set = set()
+        mcss = re.findall(r'href="(\S+?\.css)"', html)
+        media_files_set.update(set(mcss))
+        mjs = re.findall(r'src="([\w\./]\S+?\.js)"', html)
+        media_files_set.update(set(mjs))
+        msrc = re.findall(r'<img.*?src="([\w\./]\S+?)".*?>', html)
+        media_files_set.update(set(msrc))
+        msound = re.findall(r'href="sound:(.*?\.(?:mp3|wav))"', html)
+        if config.export_media:
+            media_files_set.update(set(msound))
+        for each in media_files_set:
+            html = html.replace(each, u'_' + each.split('/')[-1])
+        # find sounds
+        p = re.compile(
+            r'<a[^>]+?href=\"(sound:_.*?\.(?:mp3|wav))\"[^>]*?>(.*?)</a>')
+        html = p.sub(u"[\\1]\\2", html)
+        self.save_media_files(media_files_set)
+        for cssfile in mcss:
+            cssfile = '_' + \
+                os.path.basename(cssfile.replace('\\', os.path.sep))
+            # if not exists the css file, the user can place the file to media
+            # folder first, and it will also execute the wrap process to generate
+            # the desired file.
+            if not os.path.exists(cssfile):
+                self.missed_css.add(cssfile[1:])
+            new_css_file, wrap_class_name = wrap_css(cssfile)
+            html = html.replace(cssfile, new_css_file)
+            # add global div to the result html
+            html = u'<div class="{0}">{1}</div>'.format(
+                wrap_class_name, html)
+
+        return html
+
+    def save_default_file(self, filepath_in_mdx, savepath=None):
+        '''
+        default save file interface
+        '''
+        basename = os.path.basename(filepath_in_mdx.replace('\\', os.path.sep))
+        if savepath is None:
+            savepath = '_' + basename
+        try:
+            bytes_list = self.builder.mdd_lookup(filepath_in_mdx)
+            if bytes_list and not os.path.exists(savepath):
+                with open(savepath, 'wb') as f:
+                    f.write(bytes_list[0])
+                    return savepath
+        except sqlite3.OperationalError as e:
+            pass
+
+    def save_media_files(self, data):
+        """
+        get the necessary static files from local mdx dictionary
+        ** kwargs: data = list
+        """
+        diff = data.difference(self.media_cache['files'])
+        self.media_cache['files'].update(diff)
+        lst, errors = list(), list()
+        wild = [
+            '*' + os.path.basename(each.replace('\\', os.path.sep)) for each in diff]
+        try:
+            for each in wild:
+                keys = self.builder.get_mdd_keys(each)
+                if not keys:
+                    errors.append(each)
+                lst.extend(keys)
+            for each in lst:
+                self.save_default_file(each)
+        except AttributeError:
+            pass
+
+        return errors
+
 
 class StardictService(LocalService):
 
@@ -370,9 +471,13 @@ class StardictService(LocalService):
             self.builder = StardictBuilder(self.dict_path, in_memory=False)
             self.builder.get_header()
 
+    @staticmethod
+    def check(dict_path):
+        return os.path.isfile(dict_path) and dict_path.lower().endswith('.ifo')
+
     @property
     def support(self):
-        return os.path.isfile(self.dict_path) and self.dict_path.lower().endswith('.ifo')
+        return StardictService.check(self.dict_path)
 
     @property
     def title(self):
