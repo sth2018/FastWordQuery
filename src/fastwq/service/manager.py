@@ -112,19 +112,24 @@ class ServiceManager(object):
         return web_services, local_custom_services
 
     def _get_available_local_services(self):
-
-        services = set()
+        '''
+        available local dictionary services
+        '''
+        local_services = set()
         for each in config.dirs:
             for dirpath, dirnames, filenames in os.walk(each):
                 for filename in filenames:
                     service = None
                     dict_path = os.path.join(dirpath, filename)
-                    if MdxService.support(dict_path):
-                        service = service_wrap(MdxService, dict_path)
-                    if StardictService.support(dict_path):
-                        service = service_wrap(StardictService, dict_path)
-                    if service:
+                    #if MdxService.support(dict_path):
+                    service = service_wrap(MdxService, dict_path)
+                    if not service is None:
                         service.__unique__ = dict_path
-                        services.add(service)
+                        local_services.add(service)
+                    #if StardictService.support(dict_path):
+                    service = service_wrap(StardictService, dict_path)
+                    if not service is None:
+                        service.__unique__ = dict_path
+                        local_services.add(service)
                 # support mdx dictionary and stardict format dictionary
-        return services
+        return local_services
