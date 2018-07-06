@@ -52,7 +52,7 @@ It forks from WordQuery, **multi-thread feature**, and some other features.
    - **Thread** : The number of threads running at the same time
   
   
-## Use
+## Usage
 
 ### Set the query fields
 
