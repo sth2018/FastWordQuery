@@ -10,9 +10,7 @@ import sys
 #reload(sys)
 #sys.setdefaultencoding('utf8')
 
-BASE_URL = u'https://www.oxfordlearnersdictionaries.com/definition/english/{word}'
-
-@register(u'牛津学习词典')
+@register([u'牛津学习词典', u'Oxford Learner'])
 class OxfordLearning(WebService):
     
     def __init__(self):
@@ -23,7 +21,7 @@ class OxfordLearning(WebService):
         :param word:
         :rtype:  WebWord
         """
-        qry_url = BASE_URL.format(word=word)
+        qry_url = u'https://www.oxfordlearnersdictionaries.com/definition/english/{}'.format(word)
 
         retried = 10
         while retried:
@@ -61,15 +59,15 @@ class OxfordLearning(WebService):
                 )
         return self.cache_result(single_dict)
 
-    @export(u'音标', 0)
+    @export('PHON', 0)
     def phonetic(self):
         return self._get_single_dict('phonetic')
 
-    @export(u'词性', 1)
+    @export([u'词性', u'POS'], 1)
     def pos(self):
         return self._get_single_dict('pos')
 
-    @export(u'释义', 2)
+    @export('DEF', 2)
     @with_styles(cssfile='_oxford.css')
     def ee(self):
         # return '<div style="margin-left: 20px">' + self._get_single_dict(
@@ -84,21 +82,21 @@ class OxfordLearning(WebService):
         return ''
 
     def get_sound_ame(self):
-        url = self._get_single_dict('s_nam')
+        url = self._get_single_dict('s_ame')
         filename = u'oxford_{}_us.mp3'.format(self.word)
         if url and self.download(url, filename):
             return self.get_anki_label(filename, 'audio')
         return ''
 
-    @export(u'英式发音', 3)
+    @export('BRE_PRON', 3)
     def sound_bre(self):
         return self.get_sound_bre()
 
-    @export(u'美式发音', 4)
+    @export('AME_PRON', 4)
     def sound_ame(self):
         return self.get_sound_ame()
 
-    @export(u'英式发音优先', 5)
+    @export([u'英式发音优先', u'British Pronunciation First'], 5)
     def sound_pri(self):
         bre = self.get_sound_bre()
         return bre if bre else self.get_sound_ame()
@@ -223,7 +221,7 @@ class OxfordLearningDictWord:
     @property
     def wd_sound_url_nam(self):
         try:
-            return self.tag_phon_bre.find('div', self._cls_dic('sound audio_play_button pron-us icon-audio'))[
+            return self.tag_phon_nam.find('div', self._cls_dic('sound audio_play_button pron-us icon-audio'))[
                 'data-src-mp3']
         except:
             return ''
