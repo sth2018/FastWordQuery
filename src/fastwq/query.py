@@ -93,7 +93,9 @@ class QueryThread(QThread):
                     if self.manager.update(note, results, success_num):
                         self.note_flush.emit(note)
             except InvalidWordException:
-                showInfo(_("NO_QUERY_WORD"))
+                # only show error info on single query
+                if self.manager.total == 1:
+                    showInfo(_("NO_QUERY_WORD"))
 
             if self.manager:
                 self.manager.queue.task_done()
