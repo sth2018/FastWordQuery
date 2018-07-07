@@ -450,7 +450,7 @@ class MdxService(LocalService):
         if config.use_filename or not self.builder._title or self.builder._title.startswith('Title'):
             return self._filename
         else:
-            return self.builder['_title']
+            return self.builder._title
 
     @export([u'默认', u'Default'], 0)
     def fld_whole(self):
