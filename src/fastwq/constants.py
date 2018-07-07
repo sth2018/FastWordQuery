@@ -21,7 +21,7 @@
 from .lang import _
 
 
-VERSION = 'v1.0.5'
+VERSION = 'v1.0.6'
 
 
 class Endpoint:
@@ -29,12 +29,15 @@ class Endpoint:
     feedback_issue = u'https://github.com/sth2018/FastWordQuery/issues'
     feedback_mail = u'sth201807@gmail.com'
     check_version = u'sth2018/FastWordQuery'
-    user_guide = u'https://sth2018.github.io/FastWordQuery/'
+    user_guide = u'https://sth2018.github.io/FastWordQuery'
 
 
 class Template:
-    tmpl_about = u'<b>{t0}</b><br/>{version}<br/><b>{t1}</b><br/><a href="{url}">{url}</a><br/><b>{t2}</b><br/><a href="{feedback0}">{feedback0}</a><br/><a href="mailto:{feedback1}">{feedback1}</a>'.format(
-        t0=_('VERSION'), version=VERSION, 
+    tmpl_about = u'''<b>{t0}</b><br/>{version}<br/><b>{t1}</b><br/>
+        <a href="{url}">{url}</a><br/><b>{t2}</b><br/>
+        <a href="{feedback0}">{feedback0}</a><br/>
+        <a href="mailto:{feedback1}">{feedback1}</a>'''.format(
+        t0=_('VERSION'), version=VERSION,
         t1=_('REPOSITORY'), url=Endpoint.repository,
         t2=_('FEEDBACK'), feedback0=Endpoint.feedback_issue, feedback1=Endpoint.feedback_mail)
-    miss_css = u'MDX dictonary <b>{dict}</b> misses css file <b>{css}</b>. <br />Please choose the file.'
+    miss_css = u'MDX dictonary <b>{dict}</b> misses css file <b>{css}</b>. <br/>Please choose the file.'
