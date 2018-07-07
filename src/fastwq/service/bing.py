@@ -15,7 +15,12 @@ class Bing(WebService):
         word = self.word.replace(' ', '_')
         data = self.get_response(u"http://cn.bing.com/dict/search?q={}&mkt=zh-cn".format(word))
         soup = parseHtml(data)
-        result = {}
+        result = {
+            'phonitic_us': '',
+            'phonitic_uk': '',
+            'participle': '',
+            'def': '',
+        }
 
         element = soup.find('div', class_='hd_prUS')
         if element:
