@@ -256,6 +256,139 @@ class WebService(Service):
         except Exception as e:
             pass
 
+    class TinyDownloadError(ValueError):
+        """Raises when a download is too small."""
+
+    def net_stream(self, targets, require=None, method='GET',
+                   awesome_ua=False, add_padding=False,
+                   custom_quoter=None, custom_headers=None):
+        """
+        Returns the raw payload string from the specified target(s).
+        If multiple targets are specified, their resulting payloads are
+        glued together.
+
+        Each "target" is a bare URL string or a tuple containing an
+        address and a dict for what to tack onto the query string.
+
+        Finally, a require dict may be passed to enforce a Content-Type
+        using key 'mime' and/or a minimum payload size using key 'size'.
+        If using multiple targets, these requirements apply to each
+        response.
+
+        The underlying library here already understands how to search
+        the environment for proxy settings (e.g. HTTP_PROXY), so we do
+        not need to do anything extra for that.
+
+        If add_padding is True, then some additional null padding will
+        be added onto the stream returned. This is helpful for some web
+        services that sometimes return MP3s that `mplayer` clips early.
+        """
+        DEFAULT_UA = 'Mozilla/5.0'
+        DEFAULT_TIMEOUT = 3
+
+        PADDING = '\0' * 2**11
+
+        assert method in ['GET', 'POST'], "method must be GET or POST"
+        from urllib2 import urlopen, Request, quote
+
+        targets = targets if isinstance(targets, list) else [targets]
+        targets = [
+            (target, None) if isinstance(target, basestring)
+            else (
+                target[0],
+                '&'.join(
+                    '='.join([
+                        key,
+                        (
+                            custom_quoter[key] if (custom_quoter and
+                                                   key in custom_quoter)
+                            else quote
+                        )(
+                            val.encode('utf-8') if isinstance(val, unicode)
+                            else val if isinstance(val, str)
+                            else str(val),
+                            safe='',
+                        ),
+                    ])
+                    for key, val in target[1].items()
+                ),
+            )
+            for target in targets
+        ]
+
+        require = require or {}
+
+        payloads = []
+
+        for number, (url, params) in enumerate(targets, 1):
+            desc = "web request" if len(targets) == 1 \
+                else "web request (%d of %d)" % (number, len(targets))
+
+            headers = {'User-Agent': DEFAULT_UA}
+            if custom_headers:
+                headers.update(custom_headers)
+            
+            response = urlopen(
+                Request(
+                    url=('?'.join([url, params]) if params and method == 'GET'
+                         else url),
+                    headers=headers,
+                ),
+                data=params if params and method == 'POST' else None,
+                timeout=DEFAULT_TIMEOUT,
+            )
+
+            if not response:
+                raise IOError("No response for %s" % desc)
+
+            if response.getcode() != 200:
+                value_error = ValueError(
+                    "Got %d status for %s" %
+                    (response.getcode(), desc)
+                )
+                try:
+                    value_error.payload = response.read()
+                    response.close()
+                except StandardError:
+                    pass
+                raise value_error
+
+            if 'mime' in require and \
+                    require['mime'] != format(response.info().
+                                              gettype()).replace('/x-', '/'):
+                value_error = ValueError(
+                    "Request got %s Content-Type for %s; wanted %s" %
+                    (response.info().gettype(), desc, require['mime'])
+                )
+                value_error.got_mime = response.info().gettype()
+                value_error.wanted_mime = require['mime']
+                raise value_error
+
+            payload = response.read()
+            response.close()
+
+            if 'size' in require and len(payload) < require['size']:
+                raise self.TinyDownloadError(
+                    "Request got %d-byte stream for %s; wanted %d+ bytes" %
+                    (len(payload), desc, require['size'])
+                )
+
+            payloads.append(payload)
+
+        if add_padding:
+            payloads.append(PADDING)
+        return ''.join(payloads)
+
+    def net_download(self, path, *args, **kwargs):
+        """
+        Downloads a file to the given path from the specified target(s).
+        See net_stream() for information about available options.
+        """
+
+        payload = self.net_stream(*args, **kwargs)
+        with open(path, 'wb') as response_output:
+            response_output.write(payload)
+
 
 class LocalService(Service):
     """
