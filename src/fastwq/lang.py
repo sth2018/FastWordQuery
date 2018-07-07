@@ -47,7 +47,7 @@ arr = [
     ['NO_QUERY_WORD', u'查询字段无单词', u'No word is found in the query field'],
     ['CSS_NOT_FOUND', u'没有找到CSS文件，请手动选择', u'No valid css stylesheets found, please choose the file'],
     ['ABOUT', u'关于', u'About'],
-    ['REPOSITORY', u'项目地址', u'Project homepage'],
+    ['REPOSITORY', u'项目地址', u'Project Repo'],
     ['FEEDBACK', u'反馈', u'Feedback'],
     ['VERSION', u'版本', u'Version'],
     ['LATEST_VERSION', u'已经是最新版本.', u'It\'s the lastest version.'],
