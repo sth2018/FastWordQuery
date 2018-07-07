@@ -1,6 +1,6 @@
 #-*- coding:utf-8 -*-
 #
-# Copyright © 2016–2017 ST.Huang <wenhonghuang@gmail.com>
+# Copyright © 2016–2017 sthoo <sth201807@gmail.com>
 #
 # Support: Report an issue at https://github.com/sth2018/FastWordQuery/issues
 #
@@ -27,7 +27,7 @@ VERSION = 'v1.0.5'
 class Endpoint:
     repository = u'https://github.com/sth2018/FastWordQuery'
     feedback_issue = u'https://github.com/sth2018/FastWordQuery/issues'
-    feedback_mail = u'wenhonghuang@gmail.com'
+    feedback_mail = u'sth201807@gmail.com'
     check_version = u'sth2018/FastWordQuery'
     user_guide = u'https://sth2018.github.io/FastWordQuery/'
 
