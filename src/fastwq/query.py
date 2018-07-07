@@ -236,7 +236,7 @@ def update_note_fields(note, results):
     """
 
     if not results or not note or len(results) == 0:
-        return
+        return 0
     count = 0
     for i, q in results.items():
         if isinstance(q, QueryResult) and i < len(note.fields):
