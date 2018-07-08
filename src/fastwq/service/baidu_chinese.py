@@ -36,14 +36,14 @@ class Baidu_Chinese(WebService):
         #基本释义
         element = soup.find('div', id='basicmean-wrapper')
         if element:
-            tag = element.find_all('dl')
+            tag = element.find_all('div', {'class': 'tab-content'})
             if tag:
                 result['basicmean'] = u''.join(str(x) for x in tag)
 
         #详细释义
         element = soup.find('div', id='detailmean-wrapper')
         if element:
-            tag = element.find_all('dl')
+            tag = element.find_all('div', {'class': 'tab-content'})
             if tag:
                 result['detailmean'] = u''.join(str(x) for x in tag)
 
@@ -58,6 +58,10 @@ class Baidu_Chinese(WebService):
 
     def _get_field(self, key, default=u''):
         return self.cache_result(key) if self.cached(key) else self._get_content().get(key, default)
+
+    @with_styles(need_wrap_css=True, cssfile='_baidu.css')
+    def _css(self, val):
+        return val
 
     @export([u'拼音', u'Phoneticize'], 1)
     def fld_pinyin(self):
@@ -94,11 +98,17 @@ class Baidu_Chinese(WebService):
 
     @export([u'基本释义', u'Basic Definitions'], 3)
     def fld_basic(self):
-        return self._get_field('basicmean')
+        val = self._get_field('basicmean')
+        if val is None or val == '':
+            return ''
+        return self._css(val)
 
     @export([u'详细释义', u'Detail Definitions'], 4)
     def fld_detail(self):
-        return self._get_field('detailmean')
+        val = self._get_field('detailmean')
+        if val is None or val == '':
+            return ''
+        return self._css(val)
 
     @export([u'英文翻译', u'Translation[En]'], 5)
     def fld_fanyi(self):
