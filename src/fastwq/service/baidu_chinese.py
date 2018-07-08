@@ -11,7 +11,7 @@ class Baidu_Chinese(WebService):
         super(Baidu_Chinese, self).__init__()
 
     def _get_content(self):
-        url = u"https://hanyu.baidu.com/s?wd={}&ptype=zici#basicmean".format(self.word)
+        url = u"http://dict.baidu.com/s?wd={}#basicmean".format(self.word)
         html = self.get_response(url, timeout=10)
         soup = parseHtml(html)
         result = {
