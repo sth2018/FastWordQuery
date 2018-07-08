@@ -47,7 +47,7 @@ class ServiceManager(object):
 
     @property
     def services(self):
-        return self.web_services | self.local_services
+        return self.web_services + self.local_services
 
     # def start_all(self):
     #     self.fetch_headers()
@@ -61,7 +61,7 @@ class ServiceManager(object):
         self.local_services = self._get_available_local_services()
         # self.fetch_headers()
         # combine the customized local services into local services
-        self.local_services.update(self.local_custom_services)
+        self.local_services = self.local_services + self.local_custom_services
 
     def get_service(self, unique):
         # webservice unique: class name
@@ -81,7 +81,7 @@ class ServiceManager(object):
         get service from service packages, available type is
         WebService, LocalService
         """
-        web_services, local_custom_services = set(), set()
+        web_services, local_custom_services = list(), list()
         mypath = os.path.dirname(os.path.realpath(__file__))
         files = [f for f in os.listdir(mypath)
                  if f not in ('__init__.py', 'base.py', 'manager.py', 'pool.py') and not f.endswith('.pyc') and not os.path.isdir(mypath+os.sep+f)]
@@ -100,10 +100,10 @@ class ServiceManager(object):
                 service = service_wrap(cls, *args)
                 service.__unique__ = name
                 if issubclass(cls, WebService):
-                    web_services.add(service)
+                    web_services.append(service)
                     # get the customized local services
                 if issubclass(cls, LocalService):
-                    local_custom_services.add(service)
+                    local_custom_services.append(service)
                 #except Exception:
                     # exclude the local service whose path has error.
                 #    pass
@@ -115,7 +115,7 @@ class ServiceManager(object):
         '''
         available local dictionary services
         '''
-        local_services = set()
+        local_services = list()
         for each in config.dirs:
             for dirpath, dirnames, filenames in os.walk(each):
                 for filename in filenames:
@@ -125,11 +125,11 @@ class ServiceManager(object):
                     if MdxService.check(dict_path):
                         service = service_wrap(MdxService, dict_path)
                         service.__unique__ = dict_path
-                        local_services.add(service)
+                        local_services.append(service)
                     #Stardict    
                     if StardictService.check(dict_path):
                         service = service_wrap(StardictService, dict_path)
                         service.__unique__ = dict_path
-                        local_services.add(service)
+                        local_services.append(service)
                 # support mdx dictionary and stardict format dictionary
         return local_services
