@@ -24,18 +24,10 @@ from functools import wraps
 from aqt import mw
 from aqt.qt import QThread
 from aqt.utils import showInfo
-from .base import LocalService, MdxService, StardictService, WebService
+from .base import LocalService, MdxService, StardictService, WebService, service_wrap
 from ..context import config
 from ..utils import MapDict, importlib
 
-
-def service_wrap(service, *args):
-    """
-    wrap the service class constructor
-    """
-    def _service():
-        return service(*args)
-    return _service
 
 class ServiceManager(object):
     """

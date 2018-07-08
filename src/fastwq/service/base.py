@@ -34,6 +34,8 @@ from collections import defaultdict
 from functools import wraps
 
 import cookielib
+from aqt import mw
+from aqt.qt import QThread, QMutex
 from ..context import config
 from ..libs import MdxBuilder, StardictBuilder
 from ..utils import MapDict, wrap_css
@@ -140,6 +142,15 @@ def parseHtml(html):
     soup = BeautifulSoup(html, 'html.parser')
     lock.release()
     return soup
+
+
+def service_wrap(service, *args, **kwargs):
+    """
+    wrap the service class constructor
+    """
+    def _service():
+        return service(*args, **kwargs)
+    return _service
 
 
 class Service(object):
@@ -390,6 +401,23 @@ class WebService(Service):
             response_output.write(payload)
 
 
+# MdxBuilder instances map
+mdx_builders = defaultdict(dict)
+mutex_builder = QMutex()
+
+class DictBuilder(QThread):
+    """Local Dictionary Builder"""
+    def __init__(self, func):
+        super(DictBuilder, self).__init__()
+        self.index = 0
+        self.exit = False
+        self.builder = None
+        self.func = func
+
+    def run(self):
+        self.builder = self.func()
+
+
 class LocalService(Service):
     """
     Local Dictionary Service
@@ -400,6 +428,18 @@ class LocalService(Service):
         self.dict_path = dict_path
         self.builder = None
         self.missed_css = set()
+    
+    def get_builer(self, key, func):
+        mutex_builder.lock()
+        if not mdx_builders.has_key(key) or not mdx_builders[key]:
+                worker = DictBuilder(func)
+                worker.start()
+                while not worker.isFinished():
+                    mw.app.processEvents()
+                    worker.wait(100)
+                mdx_builders[key] = worker.builder
+        mutex_builder.unlock()
+        return mdx_builders[key]
 
     @property
     def support(self):
@@ -417,8 +457,6 @@ class LocalService(Service):
     def _filename(self):
         return os.path.splitext(os.path.basename(self.dict_path))[0]
 
-# MdxBuilder instances map
-mdx_builders = defaultdict(dict)
 
 class MdxService(LocalService):
     """
@@ -433,9 +471,7 @@ class MdxService(LocalService):
         self.query_interval = 0.01
         self.styles = []
         if self.support:
-            if not mdx_builders.has_key(dict_path) or not mdx_builders[dict_path]:
-                mdx_builders[dict_path] = MdxBuilder(dict_path)
-            self.builder = mdx_builders[dict_path]
+            self.builder = self.get_builer(dict_path, service_wrap(MdxBuilder, dict_path))
 
     @staticmethod
     def check(dict_path):
@@ -604,7 +640,11 @@ class StardictService(LocalService):
         super(StardictService, self).__init__(dict_path)
         self.query_interval = 0.05
         if self.support:
-            self.builder = StardictBuilder(self.dict_path, in_memory=False)
+            self.builder = self.get_builer(
+                dict_path,
+                service_wrap(StardictBuilder, dict_path, in_memory=False)
+            )
+            #self.builder = StardictBuilder(self.dict_path, in_memory=False)
             self.builder.get_header()
 
     @staticmethod
