@@ -257,10 +257,16 @@ class OptionsDialog(QDialog):
             # update local services
             service_manager.update_services()
             # update_dicts_combo
-            dict_cbs = self._get_combos(DICT_COMBOS)
+            #dict_cbs = self._get_combos(DICT_COMBOS)
+            dict_cbs, field_cbs = self._get_combos(ALL_COMBOS)
             for i, cb in enumerate(dict_cbs):
                 current_text = cb.currentText()
                 self.fill_dict_combo_options(cb, current_text)
+                self.fill_field_combo_options(
+                    field_cbs[i],
+                    cb.currentText(),
+                    cb.itemData(cb.currentIndex())
+                )
 
     def accept(self):
         self.save()
@@ -313,7 +319,7 @@ class OptionsDialog(QDialog):
 
         self.setLayout(self.main_layout)
         self.resize(widget_size.dialog_width,
-                    (i + 1) * widget_size.map_max_height + widget_size.dialog_height_margin)
+                    max(3, (i + 1)) * widget_size.map_max_height + widget_size.dialog_height_margin)
         self.save()
 
     def show_models(self):
