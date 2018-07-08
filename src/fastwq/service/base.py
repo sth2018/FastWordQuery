@@ -539,14 +539,17 @@ class MdxService(LocalService):
             r'<a[^>]+?href=\"(sound:_.*?\.(?:mp3|wav))\"[^>]*?>(.*?)</a>')
         html = p.sub(u"[\\1]\\2", html)
         self.save_media_files(media_files_set)
-        for cssfile in mcss:
-            cssfile = '_' + \
-                os.path.basename(cssfile.replace('\\', os.path.sep))
+        for f in mcss:
+            cssfile = u'_{}'.format(os.path.basename(f.replace('\\', os.path.sep)))
             # if not exists the css file, the user can place the file to media
             # folder first, and it will also execute the wrap process to generate
             # the desired file.
             if not os.path.exists(cssfile):
-                self.missed_css.add(cssfile[1:])
+                css_src = self.dict_path.replace(self._filename+u'.mdx', f)
+                if os.path.exists(css_src):
+                    shutil.copy(css_src, cssfile)
+                else:    
+                    self.missed_css.add(cssfile[1:])
             new_css_file, wrap_class_name = wrap_css(cssfile)
             html = html.replace(cssfile, new_css_file)
             # add global div to the result html
