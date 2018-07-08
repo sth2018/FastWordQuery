@@ -167,7 +167,7 @@ class FoldersManageDialog(QDialog):
 
 class OptionsDialog(QDialog):
 
-    def __init__(self, parent=0):
+    def __init__(self, parent=0, browser=None):
         super(OptionsDialog, self).__init__()
         self.setWindowFlags(Qt.CustomizeWindowHint |
                             Qt.WindowTitleHint | Qt.WindowCloseButtonHint | Qt.WindowMinMaxButtonsHint)
@@ -175,9 +175,9 @@ class OptionsDialog(QDialog):
         # from PyQt4 import QtCore, QtGui
         self.setWindowIcon(APP_ICON)
         self.setWindowTitle(u"Options")
-        self.build()
+        self.build(browser)
 
-    def build(self):
+    def build(self, browser=None):
         self.main_layout = QVBoxLayout()
         models_layout = QHBoxLayout()
         # add buttons
@@ -226,9 +226,14 @@ class OptionsDialog(QDialog):
         self.setLayout(self.main_layout)
         # init from saved data
         self.current_model = None
-        if config.last_model_id:
-            self.current_model = get_model_byId(
-                mw.col.models, config.last_model_id)
+        model_id = config.last_model_id
+        if browser:
+            for note_id in browser.selectedNotes():
+                note = browser.mw.col.getNote(note_id)
+                model_id = note.model()['id']
+                break
+        if model_id:
+            self.current_model = get_model_byId(mw.col.models, model_id)
             if self.current_model:
                 self.models_button.setText(
                     u'%s [%s]' % (_('CHOOSE_NOTE_TYPES'),  self.current_model['name']))
@@ -485,9 +490,9 @@ def check_updates():
         pass
 
 
-def show_options():
+def show_options(browser = None):
     config.read()
-    opt_dialog = OptionsDialog(mw)
+    opt_dialog = OptionsDialog(mw, browser)
     opt_dialog.exec_()
     opt_dialog.activateWindow()
     opt_dialog.raise_()

@@ -186,11 +186,21 @@ def query_from_browser(browser):
              for note_id in browser.selectedNotes()]
     
     if len(notes) == 1:
-        query_from_editor_all_fields(browser.editor)
-        return
-    
-    query_all(notes)
-    # browser.model.reset()
+        maps = config.get_maps(browser.editor.note.model()['id'])
+        nomaps = True
+        for each in maps:
+            dict_unique = each.get('dict_unique', '').strip()
+            if dict_unique:
+                nomaps = False
+                break
+        if nomaps:
+            from .ui import show_options
+            show_options(browser)
+        else:
+            query_from_editor_all_fields(browser.editor)
+    else:
+        query_all(notes)
+        # browser.model.reset()
  
 
 def query_from_editor_all_fields(editor):
@@ -204,7 +214,7 @@ def query_from_editor_all_fields(editor):
     query_all([editor.note])
     editor.setNote(editor.note, focus=True)
     editor.saveNow()
-    
+
    
 def query_all(notes):
     """

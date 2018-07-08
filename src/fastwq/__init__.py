@@ -27,22 +27,26 @@ from aqt.utils import showInfo, shortcut
 from .ui import show_options
 from .query import *
 from .context import config, APP_ICON
+from .lang import _
 
 
 have_setup = False
 my_shortcut = ''
 
 
-def query_decor(func, obj):
+def wrap_method(func, *args, **kwargs):
+    '''
+    wrap a function with params when it's called
+    '''
     def callback():
-        return func(obj)
+        return func(*args, **kwargs)
     return callback
 
 def add_query_button(self):
     bb = self.form.buttonBox
     ar = QDialogButtonBox.ActionRole
     self.queryButton = bb.addButton(_(u"Query"), ar)
-    self.queryButton.clicked.connect(query_decor(
+    self.queryButton.clicked.connect(wrap_method(
         query_from_editor_all_fields, self.editor))
     self.queryButton.setShortcut(QKeySequence(my_shortcut))
     self.queryButton.setToolTip(
@@ -51,23 +55,23 @@ def add_query_button(self):
 
 def browser_menu():
     """
-    添加插件菜单至浏览窗口菜单栏
+    add add-on's menu to browser window
     """
     def on_setup_menus(browser):
         """
-        浏览窗口菜单钩子
+        on browser setupMenus was called
         """
         # main menu
         menu = QMenu("FastWQ", browser.form.menubar)
         browser.form.menubar.addMenu(menu)
         # Query Selected
         action = QAction("Query Selected", browser)
-        action.triggered.connect(query_decor(query_from_browser, (browser)))
+        action.triggered.connect(wrap_method(query_from_browser, browser))
         action.setShortcut(QKeySequence(my_shortcut))
         menu.addAction(action)
         #Options
         action = QAction("Options", browser)
-        action.triggered.connect(show_options)
+        action.triggered.connect(wrap_method(show_options, browser))
         menu.addAction(action)
 
     anki.hooks.addHook('browser.setupMenus', on_setup_menus)
@@ -75,7 +79,7 @@ def browser_menu():
 
 def customize_addcards():
     """
-    定制添加卡片界面
+    add button to addcards window
     """
     AddCards.setupButtons = wrap(
         AddCards.setupButtons, add_query_button, "before")
@@ -83,10 +87,10 @@ def customize_addcards():
 
 def config_menu():
     """
-    添加菜单项至工具下拉菜单中
+    add menu to anki window menebar
     """
     action = QAction(APP_ICON, "FastWQ...", mw)
-    action.triggered.connect(show_options)
+    action.triggered.connect(wrap_method(show_options))
     mw.form.menuTools.addAction(action)
     global have_setup
     have_setup = True
@@ -94,7 +98,7 @@ def config_menu():
 
 def window_shortcut(key_sequence):
     """
-    设置快捷键
+    setup shortcut
     """
     global my_shortcut
     my_shortcut = key_sequence
