@@ -10,14 +10,14 @@ class Baidu_Chinese(WebService):
     def __init__(self):
         super(Baidu_Chinese, self).__init__()
 
-    def _get_content(self, lang='eng'):
-        url = u"https://hanyu.baidu.com/s?wd={word}".format(word=self.word)
+    def _get_content(self):
+        url = u"https://hanyu.baidu.com/s?wd={}&ptype=zici#basicmean".format(self.word)
         html = self.get_response(url, timeout=10)
         soup = parseHtml(html)
         result = {
             'pinyin': '',
             'basicmean': '',
-            'syn_ant': '',
+            'detailmean': '',
             'fanyi': '',
             'audio_url': '',
         }
@@ -30,14 +30,22 @@ class Baidu_Chinese(WebService):
                 result['pinyin'] = u' '.join(x.get_text() for x in tag)
             if tag:
                 tag = element.find('a')
-                result['audio_url'] = tag.get('url')
+                if tag:
+                    result['audio_url'] = tag.get('url')
 
         #基本释义
         element = soup.find('div', id='basicmean-wrapper')
         if element:
-            tag = element.find_all('p')
+            tag = element.find_all('dl')
             if tag:
-                result['basicmean'] = u'<br>'.join(x.get_text().strip() for x in tag)
+                result['basicmean'] = u''.join(str(x) for x in tag)
+
+        #详细释义
+        element = soup.find('div', id='detailmean-wrapper')
+        if element:
+            tag = element.find_all('dl')
+            if tag:
+                result['detailmean'] = u''.join(str(x) for x in tag)
 
         #英文翻译
         element = soup.find('div', id='fanyi-wrapper')
@@ -87,6 +95,10 @@ class Baidu_Chinese(WebService):
     @export([u'基本释义', u'Basic Definitions'], 3)
     def fld_basic(self):
         return self._get_field('basicmean')
+
+    @export([u'详细释义', u'Detail Definitions'], 4)
+    def fld_detail(self):
+        return self._get_field('detailmean')
 
     @export([u'英文翻译', u'Translation[En]'], 5)
     def fld_fanyi(self):
