@@ -39,7 +39,7 @@ DICT_COMBOS, DICT_FILED_COMBOS, ALL_COMBOS = [0, 1, 2]
 
 widget_size = namedtuple('WidgetSize', ['dialog_width', 'dialog_height_margin', 'map_min_height',
                                         'map_max_height', 'map_fld_width', 'map_dictname_width',
-                                        'map_dictfield_width'])(450, 120, 0, 30, 100, 130, 130)
+                                        'map_dictfield_width'])(450, 120, 0, 31, 100, 130, 130)
 
 class ParasDialog(QDialog):
 
@@ -175,9 +175,20 @@ class FoldersManageDialog(QDialog):
 class OptionsDialog(QDialog):
 
     def __init__(self, parent=0, browser=None):
-        super(OptionsDialog, self).__init__()
-        self.setWindowFlags(Qt.CustomizeWindowHint |
-                            Qt.WindowTitleHint | Qt.WindowCloseButtonHint | Qt.WindowMinMaxButtonsHint)
+        super(OptionsDialog, self).__init__(parent)
+        self.setModal(True)
+        self.setWindowFlags(
+            self.windowFlags() &
+            ~Qt.WindowContextHelpButtonHint
+        )
+        '''
+        self.setWindowFlags(
+            Qt.CustomizeWindowHint |
+            Qt.WindowTitleHint |
+            Qt.WindowCloseButtonHint |
+            Qt.WindowMinMaxButtonsHint
+        )
+        '''
         self.parent = parent
         self.browser = browser
         self.connect(self, SIGNAL('before_build'), self._before_build, Qt.QueuedConnection)
@@ -515,8 +526,9 @@ def check_updates():
 
 def show_options(browser = None):
     '''open options window'''
+    parent = mw if browser is None else browser
     config.read()
-    opt_dialog = OptionsDialog(mw, browser)
+    opt_dialog = OptionsDialog(parent, browser)
     opt_dialog.activateWindow()
     opt_dialog.raise_()
     opt_dialog.exec_()
@@ -546,4 +558,4 @@ def show_fm_dialog(browser = None):
             )
         '''
     # reshow options window
-    show_options()
+    show_options(browser)
