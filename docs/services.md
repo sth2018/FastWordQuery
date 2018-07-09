@@ -2,9 +2,9 @@
 
 ## Local
 
-  - **MdxService**, query from mdx dict file. It's only has Default field.
-  - **StardictService**, query from ifo dict file. It's only has Default field.
-  - **MDX-LDOCE6**, local LDOCE6 mdx file. It's has some fileds. 
+  - **MdxService**, .mdx dict file, it's only has default field.
+  - **StardictService**, .ifo dict file, it's only has default field.
+  - **MDX-LDOCE6**, local LDOCE6 mdx file, it's has some fileds. 
 
 ## Web
 
