@@ -18,6 +18,6 @@
   - **海词迷你词典**, http://dict.cn/word
   - **Oxford Learner**, https://www.oxfordlearnersdictionaries.com/definition/english/word
   - **Oxford**, https://od-api.oxforddictionaries.com/
-  - **有道词典-英语**, http://dict.youdao.com/fsearch?client=deskdict&keyfrom=chrome.extension&pos=-1&doctype=xml&xmlVersion=3.2&dogVersion=1.0&vendor=unknown&appVer=3.1.17.4208&le=eng&q=word
-  - **有道词典-法语**, http://dict.youdao.com/fsearch?client=deskdict&keyfrom=chrome.extension&pos=-1&doctype=xml&xmlVersion=3.2&dogVersion=1.0&vendor=unknown&appVer=3.1.17.4208&le=fr&q=word
+  - **有道词典-英语**, [http://dict.youdao.com/...](http://dict.youdao.com/fsearch?client=deskdict&keyfrom=chrome.extension&pos=-1&doctype=xml&xmlVersion=3.2&dogVersion=1.0&vendor=unknown&appVer=3.1.17.4208&le=eng&q=word)
+  - **有道词典-法语**, [http://dict.youdao.com/...](http://dict.youdao.com/fsearch?client=deskdict&keyfrom=chrome.extension&pos=-1&doctype=xml&xmlVersion=3.2&dogVersion=1.0&vendor=unknown&appVer=3.1.17.4208&le=fr&q=word)
   - **MDX Server**, You have to run mdx server by yourself first.
