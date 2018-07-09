@@ -32,6 +32,7 @@ import zlib
 import random
 from collections import defaultdict
 from functools import wraps
+from hashlib import md5
 
 import cookielib
 from aqt import mw
@@ -261,7 +262,9 @@ class WebService(Service):
             return ''
 
     @classmethod
-    def download(cls, url, filename):
+    def download(cls, url, filename, timeout=15):
+        import socket
+        socket.setdefaulttimeout(timeout)
         try:
             return urllib.urlretrieve(url, filename)
         except Exception as e:
@@ -401,21 +404,19 @@ class WebService(Service):
             response_output.write(payload)
 
 
-# MdxBuilder instances map
-mdx_builders = defaultdict(dict)
-mutex_builder = QMutex()
-
-class DictBuilder(QThread):
+class _DictBuildWorker(QThread):
     """Local Dictionary Builder"""
     def __init__(self, func):
-        super(DictBuilder, self).__init__()
-        self.index = 0
-        self.exit = False
-        self.builder = None
-        self.func = func
+        super(_DictBuildWorker, self).__init__()
+        self._builder = None
+        self._func = func
 
     def run(self):
-        self.builder = self.func()
+        self._builder = self._func()
+
+    @property
+    def builder(self):
+        return self._builder
 
 
 class LocalService(Service):
@@ -428,18 +429,25 @@ class LocalService(Service):
         self.dict_path = dict_path
         self.builder = None
         self.missed_css = set()
-    
-    def get_builer(self, key, func):
-        mutex_builder.lock()
-        if not mdx_builders.has_key(key) or not mdx_builders[key]:
-                worker = DictBuilder(func)
+
+    # MdxBuilder instances map
+    _mdx_builders = defaultdict(dict)
+    _mutex_builder = QMutex()
+
+    @staticmethod
+    def _get_builer(key, func=None):
+        LocalService._mutex_builder.lock()
+        key = md5(key).hexdigest()
+        if not func is None:
+            if not LocalService._mdx_builders.has_key(key) or not LocalService._mdx_builders[key]:
+                worker = _DictBuildWorker(func)
                 worker.start()
                 while not worker.isFinished():
                     mw.app.processEvents()
                     worker.wait(100)
-                mdx_builders[key] = worker.builder
-        mutex_builder.unlock()
-        return mdx_builders[key]
+                LocalService._mdx_builders[key] = worker.builder
+        LocalService._mutex_builder.unlock()
+        return LocalService._mdx_builders[key]
 
     @property
     def support(self):
@@ -471,7 +479,7 @@ class MdxService(LocalService):
         self.query_interval = 0.01
         self.styles = []
         if self.support:
-            self.builder = self.get_builer(dict_path, service_wrap(MdxBuilder, dict_path))
+            self.builder = self._get_builer(dict_path, service_wrap(MdxBuilder, dict_path))
 
     @staticmethod
     def check(dict_path):
@@ -640,7 +648,7 @@ class StardictService(LocalService):
         super(StardictService, self).__init__(dict_path)
         self.query_interval = 0.05
         if self.support:
-            self.builder = self.get_builer(
+            self.builder = self._get_builer(
                 dict_path,
                 service_wrap(StardictBuilder, dict_path, in_memory=False)
             )

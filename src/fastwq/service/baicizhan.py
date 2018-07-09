@@ -17,11 +17,25 @@ class Baicizhan(WebService):
     def _get_from_api(self):
         word = self.word.replace(' ', '_')
         url = u"http://mall.baicizhan.com/ws/search?w={}".format(word)
+        result = {
+            "accent": u"",
+            "img": u"",
+            "mean_cn": u"",
+            "st": u"",
+            "sttr": u"",
+            "tv": u"",
+            "word": u"",
+            "df": u'',
+        }
         try:
             html = self.get_response(url, timeout=5)#urllib2.urlopen(url, timeout=5).read()
-            return self.cache_this(json.loads(html))
+            result.update(json.loads(html))
         except:
-            return defaultdict(str)
+            pass
+        return self.cache_this(result)
+    
+    def _get_field(self, key, default=u''):
+        return self.cache_result(key) if self.cached(key) else self._get_from_api().get(key, default)
 
     @export('PRON', 0)
     def fld_phonetic(self):
@@ -29,7 +43,7 @@ class Baicizhan(WebService):
         url = u'http://baicizhan.qiniucdn.com/word_audios/{}.mp3'.format(word)
         audio_name = 'bcz_%s.mp3' % self.word
         if self.bcz_download_mp3:
-            if self.download(url, audio_name):
+            if os.path.exists(audio_name) or self.download(url, audio_name, 5):
                 # urllib.urlretrieve(url, audio_name)
                 with open(audio_name, 'rb') as f:
                     if f.read().strip() == '{"error":"Document not found"}':
@@ -44,11 +58,8 @@ class Baicizhan(WebService):
         else:
             return url
 
-    def _get_field(self, key, default=u''):
-        return self.cache_result(key) if self.cached(key) else self._get_from_api().get(key, default)
-
     @export('PHON', 1)
-    def fld_explains(self):
+    def fld_phon(self):
         return self._get_field('accent')
 
     @export('IMAGE', 2)
@@ -56,7 +67,7 @@ class Baicizhan(WebService):
         url = self._get_field('img')
         if url and self.bcz_download_img:
             filename = url[url.rindex('/') + 1:]
-            if self.download(url, filename):
+            if os.path.exists(filename) or self.download(url, filename):
                 return self.get_anki_label(filename, 'img')
         #return self.get_anki_label(url, 'img')
         return ''
@@ -66,7 +77,7 @@ class Baicizhan(WebService):
         url = self._get_field('df')
         if url and self.bcz_download_img:
             filename = url[url.rindex('/') + 1:]
-            if self.download(url, filename):
+            if os.path.exists(filename) or self.download(url, filename):
                 return self.get_anki_label(filename, 'img')
         #return self.get_anki_label(url, 'img')
         return ''
