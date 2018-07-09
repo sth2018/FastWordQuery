@@ -248,12 +248,15 @@ def update(add=[],install=False):
                         if isMinor:
                             i = 1
                     while i<newVersion[2]:
-                        minorTagName = 'v{0}.{1}.{2}'.format(newVersion[0],oldVersion[1],i)
-                        response = urllib2.urlopen("https://api.github.com/repos/{0}/releases/tags/{1}".format(path,minorTagName))
-                        responseData = response.read()
-                        minor = json.loads(responseData)
-                        data['body'] += '\n\n### {0}\n'.format(minor['name']) + minor['body']
-                        #data['assets'] += map(asset,minor['assets'])
+                        try:
+                            minorTagName = 'v{0}.{1}.{2}'.format(newVersion[0],oldVersion[1],i)
+                            response = urllib2.urlopen("https://api.github.com/repos/{0}/releases/tags/{1}".format(path,minorTagName))
+                            responseData = response.read()
+                            minor = json.loads(responseData)
+                            data['body'] += '\n\n### {0}\n'.format(minor['name']) + minor['body']
+                            #data['assets'] += map(asset,minor['assets'])
+                        except:
+                            pass
                     
                         i += 1
                     if oldVersion[0]<newVersion[0] or oldVersion[1]<newVersion[1]:
