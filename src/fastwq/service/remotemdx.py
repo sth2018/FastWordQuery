@@ -29,7 +29,7 @@ from aqt.utils import showInfo, showText
 from .base import QueryResult, WebService, export, register, with_styles
 
 
-@register(u'MDX server')
+@register('MDX_SERVER')
 class RemoteMdx(WebService):
 
     def __init__(self):

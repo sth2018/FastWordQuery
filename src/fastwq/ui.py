@@ -411,12 +411,14 @@ class OptionsDialog(QDialog):
     def fill_field_combo_options(self, field_combo, dict_combo_text, dict_combo_itemdata, field_combo_text):
         field_combo.clear()
         field_combo.setEnabled(True)
+        field_combo.setEditable(False)
         if dict_combo_text in _sl('NOT_DICT_FIELD'):
             field_combo.setEnabled(False)
         elif dict_combo_text in _sl('MDX_SERVER'):
-            field_combo.setEditText('http://')
+            text = field_combo_text if field_combo_text else 'http://'
+            field_combo.setEditable(True)
+            field_combo.setEditText(text)
             field_combo.setFocus(Qt.MouseFocusReason)  # MouseFocusReason
-            field_combo.setEnabled(True)
         else:
             unique = dict_combo_itemdata
             service = service_pool.get(unique)
