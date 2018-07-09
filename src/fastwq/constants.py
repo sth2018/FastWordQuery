@@ -30,6 +30,7 @@ class Endpoint:
     feedback_mail = u'sth201807@gmail.com'
     check_version = u'sth2018/FastWordQuery'
     user_guide = u'https://sth2018.github.io/FastWordQuery'
+    version = VERSION
 
 
 class Template:

@@ -43,34 +43,39 @@ dataPath = '.ankihub.json' #os.path.join(defaultBase(),'.ankihub.json')
 class DialogUpdates(QtGui.QDialog, Ui_DialogUpdates):
     def __init__(self, parent, data, oldData, callback, automaticAnswer=None,install=False):
         QtGui.QDialog.__init__(self,parent)
+        self.setModal(True)
+        self.setWindowFlags(
+            self.windowFlags() &
+            ~QtCore.Qt.WindowContextHelpButtonHint
+        )
         self.setupUi(self)
         totalSize = sum(map(lambda x:x['size'],data['assets']))
 
         def answer(doUpdate,answ):
             self.update.setEnabled(False)
-            self.dont.setEnabled(False)
-            self.always.setEnabled(False)
-            self.never.setEnabled(False)
+            #self.dont.setEnabled(False)
+            #self.always.setEnabled(False)
+            #self.never.setEnabled(False)
             callback(doUpdate,answ,self.appendHtml,self.finish,install)
 
         self.html = u''
         self.appendHtml(markdown(data['body']))
 
-        if not automaticAnswer:
-            self.connect(self.update,QtCore.SIGNAL('clicked()'),
-                         lambda:answer(True,'ask'))
-            self.connect(self.dont,QtCore.SIGNAL('clicked()'),
-                     lambda:answer(False,'ask'))
-            self.connect(self.always,QtCore.SIGNAL('clicked()'),
-                     lambda:answer(True,'always'))
-            self.connect(self.never,QtCore.SIGNAL('clicked()'),
-                     lambda:answer(False,'never'))
-        else:
+        #if not automaticAnswer:
+        self.connect(self.update,QtCore.SIGNAL('clicked()'),
+                        lambda:answer(True,'ask'))
+            #self.connect(self.dont,QtCore.SIGNAL('clicked()'),
+            #         lambda:answer(False,'ask'))
+            #self.connect(self.always,QtCore.SIGNAL('clicked()'),
+            #         lambda:answer(True,'always'))
+            #self.connect(self.never,QtCore.SIGNAL('clicked()'),
+            #         lambda:answer(False,'never'))
+        #else:
             #self.update.setEnabled(False)
             #self.dont.setEnabled(False)
             #self.always.setEnabled(False)
             #self.never.setEnabled(False)
-            answer(True,automaticAnswer)
+        #    answer(True,automaticAnswer)
 
         fromVersion = ''
         if 'tag_name' in oldData:
@@ -83,11 +88,11 @@ class DialogUpdates(QtGui.QDialog, Ui_DialogUpdates):
 
 
     def appendHtml(self,html='',temp=''):
-        self.html += html
+        self.html += html + '<div id="text_bottom"></div>'
         self.textBrowser.setHtml(u'<html><body>{0}{1}</body></html>'.format(self.html,temp))
+        self.textBrowser.scrollToAnchor('text_bottom') 
 
     def finish(self):
-
         pass
 
 
@@ -190,7 +195,7 @@ def updateSingle(repositories,path,data):
 
 datas = []
 
-def update(add=[],install=False):
+def update(add=[],install=False, VERSION='v0.0.0'):
     conn = httplib.HTTPSConnection("api.github.com")
     try:
         with open(dataPath,'r') as file:
@@ -238,7 +243,7 @@ def update(add=[],install=False):
                         while len(oldVersion)<3:
                             oldVersion.append(0)
                     else:
-                        oldVersion = [0,0,0]
+                        oldVersion = map(int,VERSION[1:].split('.'))#[0,0,0]
                     newVersion = map(int,data['tag_name'][1:].split('.'))
                     isMinor = len(newVersion)>2 and newVersion[2]>0
                     while len(newVersion)<3:
