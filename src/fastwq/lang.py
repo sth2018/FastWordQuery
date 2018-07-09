@@ -58,6 +58,7 @@ arr = [
     ['FORCE_UPDATE', u'强制更新字段', u'Force update'],
     ['SETTINGS', u'参数', u'Settings'],
     ['THREAD_NUMBER', u'线程数', u'Thread'],
+    ['INITLIZING_DICT', u'初始化词典...', u'Initlizing Dictionary...'],
 
     ['BRE_PRON', u'英式发音', u'British Pronunciation'],
     ['AME_PRON', u'美式发音', u'American Pronunciation'],

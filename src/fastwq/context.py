@@ -98,5 +98,12 @@ class Config(object):
         """
         return self.data.get('thread_number', 16)
 
+    @property
+    def last_folder(self):
+        """
+        last file dialog open path 
+        """
+        return self.data.get('last_folder', '')
+
 
 config = Config(mw)

@@ -133,10 +133,15 @@ class FoldersManageDialog(QDialog):
         self.setLayout(layout)
 
     def add_folder(self):
-        dir_ = QFileDialog.getExistingDirectory(self,
-                                                caption=u"Select Folder", directory="", options=QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks)
+        dir_ = QFileDialog.getExistingDirectory(
+            self,
+            caption=u"Select Folder", 
+            directory=config.last_folder, 
+            options=QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks
+        )
         if dir_:
             self.folders_lst.addItem(dir_)
+            config.update({'last_folder': dir_})
 
     def remove_folder(self):
         item = self.folders_lst.takeItem(self.folders_lst.currentRow())
@@ -159,9 +164,11 @@ class FoldersManageDialog(QDialog):
                 for i in range(self.folders_lst.count())]
 
     def save(self):
-        data = {'dirs': self.dirs,
-                'use_filename': self.chk_use_filename.isChecked(),
-                'export_media': self.chk_export_media.isChecked()}
+        data = {
+            'dirs': self.dirs,
+            'use_filename': self.chk_use_filename.isChecked(),
+            'export_media': self.chk_export_media.isChecked()
+        }
         config.update(data)
 
 
@@ -172,13 +179,28 @@ class OptionsDialog(QDialog):
         self.setWindowFlags(Qt.CustomizeWindowHint |
                             Qt.WindowTitleHint | Qt.WindowCloseButtonHint | Qt.WindowMinMaxButtonsHint)
         self.parent = parent
+        self.connect(self, SIGNAL('before_build'), self._before_build, Qt.QueuedConnection)
+        self.connect(self, SIGNAL('after_build'), self._after_build, Qt.QueuedConnection)
         # from PyQt4 import QtCore, QtGui
         self.setWindowIcon(APP_ICON)
         self.setWindowTitle(u"Options")
-        self.build(browser)
-
-    def build(self, browser=None):
+        # initlizing info
         self.main_layout = QVBoxLayout()
+        self.loading_label = QLabel(_('INITLIZING_DICT'))
+        self.main_layout.addWidget(self.loading_label, 0, Qt.AlignCenter)
+        #self.loading_layout.addLayout(models_layout)
+        self.setLayout(self.main_layout)
+        # size and signal
+        self.resize(widget_size.dialog_width, 4 * widget_size.map_max_height + widget_size.dialog_height_margin)
+        self.emit(SIGNAL('before_build'), browser)
+    
+    def _before_build(self, browser=None):
+        for cls in service_manager.services:
+            service = service_pool.get(cls.__unique__)
+        self.emit(SIGNAL('after_build'), browser)
+
+    def _after_build(self, browser=None):
+        self.main_layout.removeWidget(self.loading_label)
         models_layout = QHBoxLayout()
         # add buttons
         mdx_button = QPushButton(_('DICTS_FOLDERS'))
@@ -222,8 +244,8 @@ class OptionsDialog(QDialog):
         bottom_layout.addWidget(home_label)
         # bottom_layout.addWidget(shop_label)
         bottom_layout.addWidget(btnbox)
+        #self.setLayout(self.main_layout)
         self.main_layout.addLayout(bottom_layout)
-        self.setLayout(self.main_layout)
         # init from saved data
         self.current_model = None
         model_id = config.last_model_id
@@ -234,39 +256,23 @@ class OptionsDialog(QDialog):
                 break
         if model_id:
             self.current_model = get_model_byId(mw.col.models, model_id)
-            if self.current_model:
-                self.models_button.setText(
-                    u'%s [%s]' % (_('CHOOSE_NOTE_TYPES'),  self.current_model['name']))
-                # build fields -- dicts layout
-                self.build_mappings_layout(self.current_model)
+        if self.current_model:
+            self.models_button.setText(
+                u'%s [%s]' % (_('CHOOSE_NOTE_TYPES'),  self.current_model['name']))
+            # build fields -- dicts layout
+            self.build_mappings_layout(self.current_model)
 
     def show_paras(self):
         dialog = ParasDialog(self)
         dialog.exec_()
 
+    def show_fm_dialog(self):
+        self.save()
+        self.close()
+        show_fm_dialog()
+
     def show_about(self):
         QMessageBox.about(self, _('ABOUT'), Template.tmpl_about)
-
-    def show_fm_dialog(self):
-        fm_dialog = FoldersManageDialog(self)
-        fm_dialog.activateWindow()
-        fm_dialog.raise_()
-        if fm_dialog.exec_() == QDialog.Accepted:
-            dict_paths = fm_dialog.dict_paths
-            fm_dialog.save()
-            # update local services
-            service_manager.update_services()
-            # update_dicts_combo
-            #dict_cbs = self._get_combos(DICT_COMBOS)
-            dict_cbs, field_cbs = self._get_combos(ALL_COMBOS)
-            for i, cb in enumerate(dict_cbs):
-                current_text = cb.currentText()
-                self.fill_dict_combo_options(cb, current_text)
-                self.fill_field_combo_options(
-                    field_cbs[i],
-                    cb.currentText(),
-                    cb.itemData(cb.currentIndex())
-                )
 
     def accept(self):
         self.save()
@@ -317,7 +323,7 @@ class OptionsDialog(QDialog):
             else:
                 self.add_dict_layout(i, fld_name=name)
 
-        self.setLayout(self.main_layout)
+        #self.setLayout(self.main_layout)
         self.resize(widget_size.dialog_width,
                     max(3, (i + 1)) * widget_size.map_max_height + widget_size.dialog_height_margin)
         self.save()
@@ -346,13 +352,18 @@ class OptionsDialog(QDialog):
             # showInfo('to check focus')
             if dict_combo.hasFocus() or dict_combo.view().hasFocus():
                 self.fill_field_combo_options(
-                    field_combos[i], dict_combo.currentText(), dict_combo.itemData(index))
+                    field_combos[i],
+                    dict_combo.currentText(),
+                    dict_combo.itemData(index),
+                    field_combos[i].currentText()
+                )
                 break
 
     def fill_dict_combo_options(self, dict_combo, current_text):
         dict_combo.clear()
         dict_combo.addItem(_('NOT_DICT_FIELD'))
-        
+
+        # local dict service
         dict_combo.insertSeparator(dict_combo.count())
         for cls in service_manager.local_services:
             # combo_data.insert("data", each.label)
@@ -362,6 +373,7 @@ class OptionsDialog(QDialog):
                     service.title, userData=service.unique)
                 service_pool.put(service)
 
+        #web dict service
         dict_combo.insertSeparator(dict_combo.count())
         for cls in service_manager.web_services:
             service = service_pool.get(cls.__unique__)
@@ -375,15 +387,16 @@ class OptionsDialog(QDialog):
             for i in range(dict_combo.count()):
                 if current_text in _sl('NOT_DICT_FIELD'):
                     dict_combo.setCurrentIndex(0)
-                    return
+                    return False
                 if dict_combo.itemText(i) == current_text:
                     dict_combo.setCurrentIndex(i)
-                    return
+                    return True
             dict_combo.setCurrentIndex(0)
+            return False
 
-        set_dict_combo_index()
+        return set_dict_combo_index()
 
-    def fill_field_combo_options(self, field_combo, dict_combo_text, dict_combo_itemdata):
+    def fill_field_combo_options(self, field_combo, dict_combo_text, dict_combo_itemdata, field_combo_text):
         field_combo.clear()
         field_combo.setEnabled(True)
         if dict_combo_text in _sl('NOT_DICT_FIELD'):
@@ -391,18 +404,19 @@ class OptionsDialog(QDialog):
         elif dict_combo_text in _sl('MDX_SERVER'):
             field_combo.setEditText('http://')
             field_combo.setFocus(Qt.MouseFocusReason)  # MouseFocusReason
+            field_combo.setEnabled(True)
         else:
-            field_text = field_combo.currentText()
             unique = dict_combo_itemdata
             service = service_pool.get(unique)
             # problem
-            field_combo.setEditText(u'')
+            field_combo.setCurrentIndex(0)
             if service and service.support and service.fields:
-                for each in service.fields:
+                for i, each in enumerate(service.fields):
                     field_combo.addItem(each)
-                    if each == field_text:
-                        field_combo.setEditText(field_text)
-            field_combo.setEnabled(service != None and service.support)
+                    if each == field_combo_text:
+                        field_combo.setCurrentIndex(i)
+            else:
+                field_combo.setEnabled(False)
             service_pool.put(service)
 
     def radio_btn_checked(self):
@@ -436,24 +450,26 @@ class OptionsDialog(QDialog):
             word_checked = True
         word_check_btn.setChecked(word_checked)
         self.radio_group.addButton(word_check_btn)
-
+        # dict combox
         dict_combo = QComboBox()
         dict_combo.setMinimumSize(widget_size.map_dictname_width, 0)
         dict_combo.setFocusPolicy(
-            Qt.TabFocus | Qt.ClickFocus | Qt.StrongFocus | Qt.WheelFocus)
+            Qt.TabFocus | Qt.ClickFocus | Qt.StrongFocus | Qt.WheelFocus
+        )
         dict_combo.setEnabled(not word_checked)
         dict_combo.currentIndexChanged.connect(
-            self.dict_combobox_index_changed)
-        self.fill_dict_combo_options(dict_combo, dict_name)
-
+            self.dict_combobox_index_changed
+        )
+        dict_valid = self.fill_dict_combo_options(dict_combo, dict_name)
+        # field combox
         field_combo = QComboBox()
         field_combo.setMinimumSize(widget_size.map_dictfield_width, 0)
-        # field_combo.setMaximumSize(130, 30)
-        field_combo.setEnabled((not word_checked) and (
-            dict_name != _('NOT_DICT_FIELD')))
-        field_combo.setEditable(True)
-        field_combo.setEditText(dict_field)
-        self.fill_field_combo_options(field_combo, dict_name, dict_unique)
+        if word_checked or not dict_valid:
+            field_combo.clear()
+            field_combo.setEnabled(False)
+            dict_combo.setCurrentIndex(0)
+        else:
+            self.fill_field_combo_options(field_combo, dict_name, dict_unique, dict_field)
 
         self.dicts_layout.addWidget(word_check_btn, i + 1, 0)
         self.dicts_layout.addWidget(dict_combo, i + 1, 1)
@@ -497,8 +513,35 @@ def check_updates():
 
 
 def show_options(browser = None):
+    '''open options window'''
     config.read()
     opt_dialog = OptionsDialog(mw, browser)
-    opt_dialog.exec_()
     opt_dialog.activateWindow()
     opt_dialog.raise_()
+    opt_dialog.exec_()
+
+def show_fm_dialog():
+    '''open dictionary folder manager window'''
+    fm_dialog = FoldersManageDialog(mw)
+    fm_dialog.activateWindow()
+    fm_dialog.raise_()
+    if fm_dialog.exec_() == QDialog.Accepted:
+        dict_paths = fm_dialog.dict_paths
+        fm_dialog.save()
+        # update local services
+        service_manager.update_services()
+        # update_dicts_combo
+        #dict_cbs = self._get_combos(DICT_COMBOS)
+        '''
+        dict_cbs, field_cbs = self._get_combos(ALL_COMBOS)
+        for i, cb in enumerate(dict_cbs):
+            current_text = cb.currentText()
+            self.fill_dict_combo_options(cb, current_text)
+            self.fill_field_combo_options(
+                field_cbs[i],
+                cb.currentText(),
+                cb.itemData(cb.currentIndex())
+            )
+        '''
+    # reshow options window
+    show_options()
