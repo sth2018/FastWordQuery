@@ -179,6 +179,7 @@ class OptionsDialog(QDialog):
         self.setWindowFlags(Qt.CustomizeWindowHint |
                             Qt.WindowTitleHint | Qt.WindowCloseButtonHint | Qt.WindowMinMaxButtonsHint)
         self.parent = parent
+        self.browser = browser
         self.connect(self, SIGNAL('before_build'), self._before_build, Qt.QueuedConnection)
         self.connect(self, SIGNAL('after_build'), self._after_build, Qt.QueuedConnection)
         # from PyQt4 import QtCore, QtGui
@@ -192,7 +193,7 @@ class OptionsDialog(QDialog):
         self.setLayout(self.main_layout)
         # size and signal
         self.resize(widget_size.dialog_width, 4 * widget_size.map_max_height + widget_size.dialog_height_margin)
-        self.emit(SIGNAL('before_build'), browser)
+        self.emit(SIGNAL('before_build'), self.browser)
     
     def _before_build(self, browser=None):
         for cls in service_manager.services:
@@ -269,7 +270,7 @@ class OptionsDialog(QDialog):
     def show_fm_dialog(self):
         self.save()
         self.close()
-        show_fm_dialog()
+        show_fm_dialog(self.browser)
 
     def show_about(self):
         QMessageBox.about(self, _('ABOUT'), Template.tmpl_about)
@@ -520,9 +521,10 @@ def show_options(browser = None):
     opt_dialog.raise_()
     opt_dialog.exec_()
 
-def show_fm_dialog():
+def show_fm_dialog(browser = None):
     '''open dictionary folder manager window'''
-    fm_dialog = FoldersManageDialog(mw)
+    parent = mw if browser is None else browser
+    fm_dialog = FoldersManageDialog(parent)
     fm_dialog.activateWindow()
     fm_dialog.raise_()
     if fm_dialog.exec_() == QDialog.Accepted:
