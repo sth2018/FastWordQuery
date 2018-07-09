@@ -88,8 +88,8 @@ class DialogUpdates(QtGui.QDialog, Ui_DialogUpdates):
 
 
     def appendHtml(self,html='',temp=''):
-        self.html += html + '<div id="text_bottom"></div>'
-        self.textBrowser.setHtml(u'<html><body>{0}{1}</body></html>'.format(self.html,temp))
+        self.html += html
+        self.textBrowser.setHtml(u'<html><body>{0}{1}{2}</body></html>'.format(self.html, temp, u'<div id="text_bottom"></div>'))
         self.textBrowser.scrollToAnchor('text_bottom') 
 
     def finish(self):
