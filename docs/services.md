@@ -20,4 +20,5 @@
   - **Oxford**, https://od-api.oxforddictionaries.com/
   - **Youdao-English**, [http://dict.youdao.com/...](http://dict.youdao.com/fsearch?client=deskdict&keyfrom=chrome.extension&pos=-1&doctype=xml&xmlVersion=3.2&dogVersion=1.0&vendor=unknown&appVer=3.1.17.4208&le=eng&q=word)
   - **Youdao-French**, [http://dict.youdao.com/...](http://dict.youdao.com/fsearch?client=deskdict&keyfrom=chrome.extension&pos=-1&doctype=xml&xmlVersion=3.2&dogVersion=1.0&vendor=unknown&appVer=3.1.17.4208&le=fr&q=word)
+  - **Youdao-Korean**, [http://dict.youdao.com/...](http://dict.youdao.com/fsearch?client=deskdict&keyfrom=chrome.extension&pos=-1&doctype=xml&xmlVersion=3.2&dogVersion=1.0&vendor=unknown&appVer=3.1.17.4208&le=ko&q=대한민국)
   - **MDX Server**, You have to run mdx server by yourself first.
