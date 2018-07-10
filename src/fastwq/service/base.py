@@ -412,7 +412,10 @@ class _DictBuildWorker(QThread):
         self._func = func
 
     def run(self):
-        self._builder = self._func()
+        try:
+            self._builder = self._func()
+        except Exception:
+            self._builder = None
 
     @property
     def builder(self):
@@ -478,7 +481,7 @@ class MdxService(LocalService):
         self.html_cache = defaultdict(str)
         self.query_interval = 0.01
         self.styles = []
-        if self.support:
+        if MdxService.check(self.dict_path):
             self.builder = self._get_builer(dict_path, service_wrap(MdxBuilder, dict_path))
 
     @staticmethod
@@ -487,7 +490,7 @@ class MdxService(LocalService):
 
     @property
     def support(self):
-        return MdxService.check(self.dict_path)
+        return self.builder and MdxService.check(self.dict_path)
 
     @property
     def title(self):
@@ -647,13 +650,13 @@ class StardictService(LocalService):
     def __init__(self, dict_path):
         super(StardictService, self).__init__(dict_path)
         self.query_interval = 0.05
-        if self.support:
+        if StardictService.check(self.dict_path):
             self.builder = self._get_builer(
                 dict_path,
                 service_wrap(StardictBuilder, dict_path, in_memory=False)
             )
-            #self.builder = StardictBuilder(self.dict_path, in_memory=False)
-            self.builder.get_header()
+            if self.builder:
+                self.builder.get_header()
 
     @staticmethod
     def check(dict_path):
@@ -661,7 +664,7 @@ class StardictService(LocalService):
 
     @property
     def support(self):
-        return StardictService.check(self.dict_path)
+        return self.builder and StardictService.check(self.dict_path)
 
     @property
     def title(self):
