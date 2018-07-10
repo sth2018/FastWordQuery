@@ -13,37 +13,37 @@
 >  按照以下步骤，可以很方便的为整个单词本快速的添加音频。
 
 
-## 1. 准备好mdx与mdd词典文件
+#### 1. 准备好mdx与mdd词典文件
 
  ![](images/mdx_mdd_files.png)
 
 
-## 2. 准备好单词本
+#### 2. 准备好单词本
 
  ![](images/import.png)
 
 
-## 3. 设置词典
+#### 3. 设置词典
 
  ![](images/set_dicts.png)
 
 
-## 4. 设置FastWQ中对应的字典和字段
+#### 4. 设置FastWQ中对应的字典和字段
 
  ![](images/options.png)
 
 
-## 5. 选择词条并选择菜单 【FastWQ->Query Selected】 或按 【Ctral+Q】 快捷键
+#### 5. 选择词条并选择菜单 【FastWQ->Query Selected】 或按 【Ctral+Q】 快捷键
 
  ![](images/query_all.png)
 
 
-## 6. 等待查询结束，因为是本地词典此处查询速度非常的快
+#### 6. 等待查询结束，因为是本地词典此处查询速度非常的快
 
  ![](images/querying.png)
 
 
-## 7. 如果单词在朗文词典中能查询得到，则会自动添加发音并下载对应的音频文件到用户媒体文件夹
+#### 7. 如果单词在朗文词典中能查询得到，则会自动添加发音并下载对应的音频文件到用户媒体文件夹
 
  ![](images/query_end.png)
 
