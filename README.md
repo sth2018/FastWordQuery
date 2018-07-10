@@ -1,5 +1,5 @@
 # FastWordQuery Addon For Anki
-[Dictionary Support](docs/services.md)
+[Support Dictionarys](docs/services.md)
 
 
 ## Features
