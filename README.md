@@ -1,5 +1,7 @@
 # FastWordQuery Addon For Anki
+
 [Supported Dictionaries](docs/services.md)
+[单词添加真人发音(朗文mdx词典)](docs/get_mdx_ldoce6_sounds.md)
 
 
 ## Features
