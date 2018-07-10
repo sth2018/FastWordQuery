@@ -23,27 +23,32 @@
  ![](images/import.png)
 
 
-#### 3. 设置词典
+#### 3. 编辑参数，选择菜单【Tools->Add-ons->FastWQ->Edit...】
 
- ![](images/set_dicts.png)
+ ![](images/edit_dict_menu.png)
+ 
+
+#### 4. 修改词典路径为你准备的词典文件的路径
+
+ ![](images/edit_addon.png)
 
 
-#### 4. 设置FastWQ中对应的字典和字段
+#### 5. 设置FastWQ中对应的字典和字段
 
  ![](images/options.png)
 
 
-#### 5. 选择词条并选择菜单 【FastWQ->Query Selected】 或按 【Ctral+Q】 快捷键
+#### 6. 选择词条并选择菜单 【FastWQ->Query Selected】 或按 【Ctral+Q】 快捷键
 
  ![](images/query_all.png)
 
 
-#### 6. 等待查询结束，因为是本地词典此处查询速度非常的快
+#### 7. 等待查询结束，因为是本地词典此处查询速度非常的快
 
  ![](images/querying.png)
 
 
-#### 7. 如果单词在朗文词典中能查询得到，则会自动添加发音并下载对应的音频文件到用户媒体文件夹
+#### 8. 如果单词在朗文词典中能查询得到，则会自动添加发音并下载对应的音频文件到用户媒体文件夹
 
  ![](images/query_end.png)
 
