@@ -44,7 +44,12 @@ widget_size = namedtuple('WidgetSize', ['dialog_width', 'dialog_height_margin', 
 class ParasDialog(QDialog):
 
     def __init__(self, parent=0):
-        QDialog.__init__(self, parent)
+        super(ParasDialog, self).__init__(parent)
+        self.setModal(True)
+        self.setWindowFlags(
+            self.windowFlags() &
+            ~Qt.WindowContextHelpButtonHint
+        )
         self.parent = parent
         self.setWindowTitle(u"Settings")
         self.setFixedWidth(400)
@@ -100,9 +105,14 @@ class ParasDialog(QDialog):
 class FoldersManageDialog(QDialog):
 
     def __init__(self, parent=0):
-        QDialog.__init__(self, parent)
+        super(FoldersManageDialog, self).__init__(parent)
+        self.setModal(True)
+        self.setWindowFlags(
+            self.windowFlags() &
+            ~Qt.WindowContextHelpButtonHint
+        )
         self.parent = parent
-        self.setWindowTitle(u"Set Dicts")
+        self.setWindowTitle(u"Dictionary Folders Manager")
         self._dict_paths = []
         self.build()
 

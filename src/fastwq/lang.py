@@ -25,10 +25,10 @@ __all__ = ['_', '_cl', '_sl']
 
 #Language Define, [Key, zh_CN, en]
 arr = [
-    ['CHECK_FILENAME_LABEL', u'使用文件名作为标签', u'Use filename as dict label'],
-    ['EXPORT_MEDIA', u'导出媒体文件', u'Export media files'],
-    ['DICTS_FOLDERS', u'字典文件夹', u'Dict folders'],
-    ['CHOOSE_NOTE_TYPES', u'选择笔记类型', u'Choose note types'],
+    ['CHECK_FILENAME_LABEL', u'使用文件名作为标签', u'Use Filename As Label'],
+    ['EXPORT_MEDIA', u'导出媒体文件', u'Export Media Files'],
+    ['DICTS_FOLDERS', u'字典文件夹', u'Dictionary Folder'],
+    ['CHOOSE_NOTE_TYPES', u'选择笔记类型', u'Choose Note Type'],
     ['CURRENT_NOTE_TYPE', u'当前类型', u'Current type'],
     ['MDX_SERVER', u'MDX服务器', u'MDX server'],
     ['USE_DICTIONARY', u'使用字典', u'Use dict'],
@@ -41,8 +41,8 @@ arr = [
     ['WORDS', u'单词', u'Words'],
     ['NOT_DICT_FIELD', u'忽略', u'Ignore'],   #不是字典字段
     ['NOTE_TYPE_FIELDS', u'<b>笔记字段</b>', u'<b>Note fields</b>'],
-    ['DICTS', u'<b>字典</b>', u'<b>Dict</b>'],
-    ['DICT_FIELDS', u'<b>字典字段</b>', u'<b>Dict fields</b>'],
+    ['DICTS', u'<b>字典</b>', u'<b>Dictionary</b>'],
+    ['DICT_FIELDS', u'<b>字典字段</b>', u'<b>Fields</b>'],
     ['RADIOS_DESC', u'<b>单选框选中为待查询单词字段</b>', u'<b>Word field needs to be selected.</b>'],
     ['NO_QUERY_WORD', u'查询字段无单词', u'No word is found in the query field'],
     ['CSS_NOT_FOUND', u'没有找到CSS文件，请手动选择', u'No valid css stylesheets found, please choose the file'],
@@ -55,9 +55,9 @@ arr = [
     ['CHECK_FAILURE', u'版本检查失败.', u'Version check failure.'],
     ['NEW_VERSION', u'检查到新版本:', u'New version:'],
     ['UPDATE', u'更新', u'Update'],
-    ['FORCE_UPDATE', u'强制更新字段', u'Force update'],
+    ['FORCE_UPDATE', u'强制更新字段', u'Force Update Fields'],
     ['SETTINGS', u'参数', u'Settings'],
-    ['THREAD_NUMBER', u'线程数', u'Thread'],
+    ['THREAD_NUMBER', u'线程数', u'Thread Number'],
     ['INITLIZING_DICT', u'初始化词典...', u'Initlizing Dictionary...'],
 
     ['BRE_PRON', u'英式发音', u'British Pronunciation'],
