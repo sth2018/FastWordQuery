@@ -468,6 +468,10 @@ class LocalService(Service):
     def _filename(self):
         return os.path.splitext(os.path.basename(self.dict_path))[0]
 
+    def active(self, action_label, word):
+        self.missed_css.clear()
+        return super(LocalService, self).active(action_label, word)
+
 
 class MdxService(LocalService):
     """

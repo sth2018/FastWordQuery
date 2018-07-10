@@ -33,8 +33,8 @@ from .context import config
 from .lang import _, _sl
 from .progress import ProgressWindow
 from .service import service_manager, service_pool, QueryResult, copy_static_file
+from .service.base import LocalService
 from .utils import Empty, MapDict, Queue, wrap_css
-
 
 
 def inspect_note(note):
@@ -88,9 +88,9 @@ class QueryThread(QThread):
                 continue
                 
             try:
-                results, success_num = query_all_flds(note)
+                results, success_num, missed_css = query_all_flds(note)
                 if not self.exit and self.manager:
-                    if self.manager.update(note, results, success_num):
+                    if self.manager.update(note, results, success_num, missed_css):
                         self.note_flush.emit(note)
             except InvalidWordException:
                 # only show error info on single query
@@ -117,6 +117,7 @@ class QueryWorkerManager(object):
         self.counter = 0
         self.fails = 0
         self.fields = 0
+        self.missed_css = list()
 
     def get_worker(self):
         worker = QueryThread(self)
@@ -137,7 +138,7 @@ class QueryWorkerManager(object):
             worker = self.get_worker()
             worker.run()
         
-    def update(self, note, results, success_num):
+    def update(self, note, results, success_num, missed_css):
         self.mutex.lock()
         if success_num > 0:
             self.counter += 1
@@ -145,6 +146,7 @@ class QueryWorkerManager(object):
             self.fails += 1
         val = update_note_fields(note, results)
         self.fields += val
+        self.missed_css += missed_css
         self.mutex.unlock()
         if self.total > 1:
             return val > 0
@@ -236,7 +238,7 @@ def query_all(notes):
     work_manager.join()
     
     #progress.finish()
-    promot_choose_css()
+    promot_choose_css(work_manager.missed_css)
     tooltip(u'{0} {1} {2}, {3} {4}'.format(_('UPDATED'), work_manager.counter, _('CARDS'), work_manager.fields, _('FIELDS')))
     #work_manager.clean()
     service_pool.clean()
@@ -277,22 +279,34 @@ def update_note_field(note, fld_index, fld_result):
     
     return 0
 
-def promot_choose_css():
-    for local_service in service_manager.local_services:
-        try:
-            service = service_pool.get(local_service.__unique__)
-            missed_css = service.missed_css.pop()
-            showInfo(Template.miss_css.format(
-                dict=service.title, css=missed_css))
-            filepath = QFileDialog.getOpenFileName(
-                caption=u'Choose css file', filter=u'CSS (*.css)')
-            if filepath:
-                shutil.copy(filepath, u'_' + missed_css)
-                wrap_css(u'_' + missed_css)
-                service.missed_css.clear()
+def promot_choose_css(missed_css):
+    '''
+    Choose missed css file and copy to user folder
+    '''
+    checked = set()
+    for css in missed_css:
+            filename = u'_' + css['file']
+            if not os.path.exists(filename) and not css['file'] in checked:
+                checked.add(css['file'])
+                showInfo(
+                    Template.miss_css.format(
+                        dict = css['title'],
+                        css = css['file']
+                    )
+                )
+                try:
+                    filepath = css['dict_path'][:css['dict_path'].rindex(os.path.sep)+1]
+                    filepath = QFileDialog.getOpenFileName(
+                        directory = filepath,
+                        caption = u'Choose css file',
+                        filter = u'CSS (*.css)'
+                    )
+                    if filepath:
+                        shutil.copy(filepath, filename)
+                        wrap_css(filename)
 
-        except KeyError as e:
-            pass
+                except KeyError:
+                    pass
 
 
 def add_to_tmpl(note, **kwargs):
@@ -365,8 +379,16 @@ def query_all_flds(note):
         #except:
         #    showInfo(_("NO_QUERY_WORD"))
         #    pass
-        
+
+    missed_css = list()
     for service in services.values():
+        if isinstance(service, LocalService):
+            for css in service.missed_css:
+                missed_css.append({
+                    'dict_path': service.dict_path,
+                    'title': service.title,
+                    'file': css
+                })
         service_pool.put(service)
     
-    return result, success_num
+    return result, success_num, missed_css
