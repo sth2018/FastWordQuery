@@ -21,7 +21,7 @@
 from .lang import _
 
 
-VERSION = 'v1.1.0'
+VERSION = 'v1.1.1'
 
 
 class Endpoint:
