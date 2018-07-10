@@ -1,8 +1,9 @@
 #-*- coding:utf-8 -*-
 import re
+import FastWQ
 from .base import MdxService, export, register, with_styles, parseHtml
 
-PATH = u'D:\\mdx_server\\mdx\\LDOCE6.mdx'
+PATH = FastWQ.LDOCE6_PATH
 
 VOICE_PATTERN = r'<a href="sound://([\w/]+\w*\.mp3)"><img src="img/spkr_%s.png"></a>'
 MAPPINGS = [

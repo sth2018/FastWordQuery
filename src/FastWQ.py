@@ -19,6 +19,11 @@
 
 from anki.hooks import addHook
 
+############## other config here ##################
+shortcut = 'Ctrl+Q'
+LDOCE6_PATH = u'D:\\mdx_server\\mdx\\LDOCE6.mdx'
+###################################################
+
 def start_here():
 
     """
@@ -27,11 +32,6 @@ def start_here():
     """
 
     import fastwq
-
-    ############## other config here ##################
-    # shortcut
-    shortcut = 'Ctrl+Q'
-    ###################################################
 
     fastwq.config.read()
     if not fastwq.have_setup:
