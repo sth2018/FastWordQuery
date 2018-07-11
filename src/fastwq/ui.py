@@ -68,6 +68,11 @@ class ParasDialog(QDialog):
         layout.addWidget(check_force_update)
         layout.addSpacing(10)
 
+        check_ignore_accents = QCheckBox(_("IGNORE_ACCENTS"))
+        check_ignore_accents.setChecked(config.ignore_accents)
+        layout.addWidget(check_ignore_accents)
+        layout.addSpacing(10)
+
         hbox = QHBoxLayout()
         input_thread_number = QSpinBox(parent=self)
         input_thread_number.setRange(1, 120)
@@ -87,6 +92,7 @@ class ParasDialog(QDialog):
         layout.addWidget(buttonBox)
         
         self.check_force_update = check_force_update
+        self.check_ignore_accents = check_ignore_accents
         self.input_thread_number = input_thread_number
 
         layout.setAlignment(Qt.AlignTop|Qt.AlignLeft)
@@ -97,8 +103,11 @@ class ParasDialog(QDialog):
         self.close()
     
     def save(self):
-        data = {'force_update': self.check_force_update.isChecked(),
-                'thread_number': self.input_thread_number.value()}
+        data = {
+            'force_update': self.check_force_update.isChecked(),
+            'ignore_accents': self.check_ignore_accents.isChecked(),
+            'thread_number': self.input_thread_number.value()
+        }
         config.update(data)
 
 

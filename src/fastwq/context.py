@@ -105,5 +105,10 @@ class Config(object):
         """
         return self.data.get('last_folder', '')
 
+    @property
+    def ignore_accents(self):
+        '''ignore accents of field in querying'''
+        return self.data.get('ignore_accents', False)
+
 
 config = Config(mw)

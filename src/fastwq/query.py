@@ -23,6 +23,7 @@ import re
 import shutil
 import sys
 import time
+import unicodedata
 
 from aqt import mw
 from aqt.qt import QFileDialog, QObject, QThread, pyqtSignal, pyqtSlot, QMutex
@@ -337,6 +338,11 @@ def add_to_tmpl(note, **kwargs):
 class InvalidWordException(Exception):
     """Invalid word exception"""
 
+def strip_combining(txt):
+    "Return txt with all combining characters removed."
+    norm = unicodedata.normalize('NFKD', txt)
+    return u"".join([c for c in norm if not unicodedata.combining(c)])
+
 def query_all_flds(note):
     """
     Query all fields of single note
@@ -346,6 +352,9 @@ def query_all_flds(note):
     if not word:
         raise InvalidWordException
     
+    if config.ignore_accents:
+        word = strip_combining(unicode(word))
+        
     # progress.update_title(u'Querying [[ %s ]]' % word)
 
     services = {}
