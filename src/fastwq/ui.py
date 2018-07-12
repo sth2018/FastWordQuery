@@ -443,7 +443,7 @@ class OptionsDialog(Dialog):
             text = field_combo_text if field_combo_text else 'http://'
             field_combo.setEditable(True)
             field_combo.setEditText(text)
-            field_combo.setFocus(Qt.MouseFocusReason)  # MouseFocusReason
+            field_combo.setFocus(QtCore.Qt.MouseFocusReason)  # MouseFocusReason
         else:
             unique = dict_combo_itemdata
             service = service_pool.get(unique)
