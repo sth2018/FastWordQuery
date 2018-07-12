@@ -39,9 +39,12 @@ DICT_COMBOS, DICT_FILED_COMBOS, ALL_COMBOS = [0, 1, 2]
 
 widget_size = namedtuple('WidgetSize', ['dialog_width', 'dialog_height_margin', 'map_min_height',
                                         'map_max_height', 'map_fld_width', 'map_dictname_width',
-                                        'map_dictfield_width'])(450, 120, 0, 31, 100, 130, 130)
+                                        'map_dictfield_width'])(650, 120, 0, 31, 100, 130, 130)
 
 class ParasDialog(QDialog):
+    '''
+    Setting window, some golbal params for query function.
+    '''
 
     def __init__(self, parent=0):
         super(ParasDialog, self).__init__(parent)
@@ -112,6 +115,9 @@ class ParasDialog(QDialog):
 
 
 class FoldersManageDialog(QDialog):
+    '''
+    Dictionary folder manager window. add or remove dictionary folders.
+    '''
 
     def __init__(self, parent=0):
         super(FoldersManageDialog, self).__init__(parent)
@@ -192,6 +198,10 @@ class FoldersManageDialog(QDialog):
 
 
 class OptionsDialog(QDialog):
+    '''
+    query options window
+    setting query dictionary and fileds
+    '''
 
     def __init__(self, parent=0, browser=None):
         super(OptionsDialog, self).__init__(parent)
@@ -221,6 +231,9 @@ class OptionsDialog(QDialog):
         self.main_layout.addWidget(self.loading_label, 0, Qt.AlignCenter)
         #self.loading_layout.addLayout(models_layout)
         self.setLayout(self.main_layout)
+        #initlize properties
+        self.___last_checkeds___ = None
+        self.___options___ = list()
         # size and signal
         self.resize(widget_size.dialog_width, 4 * widget_size.map_max_height + widget_size.dialog_height_margin)
         self.emit(SIGNAL('before_build'), self.browser)
@@ -329,15 +342,11 @@ class OptionsDialog(QDialog):
 
         clear_layout(self.dicts_layout)
 
-        label1 = QLabel("")
-        label1.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        label2 = QLabel(_("DICTS"))
-        label2.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        label3 = QLabel(_("DICT_FIELDS"))
-        label3.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        self.dicts_layout.addWidget(label1, 0, 0)
-        self.dicts_layout.addWidget(label2, 0, 1)
-        self.dicts_layout.addWidget(label3, 0, 2)
+        labels = ['', '', 'DICTS', 'DICT_FIELDS', '']
+        for i, s in enumerate(labels):
+            label = QLabel(_(s))
+            label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+            self.dicts_layout.addWidget(label, 0, i)
 
         maps = config.get_maps(model['id'])
         self.radio_group = QButtonGroup()
@@ -372,30 +381,14 @@ class OptionsDialog(QDialog):
                 u'%s [%s]' % (_('CHOOSE_NOTE_TYPES'), ret.name))
             return model
 
-    def dict_combobox_index_changed(self, index):
-        # showInfo("combo index changed")
-        dict_combos, field_combos = self._get_combos(ALL_COMBOS)
-        assert len(dict_combos) == len(field_combos)
-        for i, dict_combo in enumerate(dict_combos):
-            # in windows and linux: the combo has current focus,
-            # in mac: the combo's listview has current focus, and the listview can
-            # be got by view()
-            # showInfo('to check focus')
-            if dict_combo.hasFocus() or dict_combo.view().hasFocus():
-                self.fill_field_combo_options(
-                    field_combos[i],
-                    dict_combo.currentText(),
-                    dict_combo.itemData(index),
-                    field_combos[i].currentText()
-                )
-                break
-
     def fill_dict_combo_options(self, dict_combo, current_text):
+        '''setup dict combo box'''
         dict_combo.clear()
-        dict_combo.addItem(_('NOT_DICT_FIELD'))
+        #dict_combo.addItem(_('NOT_DICT_FIELD'))
 
         # local dict service
-        dict_combo.insertSeparator(dict_combo.count())
+        #dict_combo.insertSeparator(dict_combo.count())
+        has_local_service = False
         for cls in service_manager.local_services:
             # combo_data.insert("data", each.label)
             service = service_pool.get(cls.__unique__)
@@ -403,9 +396,13 @@ class OptionsDialog(QDialog):
                 dict_combo.addItem(
                     service.title, userData=service.unique)
                 service_pool.put(service)
+                has_local_service = True
 
-        #web dict service
-        dict_combo.insertSeparator(dict_combo.count())
+        # hr
+        if has_local_service:
+            dict_combo.insertSeparator(dict_combo.count())
+        
+        # web dict service
         for cls in service_manager.web_services:
             service = service_pool.get(cls.__unique__)
             if service and service.support:
@@ -415,25 +412,24 @@ class OptionsDialog(QDialog):
 
         def set_dict_combo_index():
             #dict_combo.setCurrentIndex(-1)
+            dict_combo.setCurrentIndex(0)
             for i in range(dict_combo.count()):
-                if current_text in _sl('NOT_DICT_FIELD'):
-                    dict_combo.setCurrentIndex(0)
-                    return False
+                #if current_text in _sl('NOT_DICT_FIELD'):
+                #    dict_combo.setCurrentIndex(0)
+                #    return False
                 if dict_combo.itemText(i) == current_text:
                     dict_combo.setCurrentIndex(i)
-                    return True
-            dict_combo.setCurrentIndex(0)
-            return False
-
-        return set_dict_combo_index()
+            
+        set_dict_combo_index()
 
     def fill_field_combo_options(self, field_combo, dict_combo_text, dict_combo_itemdata, field_combo_text):
+        '''setup field combobox'''
         field_combo.clear()
-        field_combo.setEnabled(True)
         field_combo.setEditable(False)
-        if dict_combo_text in _sl('NOT_DICT_FIELD'):
-            field_combo.setEnabled(False)
-        elif dict_combo_text in _sl('MDX_SERVER'):
+        #if dict_combo_text in _sl('NOT_DICT_FIELD'):
+        #    field_combo.setEnabled(False)
+        #el
+        if dict_combo_text in _sl('MDX_SERVER'):
             text = field_combo_text if field_combo_text else 'http://'
             field_combo.setEditable(True)
             field_combo.setEditText(text)
@@ -448,39 +444,31 @@ class OptionsDialog(QDialog):
                     field_combo.addItem(each)
                     if each == field_combo_text:
                         field_combo.setCurrentIndex(i)
-            else:
-                field_combo.setEnabled(False)
             service_pool.put(service)
-
-    def radio_btn_checked(self):
-        rbs = self.findChildren(QRadioButton)
-        dict_cbs, fld_cbs = self._get_combos(ALL_COMBOS)
-        for i, rb in enumerate(rbs):
-            dict_cbs[i].setEnabled(not rb.isChecked())
-            fld_cbs[i].setEnabled(
-                (dict_cbs[i].currentText() != _('NOT_DICT_FIELD')) and (not rb.isChecked()))
 
     def add_dict_layout(self, i, **kwargs):
         """
         kwargs:
         word_checked  dict  fld_name dict_field
         """
-        word_checked, dict_name, dict_unique, fld_name, dict_field = (
-            kwargs.get('word_checked', False),
-            kwargs.get('dict', _('NOT_DICT_FIELD')),
+        word_checked = i == 0
+        dict_name, dict_unique, fld_name, dict_field, ignore, skip = (
+            kwargs.get('dict', ''),
             kwargs.get('dict_unique', ''),
             kwargs.get('fld_name', ''),
-            kwargs.get('dict_field', ''),)
-
+            kwargs.get('dict_field', ''),
+            kwargs.get('ignore', False),
+            kwargs.get('skip_valued', False),
+        )
+        # check
         word_check_btn = QRadioButton(fld_name)
         word_check_btn.setMinimumSize(widget_size.map_fld_width, 0)
-        word_check_btn.setMaximumSize(widget_size.map_fld_width,
-                                      widget_size.map_max_height)
+        word_check_btn.setMaximumSize(
+            widget_size.map_fld_width,
+            widget_size.map_max_height
+        )
         word_check_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         word_check_btn.setCheckable(True)
-        word_check_btn.clicked.connect(self.radio_btn_checked)
-        if i == 0:
-            word_checked = True
         word_check_btn.setChecked(word_checked)
         self.radio_group.addButton(word_check_btn)
         # dict combox
@@ -489,46 +477,97 @@ class OptionsDialog(QDialog):
         dict_combo.setFocusPolicy(
             Qt.TabFocus | Qt.ClickFocus | Qt.StrongFocus | Qt.WheelFocus
         )
-        dict_combo.setEnabled(not word_checked)
-        dict_combo.currentIndexChanged.connect(
-            self.dict_combobox_index_changed
-        )
-        dict_valid = self.fill_dict_combo_options(dict_combo, dict_name)
+        dict_combo.setEnabled(not word_checked and not ignore)
+        self.fill_dict_combo_options(dict_combo, dict_name)
         # field combox
         field_combo = QComboBox()
         field_combo.setMinimumSize(widget_size.map_dictfield_width, 0)
-        if word_checked or not dict_valid:
-            field_combo.clear()
-            field_combo.setEnabled(False)
-            dict_combo.setCurrentIndex(0)
-        else:
-            self.fill_field_combo_options(field_combo, dict_name, dict_unique, dict_field)
+        field_combo.setEnabled(not word_checked and not ignore)
+        self.fill_field_combo_options(field_combo, dict_name, dict_unique, dict_field)
+
+        # ignore
+        check_ignore = QCheckBox(_("NOT_DICT_FIELD"))
+        check_ignore.setEnabled(not word_checked)
+        check_ignore.setChecked(ignore)
+
+        # Skip valued
+        check_skip = QCheckBox(_("SKIP_VALUED"))
+        check_skip.setEnabled(not word_checked and not ignore)
+        check_skip.setChecked(skip)
+
+        # events
+        # word
+        def radio_btn_checked():
+            if self.___last_checkeds___:
+                self.___last_checkeds___[0].setEnabled(True)
+                ignore = self.___last_checkeds___[0].isChecked()
+                for i in range(1, len(self.___last_checkeds___)):
+                    self.___last_checkeds___[i].setEnabled(not ignore)
+
+            word_checked = word_check_btn.isChecked()
+            check_ignore.setEnabled(not word_checked)
+            ignore = check_ignore.isChecked()
+            dict_combo.setEnabled(not word_checked and not ignore)
+            field_combo.setEnabled(not word_checked and not ignore)
+            check_skip.setEnabled(not word_checked and not ignore)
+            if word_checked:
+                self.___last_checkeds___ = [
+                    check_ignore, dict_combo, 
+                    field_combo, check_skip
+                ]
+        word_check_btn.clicked.connect(radio_btn_checked)
+        if word_checked: 
+            self.___last_checkeds___ = None
+            radio_btn_checked()
+        # ignor
+        def ignore_check_changed():
+            ignore = not check_ignore.isChecked()
+            dict_combo.setEnabled(ignore)
+            field_combo.setEnabled(ignore)
+            check_skip.setEnabled(ignore)
+        check_ignore.clicked.connect(ignore_check_changed)
+        # dict
+        def dict_combo_changed(index):
+            '''dict combo box index changed'''
+            self.fill_field_combo_options(
+                field_combo,
+                dict_combo.currentText(),
+                dict_combo.itemData(index),
+                field_combo.currentText()
+            )
+        dict_combo.currentIndexChanged.connect(dict_combo_changed)
 
         self.dicts_layout.addWidget(word_check_btn, i + 1, 0)
-        self.dicts_layout.addWidget(dict_combo, i + 1, 1)
-        self.dicts_layout.addWidget(field_combo, i + 1, 2)
+        self.dicts_layout.addWidget(check_ignore, i + 1, 1)
+        self.dicts_layout.addWidget(dict_combo, i + 1, 2)
+        self.dicts_layout.addWidget(field_combo, i + 1, 3)
+        self.dicts_layout.addWidget(check_skip, i + 1, 4)
 
-    def _get_combos(self, flag):
-        # 0 : dict_combox, 1:field_combox
-        dict_combos = self.findChildren(QComboBox)
-        if flag in [DICT_COMBOS, DICT_FILED_COMBOS]:
-            return dict_combos[flag::2]
-        if flag == ALL_COMBOS:
-            return dict_combos[::2], dict_combos[1::2]
+        self.___options___.append([
+                word_check_btn,
+                dict_combo,
+                field_combo,
+                check_ignore,
+                check_skip
+            ]
+        )
 
     def save(self):
         if not self.current_model:
             return
         data = dict()
-        labels = self.findChildren(QRadioButton)
-        dict_cbs, field_cbs = self._get_combos(ALL_COMBOS)
-        maps = [{"word_checked": label.isChecked(),
-                 "dict": dict_cb.currentText().strip(),
-                 "dict_unique": dict_cb.itemData(dict_cb.currentIndex()) if dict_cb.itemData(dict_cb.currentIndex()) else "",
-                 "dict_field": field_cb.currentText().strip(),
-                 "fld_ord": get_ord_from_fldname(self.current_model, label.text()
-                                                 )}
-                for (dict_cb, field_cb, label) in zip(dict_cbs, field_cbs, labels)]
+        maps = [
+            {
+                "word_checked": x[0].isChecked(),
+                "dict": x[1].currentText().strip(),
+                "dict_unique": x[1].itemData(x[1].currentIndex()) if x[1].itemData(x[1].currentIndex()) else '',
+                "dict_field": x[2].currentText().strip(),
+                "fld_ord": get_ord_from_fldname(self.current_model, x[0].text()),
+                'ignore': x[3].isChecked(),
+                'skip_valued': x[4].isChecked(),
+            }
+            for x in self.___options___
+        ]
         current_model_id = str(self.current_model['id'])
         data[current_model_id] = maps
         data['last_model'] = self.current_model['id']
@@ -536,6 +575,7 @@ class OptionsDialog(QDialog):
 
 
 def check_updates():
+    '''check add-on last version'''
     try:
         import libs.ankihub
         if not libs.ankihub.update([Endpoint.check_version], False, Endpoint.version):
@@ -554,6 +594,7 @@ def show_options(browser = None):
     opt_dialog.raise_()
     opt_dialog.exec_()
 
+
 def show_fm_dialog(browser = None):
     '''open dictionary folder manager window'''
     parent = mw if browser is None else browser
@@ -565,18 +606,5 @@ def show_fm_dialog(browser = None):
         fm_dialog.save()
         # update local services
         service_manager.update_services()
-        # update_dicts_combo
-        #dict_cbs = self._get_combos(DICT_COMBOS)
-        '''
-        dict_cbs, field_cbs = self._get_combos(ALL_COMBOS)
-        for i, cb in enumerate(dict_cbs):
-            current_text = cb.currentText()
-            self.fill_dict_combo_options(cb, current_text)
-            self.fill_field_combo_options(
-                field_cbs[i],
-                cb.currentText(),
-                cb.itemData(cb.currentIndex())
-            )
-        '''
     # reshow options window
     show_options(browser)

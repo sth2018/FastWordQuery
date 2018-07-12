@@ -364,6 +364,15 @@ def query_all_flds(note):
             continue
         if i == len(note.fields):
             break
+        #ignore field
+        ignore = each.get('ignore', False)
+        if ignore:
+            continue
+        #skip valued
+        skip = each.get('skip_valued', False)
+        if skip and not note.fields[i]:
+            continue
+        #normal
         dict_name = each.get('dict', '').strip()
         dict_field = each.get('dict_field', '').strip()
         dict_unique = each.get('dict_unique', '').strip()
