@@ -65,7 +65,7 @@ class Esdict(WebService):
     def _get_field(self, key, default=u''):
         return self.cache_result(key) if self.cached(key) else self._get_content().get(key, default)
 
-    @export(u'真人发音', 0)
+    @export(u'真人发音')
     def fld_sound(self):
         # base64.b64encode('bonjour') == 'Ym9uam91cg=='
         # https://api.frdic.com/api/v2/speech/speakweb?langid=fr&txt=QYNYm9uam91cg%3d%3d
@@ -78,30 +78,30 @@ class Esdict(WebService):
         except Exception as e:
             return ''
 
-    @export(u'音标', 1)
+    @export(u'音标')
     def fld_phonetic(self):
         return self._get_field('phonitic')
 
-    @export(u'西汉-汉西词典', 2)
+    @export(u'西汉-汉西词典')
     @with_styles(css=css)
     def fld_fccf(self):
         return self._get_field('fccf')
 
-    @export(u'西语例句库', 3)
+    @export(u'西语例句库')
     @with_styles(css=css)
     def fld_example(self):
         return self._get_field('example')
 
-    @export(u'近义、反义、派生词典', 4)
+    @export(u'近义、反义、派生词典')
     def fld_syn(self):
         return self._get_field('syn')
 
-    @export(u'西西词典', 5)
+    @export(u'西西词典')
     @with_styles(css=css)
     def fld_ff(self):
         return self._get_field('ff')
 
-    @export(u'西英词典', 6)
+    @export(u'西英词典')
     @with_styles(css=css)
     def fld_fe(self):
         return self._get_field('fe')

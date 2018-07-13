@@ -1,6 +1,6 @@
 #-*- coding:utf-8 -*-
 import re
-from .base import WebService, export, register, with_styles, parseHtml
+from .base import WebService, export, register, with_styles, parse_html
 
 bing_download_mp3 = True
 
@@ -13,7 +13,7 @@ class Bing(WebService):
     def _get_content(self):
         word = self.word.replace(' ', '_')
         data = self.get_response(u"http://cn.bing.com/dict/search?q={}&mkt=zh-cn".format(word))
-        soup = parseHtml(data)
+        soup = parse_html(data)
         result = {
             'pronunciation': {'AmE': '', 'BrE': '', 'AmEmp3': '', 'BrEmp3': ''},
             'def': '',
@@ -73,12 +73,12 @@ class Bing(WebService):
     def _css(self, val):
         return val
 
-    @export('AME_PHON', 1)
+    @export('AME_PHON')
     def fld_phonetic_us(self):
         seg = self._get_field('pronunciation')
         return seg.get('AmE', u'')
 
-    @export('BRE_PHON', 2)
+    @export('BRE_PHON')
     def fld_phonetic_uk(self):
         seg = self._get_field('pronunciation')
         return seg.get('BrE', u'')
@@ -91,22 +91,22 @@ class Bing(WebService):
                 return self.get_anki_label(filename, 'audio')
         return ''
 
-    @export('AME_PRON', 3)
+    @export('AME_PRON')
     def fld_mp3_us(self):
         return self._fld_mp3('AmEmp3')
 
-    @export('BRE_PRON', 4)
+    @export('BRE_PRON')
     def fld_mp3_uk(self):
         return self._fld_mp3('BrEmp3')
     
-    @export('DEF', 5)
+    @export('DEF')
     def fld_definition(self):
         val = self._get_field('def')
         if val == None or val == '':
             return ''
         return self._css(val)
 
-    @export('EXAMPLE', 6)
+    @export('EXAMPLE')
     def fld_samples(self):
         max_numbers = 10
         segs = self._get_field('sams')

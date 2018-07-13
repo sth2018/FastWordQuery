@@ -134,32 +134,32 @@ class Longman(WebService):
                 return ''
         return self.cache_result(single_dict)
 
-    @export(u'音标', 2)
-    def phonetic(self):
+    @export(u'音标')
+    def fld_phonetic(self):
         return self._get_singledict('phonetic')
 
-    @export(u'断字单词', 3)
-    def hyphenation(self):
+    @export(u'断字单词')
+    def fld_hyphenation(self):
         return self._get_singledict('hyphenation')
 
-    @export(u'词性', 1)
-    def pos(self):
+    @export(u'词性')
+    def fld_pos(self):
         return self._get_singledict('pos')
 
-    @export(u'英英解释', 0)
+    @export(u'英英解释')
     @with_styles(cssfile='_longman.css')
-    def ee(self):
+    def fld_ee(self):
         return self._get_singledict('ee')
 
-    @export(u'图片', 4)
-    def pic(self):
+    @export(u'图片')
+    def fld_pic(self):
         url = self._get_singledict('img')
         filename = u'longman_img_{}'.format(os.path.basename(url))
         if url and self.download(url, filename):
             return self.get_anki_label(filename, 'img')
         return ''
 
-    @export(u'变形', 5)
+    @export(u'变形')
     @with_styles(cssfile='_longman.css')
-    def inflections(self):
+    def fld_inflections(self):
         return self._get_singledict('inflections')

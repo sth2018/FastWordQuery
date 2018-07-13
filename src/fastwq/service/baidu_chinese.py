@@ -1,6 +1,6 @@
 #-*- coding:utf-8 -*-
 from hashlib import sha1
-from .base import WebService, export, register, with_styles, parseHtml
+from .base import WebService, export, register, with_styles, parse_html
 
 baidu_download_mp3 = True
 
@@ -13,7 +13,7 @@ class Baidu_Chinese(WebService):
     def _get_content(self):
         url = u"http://dict.baidu.com/s?wd={}#basicmean".format(self.word)
         html = self.get_response(url, timeout=10)
-        soup = parseHtml(html)
+        soup = parse_html(html)
         result = {
             'pinyin': '',
             'basicmean': '',
@@ -63,11 +63,11 @@ class Baidu_Chinese(WebService):
     def _css(self, val):
         return val
 
-    @export([u'拼音', u'Phoneticize'], 1)
+    @export([u'拼音', u'Phoneticize'])
     def fld_pinyin(self):
         return self._get_field('pinyin')
 
-    @export('PRON', 2)
+    @export('PRON')
     def fld_pron(self):
         audio_url = self._get_field('audio_url')
         if baidu_download_mp3 and audio_url:
@@ -96,20 +96,20 @@ class Baidu_Chinese(WebService):
                 pass
         return ''
 
-    @export([u'基本释义', u'Basic Definitions'], 3)
+    @export([u'基本释义', u'Basic Definitions'])
     def fld_basic(self):
         val = self._get_field('basicmean')
         if val is None or val == '':
             return ''
         return self._css(val)
 
-    @export([u'详细释义', u'Detail Definitions'], 4)
+    @export([u'详细释义', u'Detail Definitions'])
     def fld_detail(self):
         val = self._get_field('detailmean')
         if val is None or val == '':
             return ''
         return self._css(val)
 
-    @export([u'英文翻译', u'Translation[En]'], 5)
+    @export([u'英文翻译', u'Translation[En]'])
     def fld_fanyi(self):
         return self._get_field('fanyi')

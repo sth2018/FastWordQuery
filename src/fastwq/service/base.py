@@ -19,6 +19,8 @@
 
 import inspect
 import os
+import sys
+import types
 # use ntpath module to ensure the windows-style (e.g. '\\LDOCE.css')
 # path can be processed on Unix platform.
 # However, anki version on mac platforms doesn't including this package?
@@ -49,28 +51,52 @@ except ImportError:
     import dummy_threading as _threading
 
 
+__all__ = [
+    'register', 'export', 'copy_static_file', 'with_styles', 'parse_html', 'service_wrap',
+    'Service', 'WebService', 'LocalService', 'MdxService', 'StardictService', 'QueryResult'
+]
+
+
 def register(labels):
     """
     register the dict service with a labels, which will be shown in the dicts list.
     """
     def _deco(cls):
         cls.__register_label__ = _cl(labels)
+
+        methods = inspect.getmembers(cls, predicate=inspect.ismethod)
+        exports = []
+        for method in methods:
+            attrs = getattr(method[1], '__export_attrs__', None)
+            if attrs and attrs[1] == -1:
+                exports.append((
+                    getattr(method[1], '__def_index__', 0),
+                    method[1]
+                ))
+        exports = sorted(exports)
+        for index, method in enumerate(exports):
+            attrs = getattr(method[1], '__export_attrs__', None)
+            attrs[1] = index
+
         return cls
     return _deco
 
 
-def export(labels, index):
+def export(labels):
     """
     export dict field function with a labels, which will be shown in the fields list.
     """
     def _with(fld_func):
         @wraps(fld_func)
-        def _deco(cls, *args, **kwargs):
-            res = fld_func(cls, *args, **kwargs)
+        def _deco(self, *args, **kwargs):
+            res = fld_func(self, *args, **kwargs)
             return QueryResult(result=res) if not isinstance(res, QueryResult) else res
-        _deco.__export_attrs__ = (_cl(labels), index)
+        _deco.__export_attrs__ = [_cl(labels), -1]
+        _deco.__def_index__ = export.EXPORT_INDEX
+        export.EXPORT_INDEX += 1
         return _deco
     return _with
+export.EXPORT_INDEX = 0
 
 
 def copy_static_file(filename, new_filename=None, static_dir='static'):
@@ -132,13 +158,13 @@ def with_styles(**styles):
     return _with
 
 # bs4 threading lock, overload protection
-BS_LOCKS = [_threading.Lock(), _threading.Lock()]
+_BS_LOCKS = [_threading.Lock(), _threading.Lock()]
 
-def parseHtml(html):
+def parse_html(html):
     '''
     use bs4 lib parse HTML, run only 2 BS at the same time
     '''
-    lock = BS_LOCKS[random.randrange(0, len(BS_LOCKS) - 1, 1)]
+    lock = _BS_LOCKS[random.randrange(0, len(_BS_LOCKS) - 1, 1)]
     lock.acquire()
     soup = BeautifulSoup(html, 'html.parser')
     lock.release()
@@ -161,7 +187,7 @@ class Service(object):
 
     def __init__(self):
         self.cache = defaultdict(defaultdict)
-        self._exporters = self.get_exporters()
+        self._exporters = self._get_exporters()
         self._fields, self._actions = zip(*self._exporters) \
             if self._exporters else (None, None)
         # query interval: default 500ms
@@ -193,28 +219,21 @@ class Service(object):
     def exporters(self):
         return self._exporters
 
-    def get_exporters(self):
+    def _get_exporters(self):
         flds = dict()
         methods = inspect.getmembers(self, predicate=inspect.ismethod)
         for method in methods:
             export_attrs = getattr(method[1], '__export_attrs__', None)
             if export_attrs:
-                label, index = export_attrs
+                label, index = export_attrs[0], export_attrs[1]
                 flds.update({int(index): (label, method[1])})
         sorted_flds = sorted(flds)
         return [flds[key] for key in sorted_flds]
 
-    def active(self, action_label, word):
+    def active(self, fld_ord, word):
         self.word = word
-        # if the service instance is LocalService,
-        # then have to build then index.
-        #if isinstance(self, LocalService):
-        #    if isinstance(self, MdxService) or isinstance(self, StardictService):
-        #        self.builder.check_build()
-
-        for each in self.exporters:
-            if action_label == each[0]:
-                return each[1]()
+        if fld_ord >= 0 and fld_ord < len(self.actions):
+            return self.actions[fld_ord]()
         return QueryResult.default()
 
     @staticmethod
@@ -468,9 +487,9 @@ class LocalService(Service):
     def _filename(self):
         return os.path.splitext(os.path.basename(self.dict_path))[0]
 
-    def active(self, action_label, word):
+    def active(self, fld_ord, word):
         self.missed_css.clear()
-        return super(LocalService, self).active(action_label, word)
+        return super(LocalService, self).active(fld_ord, word)
 
 
 class MdxService(LocalService):
@@ -503,7 +522,7 @@ class MdxService(LocalService):
         else:
             return self.builder._title
 
-    @export([u'默认', u'Default'], 0)
+    @export([u'默认', u'Default'])
     def fld_whole(self):
         html = self.get_default_html()
         js = re.findall(r'<script.*?>.*?</script>', html, re.DOTALL)
@@ -650,7 +669,9 @@ class MdxService(LocalService):
 
 
 class StardictService(LocalService):
-
+    '''
+    Stardict Local Dictionary Service
+    '''
     def __init__(self, dict_path):
         super(StardictService, self).__init__(dict_path)
         self.query_interval = 0.05
@@ -677,7 +698,7 @@ class StardictService(LocalService):
         else:
             return self.builder.ifo.bookname.decode('utf-8')
 
-    @export([u'默认', u'Default'], 0)
+    @export([u'默认', u'Default'])
     def fld_whole(self):
         #self.builder.check_build()
         try:

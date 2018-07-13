@@ -14,7 +14,7 @@ class MiniDict(WebService):
         super(MiniDict, self).__init__()
         self.encoder = Encoder()
 
-    def get_content(self, token):
+    def _get_content(self, token):
         expressions, sentences, variations = [''] * 3
 
         encoded_word = self.encoder.go(self.word, token)
@@ -31,7 +31,7 @@ class MiniDict(WebService):
                 {'expressions': expressions, 'sentences': sentences, 'variations': variations})
         return expressions, sentences, variations
 
-    def get_token_phonetic(self):
+    def _get_token_phonetic(self):
         result = self.get_response(
             "http://dict.cn/mini.php?q={}".format(self.word))
 
@@ -45,39 +45,39 @@ class MiniDict(WebService):
             self.cache_this({'phonetic': phonetic})
         return page_token, phonetic
 
-    @export(u'音标', 0)
+    @export(u'音标')
     # @with_css('''<style type="text/css">.p {font-family: Lucida Sans Unicode; color: #666699;}</style>''')
     def fld_phonetic(self):
-        return self.cache_result('phonetic') if self.cached('phonetic') else self.get_token_phonetic()[1]
+        return self.cache_result('phonetic') if self.cached('phonetic') else self._get_token_phonetic()[1]
 
-    @export(u'基本释义', 1)
+    @export(u'基本释义')
     def fld_explains(self):
         if self.cached('expressions'):
             return self.cache_result('expressions')
             # showInfo(u'%s 基本释义cached:\n %s' % (self.word, res))
         else:
-            page_token, phonetic = self.get_token_phonetic()
-            return self.get_content(page_token)[0]
+            page_token, phonetic = self._get_token_phonetic()
+            return self._get_content(page_token)[0]
             # showInfo(u'%s 基本释义获取:\n %s' % (self.word, res))
 
-    @export(u'例句与用法', 2)
+    @export(u'例句与用法')
     def fld_sentences(self):
         if self.cached('sentences'):
             return self.cache_result('sentences')
             # showInfo(u'%s 基本释义cached:\n %s' % (self.word, res))
         else:
-            page_token, phonetic = self.get_token_phonetic()
-            return self.get_content(page_token)[1]
+            page_token, phonetic = self._get_token_phonetic()
+            return self._get_content(page_token)[1]
             # showInfo(u'%s 基本释义获取:\n %s' % (self.word, res))
 
-    @export(u'词形变化', 3)
+    @export(u'词形变化')
     def fld_variations(self):
         if self.cached('variations'):
             return self.cache_result('variations')
             # showInfo(u'%s 基本释义cached:\n %s' % (self.word, res))
         else:
-            page_token, phonetic = self.get_token_phonetic()
-            return self.get_content(page_token)[2]
+            page_token, phonetic = self._get_token_phonetic()
+            return self._get_content(page_token)[2]
             # showInfo(u'%s 基本释义获取:\n %s' % (self.word, res))
 
 

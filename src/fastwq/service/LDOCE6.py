@@ -1,7 +1,7 @@
 #-*- coding:utf-8 -*-
 import re
 import FastWQ
-from .base import MdxService, export, register, with_styles, parseHtml
+from .base import MdxService, export, register, with_styles, parse_html
 
 PATH = FastWQ.LDOCE6_PATH
 
@@ -27,7 +27,7 @@ class Ldoce6(MdxService):
     def title(self):
         return self.__register_label__
 
-    @export('PHON', 1)
+    @export('PHON')
     def fld_phonetic(self):
         html = self.get_html()
         m = re.search(r'<span class="pron">(.*?)</span>', html)
@@ -60,19 +60,19 @@ class Ldoce6(MdxService):
                     return self.get_anki_label(name, 'audio')
         return ''
 
-    @export('BRE_PRON', 2)
+    @export('BRE_PRON')
     def fld_voicebre(self):
         return self._fld_voice(self.get_html(), 'br')
 
-    @export('AME_PRON', 3)
+    @export('AME_PRON')
     def fld_voiceame(self):
         return self._fld_voice(self.get_html(), 'us')
 
-    @export('EXAMPLE', 4)
+    @export('EXAMPLE')
     def fld_sentence(self):
         m = re.findall(r'<span class="example"\s*.*>\s*.*<\/span>', self.get_html())
         if m:
-            soup = parseHtml(m[0])
+            soup = parse_html(m[0])
             el_list = soup.findAll('span', {'class':'example'})
             if el_list:
                 maps = [u''.join(str(content).decode('utf-8') for content in element.contents) 
@@ -85,11 +85,11 @@ class Ldoce6(MdxService):
             return self._css(my_str)
         return ''
 
-    @export('DEF', 5)
+    @export('DEF')
     def fld_definate(self):
         m = m = re.findall(r'<span class="def"\s*.*>\s*.*<\/span>', self.get_html())
         if m:
-            soup = parseHtml(m[0])
+            soup = parse_html(m[0])
             el_list = soup.findAll('span', {'class':'def'})
             if el_list:
                 maps = [u''.join(str(content).decode('utf-8') for content in element.contents) 

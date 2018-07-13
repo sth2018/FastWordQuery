@@ -1,7 +1,7 @@
 # coding=utf-8
 #from warnings import filterwarnings
 from ..libs.bs4 import Tag
-from .base import WebService, export, register, with_styles, parseHtml
+from .base import WebService, export, register, with_styles, parse_html
 
 #filterwarnings('ignore')
 
@@ -59,17 +59,17 @@ class OxfordLearning(WebService):
                 )
         return self.cache_result(single_dict)
 
-    @export('PHON', 0)
-    def phonetic(self):
+    @export('PHON')
+    def fld_phonetic(self):
         return self._get_single_dict('phonetic')
 
-    @export([u'词性', u'POS'], 1)
-    def pos(self):
+    @export([u'词性', u'POS'])
+    def fld_pos(self):
         return self._get_single_dict('pos')
 
-    @export('DEF', 2)
+    @export('DEF')
     @with_styles(cssfile='_oxford.css')
-    def ee(self):
+    def fld_ee(self):
         # return '<div style="margin-left: 20px">' + self._get_single_dict(
         #     'ee') + "</div>" if "<li>" not in self._get_single_dict('ee') else self._get_single_dict('ee')
         return self._get_single_dict('ee')
@@ -88,16 +88,16 @@ class OxfordLearning(WebService):
             return self.get_anki_label(filename, 'audio')
         return ''
 
-    @export('BRE_PRON', 3)
-    def sound_bre(self):
+    @export('BRE_PRON')
+    def fld_sound_bre(self):
         return self.get_sound_bre()
 
-    @export('AME_PRON', 4)
-    def sound_ame(self):
+    @export('AME_PRON')
+    def fld_sound_ame(self):
         return self.get_sound_ame()
 
-    @export([u'英式发音优先', u'British Pronunciation First'], 5)
-    def sound_pri(self):
+    @export([u'英式发音优先', u'British Pronunciation First'])
+    def fld_sound_pri(self):
         bre = self.get_sound_bre()
         return bre if bre else self.get_sound_ame()
 
@@ -108,7 +108,7 @@ class OxfordLearningDictWord:
         if not markups:
             return
         self.markups = markups
-        self.bs = parseHtml(self.markups)
+        self.bs = parse_html(self.markups)
         self._defs = []
         self._defs_html = []
 

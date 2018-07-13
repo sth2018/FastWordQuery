@@ -37,7 +37,7 @@ class Baicizhan(WebService):
     def _get_field(self, key, default=u''):
         return self.cache_result(key) if self.cached(key) else self._get_from_api().get(key, default)
 
-    @export('PRON', 0)
+    @export('PRON')
     def fld_phonetic(self):
         word = self.word.replace(' ', '_')
         url = u'http://baicizhan.qiniucdn.com/word_audios/{}.mp3'.format(word)
@@ -58,11 +58,11 @@ class Baicizhan(WebService):
         else:
             return url
 
-    @export('PHON', 1)
+    @export('PHON')
     def fld_phon(self):
         return self._get_field('accent')
 
-    @export('IMAGE', 2)
+    @export('IMAGE')
     def fld_img(self):
         url = self._get_field('img')
         if url and self.bcz_download_img:
@@ -72,7 +72,7 @@ class Baicizhan(WebService):
         #return self.get_anki_label(url, 'img')
         return ''
 
-    @export([u'象形', u'Pictogram'], 3)
+    @export([u'象形', u'Pictogram'])
     def fld_df(self):
         url = self._get_field('df')
         if url and self.bcz_download_img:
@@ -82,19 +82,19 @@ class Baicizhan(WebService):
         #return self.get_anki_label(url, 'img')
         return ''
 
-    @export(u'DEF', 6)
+    @export(u'DEF')
     def fld_mean(self):
         return self._get_field('mean_cn')
 
-    @export(u'EXAMPLE', 4)
+    @export(u'EXAMPLE')
     def fld_st(self):
         return self._get_field('st')
 
-    @export('TRANS', 5)
+    @export('TRANS')
     def fld_sttr(self):
         return self._get_field('sttr')
 
-    @export([u'单词tv', u'TV'], 7)
+    @export([u'单词tv', u'TV'])
     def fld_tv_url(self):
         video = self._get_field('tv')
         if video:

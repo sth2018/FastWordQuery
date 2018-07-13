@@ -26,6 +26,6 @@ class Oxford(WebService):
 
         return response["results"]
 
-    @export("Lexical Category", 1)
-    def _fld_category(self):
+    @export("Lexical Category")
+    def fld_category(self):
         return self._get_from_api()[0]["lexicalEntries"][0]["lexicalCategory"]

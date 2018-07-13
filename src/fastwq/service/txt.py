@@ -17,7 +17,7 @@ class TxtTest(LocalService):
         except:
             self.handle = None
 
-    @export(u'all', 1)
+    @export(u'all')
     def fld_phonetic(self):
         if not self.handle:
             return

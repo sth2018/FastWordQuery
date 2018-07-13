@@ -69,11 +69,11 @@ class Youdao(WebService):
     def _get_field(self, key, default=u''):
         return self.cache_result(key) if self.cached(key) else self._get_from_api().get(key, default)
 
-    @export(u'音标', 0)
+    @export(u'音标')
     def fld_phonetic(self):
         return self._get_field('phonetic')
 
-    @export(u'基本释义', 1)
+    @export(u'基本释义')
     def fld_explains(self):
         return self._get_field('explains')
 
@@ -98,7 +98,7 @@ class Youdao(WebService):
         except:
             return ''
 
-    @export(u'英式发音', 2)
+    @export(u'英式发音')
     def fld_british_audio(self):
         audio_url = u'http://dict.youdao.com/dictvoice?audio={}&type=1'.format(self.word)
         if youdao_download_mp3:
@@ -107,7 +107,7 @@ class Youdao(WebService):
                 return self.get_anki_label(filename, 'audio')
         return audio_url
 
-    @export(u'美式发音', 3)
+    @export(u'美式发音')
     def fld_american_audio(self):
         audio_url = u'http://dict.youdao.com/dictvoice?audio={}&type=2'.format(self.word)
         if youdao_download_mp3:
@@ -116,54 +116,54 @@ class Youdao(WebService):
                 return self.get_anki_label(filename, 'audio')
         return audio_url
 
-    @export(u'柯林斯英汉', 4)
+    @export(u'柯林斯英汉')
     def fld_collins(self):
         return self._get_singledict('collins')
 
-    @export(u'21世纪', 5)
+    @export(u'21世纪')
     def fld_ec21(self):
         return self._get_singledict('ec21')
 
-    @export(u'英英释义', 6)
+    @export(u'英英释义')
     def fld_ee(self):
         return self._get_singledict('ee')
 
-    @export(u'网络释义', 7)
+    @export(u'网络释义')
     def fld_web_trans(self):
         return self._get_singledict('web_trans')
 
-    @export(u'同根词', 8)
+    @export(u'同根词')
     def fld_rel_word(self):
         return self._get_singledict('rel_word')
 
-    @export(u'同近义词', 9)
+    @export(u'同近义词')
     def fld_syno(self):
         return self._get_singledict('syno')
 
-    @export(u'双语例句', 10)
+    @export(u'双语例句')
     def fld_blng_sents_part(self):
         return self._get_singledict('blng_sents_part')
 
-    @export(u'原生例句', 11)
+    @export(u'原生例句')
     def fld_media_sents_part(self):
         return self._get_singledict('media_sents_part')
 
-    @export(u'权威例句', 12)
+    @export(u'权威例句')
     def fld_auth_sents_part(self):
         return self._get_singledict('auth_sents_part')
 
-    @export(u'新英汉大辞典(中)', 13)
+    @export(u'新英汉大辞典(中)')
     def fld_ce_new(self):
         return self._get_singledict('ce_new')
 
-    @export(u'百科', 14)
+    @export(u'百科')
     def fld_baike(self):
         return self._get_singledict('baike')
 
-    @export(u'汉语词典(中)', 15)
+    @export(u'汉语词典(中)')
     def fld_hh(self):
         return self._get_singledict('hh')
 
-    @export(u'专业释义(中)', 16)
+    @export(u'专业释义(中)')
     def fld_special(self):
         return self._get_singledict('special')

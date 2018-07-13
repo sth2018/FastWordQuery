@@ -32,12 +32,12 @@ class BingXtk(WebService):
     def _get_field(self, key, default=u''):
         return self.cache_result(key) if self.cached(key) else self._get_content().get(key, default)
 
-    @export('AME_PHON', 1)
+    @export('AME_PHON')
     def fld_phonetic_us(self):
         seg = self._get_field('pronunciation')
         return seg.get('AmE', u'')
 
-    @export('BRE_PHON', 2)
+    @export('BRE_PHON')
     def fld_phonetic_uk(self):
         seg = self._get_field('pronunciation')
         return seg.get('BrE', u'')
@@ -50,11 +50,11 @@ class BingXtk(WebService):
                 return self.get_anki_label(filename, 'audio')
         return ''
 
-    @export('AME_PRON', 3)
+    @export('AME_PRON')
     def fld_mp3_us(self):
         return self._fld_mp3('AmEmp3')
 
-    @export('BRE_PRON', 4)
+    @export('BRE_PRON')
     def fld_mp3_uk(self):
         return self._fld_mp3('BrEmp3')
     
@@ -62,7 +62,7 @@ class BingXtk(WebService):
     def _css(self, val):
         return val
 
-    @export('DEF', 5)
+    @export('DEF')
     def fld_definition(self):
         segs = self._get_field('defs')
         if isinstance(segs, list) and len(segs) > 0:
@@ -71,7 +71,7 @@ class BingXtk(WebService):
             return self._css(val)
         return ''
     
-    @export('EXAMPLE', 6)
+    @export('EXAMPLE')
     def fld_samples(self):
         max_numbers = 10
         segs = self._get_field('sams')
