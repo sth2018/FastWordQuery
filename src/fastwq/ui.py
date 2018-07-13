@@ -338,7 +338,9 @@ class OptionsDialog(Dialog):
             self.build_mappings_layout(self.current_model)
 
     def build_mappings_layout(self, model):
-
+        '''
+        build dictionary、fields etc
+        '''
         def clear_layout(layout):
             if layout is not None:
                 while layout.count():
@@ -366,13 +368,15 @@ class OptionsDialog(Dialog):
             name = fld['name']
             if maps:
                 for j, each in enumerate(maps):
-                    if each.get('fld_ord', -1) == ord:
-                        self.add_dict_layout(j, fld_name=name, **each)
+                    if each.get('fld_ord', -1) == ord or each.get('fld_name', '') == name:
+                        each['fld_name'] = name
+                        each['fld_ord'] = ord
+                        self.add_dict_layout(j, **each)
                         break
                 else:
-                    self.add_dict_layout(i, fld_name=name)
+                    self.add_dict_layout(i, fld_name=name, fld_ord=ord)
             else:
-                self.add_dict_layout(i, fld_name=name)
+                self.add_dict_layout(i, fld_name=name, fld_ord=ord)
 
         #self.setLayout(self.main_layout)
         self.resize(WIDGET_SIZE.dialog_width,
@@ -380,6 +384,9 @@ class OptionsDialog(Dialog):
         self.save()
 
     def show_models(self):
+        '''
+        show choose note type window
+        '''
         edit = QtGui.QPushButton(anki.lang._("Manage"),
                            clicked=lambda: aqt.models.Models(mw, self))
         ret = StudyDeck(mw, names=lambda: sorted(mw.col.models.allNames()),
@@ -392,7 +399,7 @@ class OptionsDialog(Dialog):
                 u'%s [%s]' % (_('CHOOSE_NOTE_TYPES'), ret.name))
             return model
 
-    def fill_dict_combo_options(self, dict_combo, current_text):
+    def fill_dict_combo_options(self, dict_combo, current_unique):
         '''setup dict combo box'''
         dict_combo.clear()
         #dict_combo.addItem(_('NOT_DICT_FIELD'))
@@ -424,15 +431,15 @@ class OptionsDialog(Dialog):
         def set_dict_combo_index():
             #dict_combo.setCurrentIndex(-1)
             dict_combo.setCurrentIndex(0)
-            if current_text:
+            if current_unique:
                 for i in range(dict_combo.count()):
-                    if dict_combo.itemText(i) == current_text:
+                    if dict_combo.itemData(i) == current_unique:
                         dict_combo.setCurrentIndex(i)
                         break
             
         set_dict_combo_index()
 
-    def fill_field_combo_options(self, field_combo, dict_combo_text, dict_combo_itemdata, field_combo_text):
+    def fill_field_combo_options(self, field_combo, dict_combo_text, dict_combo_itemdata, dict_fld_name, dict_fld_ord):
         '''setup field combobox'''
         field_combo.clear()
         field_combo.setEditable(False)
@@ -440,7 +447,7 @@ class OptionsDialog(Dialog):
         #    field_combo.setEnabled(False)
         #el
         if dict_combo_text in _sl('MDX_SERVER'):
-            text = field_combo_text if field_combo_text else 'http://'
+            text = dict_fld_name if dict_fld_name else 'http://'
             field_combo.setEditable(True)
             field_combo.setEditText(text)
             field_combo.setFocus(QtCore.Qt.MouseFocusReason)  # MouseFocusReason
@@ -451,24 +458,32 @@ class OptionsDialog(Dialog):
             field_combo.setCurrentIndex(0)
             if service and service.support and service.fields:
                 for i, each in enumerate(service.fields):
-                    field_combo.addItem(each)
-                    if each == field_combo_text:
+                    field_combo.addItem(each, userData=i)
+                    if each == dict_fld_name or i == dict_fld_ord:
                         field_combo.setCurrentIndex(i)
             service_pool.put(service)
 
     def add_dict_layout(self, i, **kwargs):
         """
-        kwargs:
-        word_checked  dict  fld_name dict_field
+        add dictionary fields row
         """
         word_checked = i == 0
-        dict_name, dict_unique, fld_name, dict_field, ignore, skip = (
-            kwargs.get('dict', ''),
-            kwargs.get('dict_unique', ''),
-            kwargs.get('fld_name', ''),
-            kwargs.get('dict_field', ''),
-            kwargs.get('ignore', False),
-            kwargs.get('skip_valued', False),
+
+        fld_name, fld_ord = (
+            kwargs.get('fld_name', ''),                                 #笔记类型的字段名
+            kwargs.get('fld_ord', ''),                                  #笔记类型的字段编号
+        )
+
+        dict_name, dict_unique, dict_fld_name, dict_fld_ord = (
+            kwargs.get('dict_name', ''),                                #字典名
+            kwargs.get('dict_unique', ''),                              #字典ID
+            kwargs.get('dict_fld_name', ''),                            #对应字典的字段名
+            kwargs.get('dcit_fld_ord', 0)                               #对应字典的字段编号
+        )
+
+        ignore, skip = (
+            kwargs.get('ignore', False),                                #忽略标志
+            kwargs.get('skip_valued', False),                           #略过有值项标志
         )
         # check
         word_check_btn = QtGui.QRadioButton(fld_name)
@@ -488,23 +503,23 @@ class OptionsDialog(Dialog):
             QtCore.Qt.TabFocus | QtCore.Qt.ClickFocus | QtCore.Qt.StrongFocus | QtCore.Qt.WheelFocus
         )
         dict_combo.setEnabled(not word_checked and not ignore)
-        self.fill_dict_combo_options(dict_combo, dict_name)
+        self.fill_dict_combo_options(dict_combo, dict_unique)
         dict_unique = dict_combo.itemData(dict_combo.currentIndex())
         # field combox
         field_combo = QtGui.QComboBox()
         field_combo.setMinimumSize(WIDGET_SIZE.map_dictfield_width, 0)
         field_combo.setEnabled(not word_checked and not ignore)
-        self.fill_field_combo_options(field_combo, dict_name, dict_unique, dict_field)
+        self.fill_field_combo_options(field_combo, dict_name, dict_unique, dict_fld_name, dict_fld_ord)
 
         # ignore
-        check_ignore = QtGui.QCheckBox(_("NOT_DICT_FIELD"))
-        check_ignore.setEnabled(not word_checked)
-        check_ignore.setChecked(ignore)
+        ignore_check_btn = QtGui.QCheckBox(_("NOT_DICT_FIELD"))
+        ignore_check_btn.setEnabled(not word_checked)
+        ignore_check_btn.setChecked(ignore)
 
         # Skip valued
-        check_skip = QtGui.QCheckBox(_("SKIP_VALUED"))
-        check_skip.setEnabled(not word_checked and not ignore)
-        check_skip.setChecked(skip)
+        skip_check_btn = QtGui.QCheckBox(_("SKIP_VALUED"))
+        skip_check_btn.setEnabled(not word_checked and not ignore)
+        skip_check_btn.setChecked(skip)
 
         # events
         # word
@@ -516,15 +531,15 @@ class OptionsDialog(Dialog):
                     self.___last_checkeds___[i].setEnabled(not ignore)
 
             word_checked = word_check_btn.isChecked()
-            check_ignore.setEnabled(not word_checked)
-            ignore = check_ignore.isChecked()
+            ignore_check_btn.setEnabled(not word_checked)
+            ignore = ignore_check_btn.isChecked()
             dict_combo.setEnabled(not word_checked and not ignore)
             field_combo.setEnabled(not word_checked and not ignore)
-            check_skip.setEnabled(not word_checked and not ignore)
+            skip_check_btn.setEnabled(not word_checked and not ignore)
             if word_checked:
                 self.___last_checkeds___ = [
-                    check_ignore, dict_combo, 
-                    field_combo, check_skip
+                    ignore_check_btn, dict_combo, 
+                    field_combo, skip_check_btn
                 ]
         word_check_btn.clicked.connect(radio_btn_checked)
         if word_checked: 
@@ -532,11 +547,11 @@ class OptionsDialog(Dialog):
             radio_btn_checked()
         # ignor
         def ignore_check_changed():
-            ignore = not check_ignore.isChecked()
+            ignore = not ignore_check_btn.isChecked()
             dict_combo.setEnabled(ignore)
             field_combo.setEnabled(ignore)
-            check_skip.setEnabled(ignore)
-        check_ignore.clicked.connect(ignore_check_changed)
+            skip_check_btn.setEnabled(ignore)
+        ignore_check_btn.clicked.connect(ignore_check_changed)
         # dict
         def dict_combo_changed(index):
             '''dict combo box index changed'''
@@ -544,40 +559,44 @@ class OptionsDialog(Dialog):
                 field_combo,
                 dict_combo.currentText(),
                 dict_combo.itemData(index),
-                field_combo.currentText()
+                field_combo.currentText(),
+                field_combo.itemData(field_combo.currentIndex())
             )
         dict_combo.currentIndexChanged.connect(dict_combo_changed)
 
         self.dicts_layout.addWidget(word_check_btn, i + 1, 0)
-        self.dicts_layout.addWidget(check_ignore, i + 1, 1)
+        self.dicts_layout.addWidget(ignore_check_btn, i + 1, 1)
         self.dicts_layout.addWidget(dict_combo, i + 1, 2)
         self.dicts_layout.addWidget(field_combo, i + 1, 3)
-        self.dicts_layout.addWidget(check_skip, i + 1, 4)
+        self.dicts_layout.addWidget(skip_check_btn, i + 1, 4)
 
-        self.___options___.append([
-            word_check_btn, 
-            dict_combo, 
-            field_combo, 
-            check_ignore, 
-            check_skip
-        ])
+        self.___options___.append({
+            'model': {'fld_name': fld_name, 'fld_ord': fld_ord},
+            'word_check_btn': word_check_btn, 
+            'dict_combo': dict_combo, 
+            'field_combo': field_combo, 
+            'ignore_check_btn': ignore_check_btn, 
+            'skip_check_btn': skip_check_btn
+        })
 
     def save(self):
+        '''save config to file'''
         if not self.current_model:
             return
         data = dict()
-        maps = [
-            {
-                "word_checked": x[0].isChecked(),
-                "dict": x[1].currentText().strip(),
-                "dict_unique": x[1].itemData(x[1].currentIndex()) if x[1].itemData(x[1].currentIndex()) else '',
-                "dict_field": x[2].currentText().strip(),
-                "fld_ord": get_ord_from_fldname(self.current_model, x[0].text()),
-                'ignore': x[3].isChecked(),
-                'skip_valued': x[4].isChecked(),
-            }
-            for x in self.___options___
-        ]
+        maps = []
+        for row in self.___options___:
+            maps.append({
+                'fld_name': row['model']['fld_name'],
+                'fld_ord': row['model']['fld_ord'],
+                'word_checked': row['word_check_btn'].isChecked(),
+                'dict_name': row['dict_combo'].currentText().strip(),
+                'dict_unique': row['dict_combo'].itemData(row['dict_combo'].currentIndex()),
+                'dict_fld_name': row['field_combo'].currentText().strip(),
+                'dict_fld_ord': row['field_combo'].itemData(row['field_combo'].currentIndex()),
+                'ignore': row['ignore_check_btn'].isChecked(),
+                'skip_valued': row['skip_check_btn'].isChecked()
+            })
         current_model_id = str(self.current_model['id'])
         data[current_model_id] = maps
         data['last_model'] = self.current_model['id']

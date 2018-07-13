@@ -382,17 +382,17 @@ def query_all_flds(note):
         if skip and len(note.fields[i]) != 0:
             continue
         #normal
-        dict_name = each.get('dict', '').strip()
-        dict_field = each.get('dict_field', '').strip()
         dict_unique = each.get('dict_unique', '').strip()
-        if dict_name and dict_name not in _sl('NOT_DICT_FIELD') and dict_field:
+        dict_fld_ord = each.get('dict_fld_ord', -1)
+        fld_ord = each.get('fld_ord', -1)
+        if dict_unique and dict_fld_ord != -1 and fld_ord != -1:
             s = services.get(dict_unique, None)
             if s is None:
                 s = service_pool.get(dict_unique)
                 if s.support:
                     services[dict_unique] = s
             if s and s.support:
-                tasks.append({'k': dict_unique, 'w': word, 'f': dict_field, 'i': i})
+                tasks.append({'k': dict_unique, 'w': word, 'f': dict_fld_ord, 'i': fld_ord})
     
     success_num = 0
     result = defaultdict(QueryResult)
