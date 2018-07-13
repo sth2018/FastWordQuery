@@ -20,6 +20,7 @@
 import os
 import sys
 import json
+import types
 from collections import namedtuple
 
 import anki
@@ -43,13 +44,13 @@ __all__ = ['WIDGET_SIZE', 'Dialog', 'ParasDialog',
 
 
 class WIDGET_SIZE:
-    dialog_width = 650 
+    dialog_width = 700 
     dialog_height_margin = 120 
     map_min_height = 0
     map_max_height = 31
     map_fld_width = 100
-    map_dictname_width = 130
-    map_dictfield_width = 130
+    map_dictname_width = 150
+    map_dictfield_width = 160
 
 
 class Dialog(QtGui.QDialog):
@@ -482,8 +483,8 @@ class OptionsDialog(Dialog):
         )
 
         ignore, skip = (
-            kwargs.get('ignore', False),                                #忽略标志
-            kwargs.get('skip_valued', False),                           #略过有值项标志
+            kwargs.get('ignore', True),                                 #忽略标志
+            kwargs.get('skip_valued', True),                            #略过有值项标志
         )
         # check
         word_check_btn = QtGui.QRadioButton(fld_name)
@@ -614,7 +615,7 @@ def check_updates():
         pass
 
 
-def show_options(browser = None):
+def show_options(browser = None, callback = None, *args, **kwargs):
     '''open options window'''
     parent = mw if browser is None else browser
     config.read()
@@ -622,6 +623,8 @@ def show_options(browser = None):
     opt_dialog.activateWindow()
     opt_dialog.raise_()
     opt_dialog.exec_()
+    if isinstance(callback, types.FunctionType):
+        callback(*args, **kwargs)
 
 
 def show_fm_dialog(browser = None):

@@ -198,16 +198,18 @@ def query_from_browser(browser):
              for note_id in browser.selectedNotes()]
     
     if len(notes) == 1:
+        tooltip(_('PLS_SET_DICTIONARY_FIELDS'))
         maps = config.get_maps(browser.editor.note.model()['id'])
         nomaps = True
         for each in maps:
             dict_unique = each.get('dict_unique', '').strip()
-            if dict_unique:
+            ignore = each.get('ignore', True)
+            if dict_unique and not ignore:
                 nomaps = False
                 break
         if nomaps:
             from .ui import show_options
-            show_options(browser)
+            show_options(browser, query_from_browser, browser)
         else:
             query_from_editor_all_fields(browser.editor)
     else:
