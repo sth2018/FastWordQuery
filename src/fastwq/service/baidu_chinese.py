@@ -4,7 +4,7 @@ from .base import WebService, export, register, with_styles, parse_html
 
 baidu_download_mp3 = True
 
-@register([u'百度汉语', u'Baidu Chinese'])
+@register([u'百度汉语', u'Baidu-Hanyu'])
 class Baidu_Chinese(WebService):
 
     def __init__(self):

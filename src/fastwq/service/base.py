@@ -258,7 +258,7 @@ class WebService(Service):
 
     @property
     def title(self):
-        return self.__register_label__
+        return getattr(self, '__register_label__', self.unique)
 
     @property
     def unique(self):
@@ -449,6 +449,7 @@ class LocalService(Service):
     def __init__(self, dict_path):
         super(LocalService, self).__init__()
         self.dict_path = dict_path
+        self._unique = md5(dict_path).hexdigest()
         self.builder = None
         self.missed_css = set()
 
@@ -477,11 +478,11 @@ class LocalService(Service):
 
     @property
     def unique(self):
-        return self.dict_path
+        return self._unique
 
     @property
     def title(self):
-        return self.__register_label__
+        return getattr(self, '__register_label__', u'Unkown')
 
     @property
     def _filename(self):

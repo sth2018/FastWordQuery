@@ -25,7 +25,7 @@ class Ldoce6(MdxService):
 
     @property
     def title(self):
-        return self.__register_label__
+        return getattr(self, '__register_label__', self.unique)
 
     @export('PHON')
     def fld_phonetic(self):
