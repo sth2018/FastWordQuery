@@ -118,6 +118,7 @@ class QueryWorkerManager(object):
         self.counter = 0
         self.fails = 0
         self.fields = 0
+        self.skips = 0
         self.missed_css = list()
 
     def get_worker(self):
@@ -143,8 +144,10 @@ class QueryWorkerManager(object):
         self.mutex.lock()
         if success_num > 0:
             self.counter += 1
-        else:
+        elif success_num == 0:
             self.fails += 1
+        else:
+            self.skips += 1
         val = update_note_fields(note, results)
         self.fields += val
         self.missed_css += missed_css
@@ -165,6 +168,7 @@ class QueryWorkerManager(object):
                     self.progress.update_labels(MapDict(
                                 type='count',
                                 words_number = self.counter,
+                                skips_number = self.skips,
                                 fails_number = self.fails,
                                 fields_number = self.fields))
                 mw.app.processEvents()
@@ -370,7 +374,7 @@ def query_all_flds(note):
             continue
         #skip valued
         skip = each.get('skip_valued', False)
-        if skip and not note.fields[i]:
+        if skip and len(note.fields[i]) != 0:
             continue
         #normal
         dict_name = each.get('dict', '').strip()
@@ -397,7 +401,7 @@ def query_all_flds(note):
         #except:
         #    showInfo(_("NO_QUERY_WORD"))
         #    pass
-
+    
     missed_css = list()
     for service in services.values():
         if isinstance(service, LocalService):
@@ -409,4 +413,4 @@ def query_all_flds(note):
                 })
         service_pool.put(service)
     
-    return result, success_num, missed_css
+    return result, -1 if len(tasks) == 0 else success_num, missed_css

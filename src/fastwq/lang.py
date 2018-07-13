@@ -58,6 +58,7 @@ arr = [
     ['FORCE_UPDATE', u'强制更新字段', u'Force Update Fields'],
     ['IGNORE_ACCENTS', u'忽略声调', u'Ignore Accents'],
     ['SKIP_VALUED', u'跳过有值项', u'Skip Valued'],
+    ['SKIPED', u'略过', 'Skip'],
     ['SETTINGS', u'参数', u'Settings'],
     ['THREAD_NUMBER', u'线程数', u'Thread Number'],
     ['INITLIZING_DICT', u'初始化词典...', u'Initlizing Dictionary...'],

@@ -21,8 +21,17 @@
 import time
 from collections import defaultdict
 
-from aqt.qt import *
+from PyQt4 import QtCore, QtGui
 from .lang import _
+
+
+INFO_TEMPLATE = u''.join([
+    _('QUERIED') + u'<br>' + 45 * u'-' + u'<br>',
+    _('SUCCESS') + u' {} ' + _('WORDS') + u'<br>',
+    _('SKIPED') + u' {} ' + _('WORDS') + u'<br>',
+    _('UPDATE') + u' {} ' +  _('FIELDS') + u'<br>',
+    _('FAILURE') + u' {} ' + _('WORDS') + u'<br>'
+])
 
 
 class ProgressWindow(object):
@@ -32,7 +41,7 @@ class ProgressWindow(object):
 
     def __init__(self, mw):
         self.mw = mw
-        self.app = QApplication.instance()
+        self.app = QtGui.QApplication.instance()
         self._win = None
         self._msg_count = defaultdict(int)
 
@@ -45,22 +54,20 @@ class ProgressWindow(object):
         else:
             return
 
-        number_info = ''
-        words_number, fields_number, fails_number = (
-            self._msg_count['words_number'],
-            self._msg_count['fields_number'],
-            self._msg_count['fails_number']
+        words_number, fields_number, fails_number, skips_number = (
+            self._msg_count.get('words_number', 0),
+            self._msg_count.get('fields_number', 0),
+            self._msg_count.get('fails_number', 0),
+            self._msg_count.get('skips_number', 0)
         )
-        if words_number or fields_number:
-            number_info += _('QUERIED') + u'<br>' + 45 * u'-'
-            number_info += u'<br>{0}: {1} {2}'.format(
-                _('SUCCESS'), words_number, _('WORDS'))
-            number_info += u'<br>{0}: {1} {2}'.format(
-                _('UPDATE'), fields_number, _('FIELDS'))
-            number_info += u'<br>{0}: {1} {2}'.format(
-                _('FAILURE'), fails_number, _('WORDS'))
+        number_info = INFO_TEMPLATE.format(
+            words_number,
+            skips_number,
+            fields_number,
+            fails_number
+        )
 
-        self._update(label=number_info, value=words_number)
+        self._update(label=number_info, value=words_number+skips_number+fails_number)
         self._win.adjustSize()
 
     def update_title(self, title):
@@ -73,8 +80,8 @@ class ProgressWindow(object):
         # setup window
         label = label or _("Processing...")
         parent = parent or self.app.activeWindow() or self.mw
-        self._win = QProgressDialog(label, '', min, max, parent)
-        self._win.setWindowModality(Qt.ApplicationModal)
+        self._win = QtGui.QProgressDialog(label, '', min, max, parent)
+        self._win.setWindowModality(QtCore.Qt.ApplicationModal)
         self._win.setCancelButton(None)
         self._win.canceled.connect(self.finish)
         self._win.setWindowTitle("Querying...")
@@ -107,12 +114,12 @@ class ProgressWindow(object):
             self._counter = value or (self._counter + 1)
             self._win.setValue(self._counter)
         if process and elapsed >= 0.2:
-            self.app.processEvents(QEventLoop.ExcludeUserInputEvents)
+            self.app.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
             self._lastUpdate = time.time()
 
     def _setBusy(self):
         self._disabled = True
-        self.mw.app.setOverrideCursor(QCursor(Qt.WaitCursor))
+        self.mw.app.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
 
     def _unsetBusy(self):
         self._disabled = False
