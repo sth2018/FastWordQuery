@@ -19,10 +19,7 @@
 
 from collections import defaultdict
 import os
-import re
 import shutil
-import sys
-import time
 import unicodedata
 
 from aqt import mw
@@ -36,6 +33,14 @@ from .progress import ProgressWindow
 from .service import service_manager, service_pool, QueryResult, copy_static_file
 from .service.base import LocalService
 from .utils import Empty, MapDict, Queue, wrap_css
+
+
+__all__ = ['QueryThread', 'QueryWorkerManager', 'InvalidWordException',
+    'query_from_browser', 'query_from_editor_all_fields',
+    'query_all', 'update_note_fields', 'update_note_field',
+    'promot_choose_css', 'add_to_tmpl', 'strip_combining', 
+    'query_all_flds', 'inspect_note'
+]
 
 
 def inspect_note(note):

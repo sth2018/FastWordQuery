@@ -25,6 +25,9 @@ from PyQt4 import QtCore, QtGui
 from .lang import _
 
 
+__all__ = ['INFO_TEMPLATE', 'ProgressWindow']
+
+
 INFO_TEMPLATE = u''.join([
     _('QUERIED') + u'<br>' + 45 * u'-' + u'<br>',
     _('SUCCESS') + u' {} ' + _('WORDS') + u'<br>',
