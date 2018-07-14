@@ -20,6 +20,7 @@
 import inspect
 import os
 from functools import wraps
+from hashlib import md5
 
 from aqt import mw
 from aqt.qt import QThread
@@ -61,7 +62,9 @@ class ServiceManager(object):
         for each in self.services:
             if each.__unique__ == unique:
                 #cls = getattr(each,"__class__")
-                return each()
+                service = each()
+                service.unique = unique
+                return service
 
     def get_service_action(self, service, label):
         for each in service.fields:
@@ -116,12 +119,12 @@ class ServiceManager(object):
                     #MDX
                     if MdxService.check(dict_path):
                         service = service_wrap(MdxService, dict_path)
-                        service.__unique__ = dict_path
+                        service.__unique__ = md5(dict_path).hexdigest()
                         local_services.append(service)
                     #Stardict    
                     if StardictService.check(dict_path):
                         service = service_wrap(StardictService, dict_path)
-                        service.__unique__ = dict_path
+                        service.__unique__ = md5(dict_path).hexdigest()
                         local_services.append(service)
                 # support mdx dictionary and stardict format dictionary
         return local_services

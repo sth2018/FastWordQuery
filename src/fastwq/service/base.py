@@ -187,6 +187,7 @@ class Service(object):
 
     def __init__(self):
         self.cache = defaultdict(defaultdict)
+        self._unique = self.__class__.__name__
         self._exporters = self._get_exporters()
         self._fields, self._actions = zip(*self._exporters) \
             if self._exporters else (None, None)
@@ -202,6 +203,14 @@ class Service(object):
 
     def cache_result(self, key):
         return self.cache[self.word].get(key, u'')
+
+    @property
+    def unique(self):
+        return self._unique
+    
+    @unique.setter
+    def unique(self, value):
+        self._unique = value
 
     @property
     def support(self):
@@ -259,10 +268,6 @@ class WebService(Service):
     @property
     def title(self):
         return getattr(self, '__register_label__', self.unique)
-
-    @property
-    def unique(self):
-        return self.__class__.__name__
 
     def get_response(self, url, data=None, headers=None, timeout=10):
         default_headers = {'User-Agent': 'Anki WordQuery',
@@ -449,7 +454,6 @@ class LocalService(Service):
     def __init__(self, dict_path):
         super(LocalService, self).__init__()
         self.dict_path = dict_path
-        self._unique = md5(dict_path).hexdigest()
         self.builder = None
         self.missed_css = set()
 
@@ -475,10 +479,6 @@ class LocalService(Service):
     @property
     def support(self):
         return os.path.isfile(self.dict_path)
-
-    @property
-    def unique(self):
-        return self._unique
 
     @property
     def title(self):

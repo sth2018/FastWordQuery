@@ -20,10 +20,6 @@ class Ldoce6(MdxService):
         super(Ldoce6, self).__init__(PATH)
 
     @property
-    def unique(self):
-        return self.__class__.__name__
-
-    @property
     def title(self):
         return getattr(self, '__register_label__', self.unique)
 
