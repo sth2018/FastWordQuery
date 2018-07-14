@@ -38,7 +38,7 @@ def defaultBase():
                 return os.path.join(loc, "Anki")
     '''
     path = mw.pm.addonFolder()
-    return path[:path.rindex(os.path.sep)]
+    return os.path.dirname(os.path.abspath(path))
 
 
 headers = {"User-Agent": "AnkiHub"}

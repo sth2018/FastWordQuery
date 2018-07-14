@@ -74,7 +74,7 @@ class ServiceManager(object):
         """
         service_path = u'dict'
         web_services, local_custom_services = list(), list()
-        mypath = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + service_path
+        mypath = os.path.join(os.path.dirname(os.path.realpath(__file__)), service_path)
         files = [f for f in os.listdir(mypath)
                  if f not in ('__init__.py') and not f.endswith('.pyc') and not os.path.isdir(mypath+os.sep+f)]
         base_class = (WebService, LocalService,
