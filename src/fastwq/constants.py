@@ -21,8 +21,9 @@
 from .lang import _
 
 
-VERSION = 'v1.1.4'
+__all__ = ['VERSION', 'Endpoint', 'Template']
 
+VERSION = 'v1.1.4'
 
 class Endpoint:
     repository = u'https://github.com/sth2018/FastWordQuery'

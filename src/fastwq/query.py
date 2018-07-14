@@ -28,19 +28,14 @@ from aqt.utils import showInfo, showText, tooltip
 
 from .constants import Endpoint, Template
 from .context import config
-from .lang import _, _sl
-from .progress import ProgressWindow
+from .lang import _
+from .gui import ProgressWindow
 from .service import service_manager, service_pool, QueryResult, copy_static_file
 from .service.base import LocalService
 from .utils import Empty, MapDict, Queue, wrap_css
 
 
-__all__ = ['QueryThread', 'QueryWorkerManager', 'InvalidWordException',
-    'query_from_browser', 'query_from_editor_all_fields',
-    'query_all', 'update_note_fields', 'update_note_field',
-    'promot_choose_css', 'add_to_tmpl', 'strip_combining', 
-    'query_all_flds', 'inspect_note'
-]
+__all__ = ['query_from_browser', 'query_from_editor_all_fields']
 
 
 def inspect_note(note):

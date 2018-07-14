@@ -22,18 +22,18 @@ import time
 from collections import defaultdict
 
 from PyQt4 import QtCore, QtGui
-from .lang import _
+from ..lang import _
 
 
-__all__ = ['INFO_TEMPLATE', 'ProgressWindow']
+__all__ = ['ProgressWindow']
 
 
-INFO_TEMPLATE = u''.join([
+_INFO_TEMPLATE = u''.join([
     _('QUERIED') + u'<br>' + 45 * u'-' + u'<br>',
     _('SUCCESS') + u' {} ' + _('WORDS') + u'<br>',
     _('SKIPED') + u' {} ' + _('WORDS') + u'<br>',
     _('UPDATE') + u' {} ' +  _('FIELDS') + u'<br>',
-    _('FAILURE') + u' {} ' + _('WORDS') + u'<br>'
+    _('FAILURE') + u' {} ' + _('WORDS') + u''
 ])
 
 
@@ -63,7 +63,7 @@ class ProgressWindow(object):
             self._msg_count.get('fails_number', 0),
             self._msg_count.get('skips_number', 0)
         )
-        number_info = INFO_TEMPLATE.format(
+        number_info = _INFO_TEMPLATE.format(
             words_number,
             skips_number,
             fields_number,

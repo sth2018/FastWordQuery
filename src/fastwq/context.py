@@ -23,7 +23,9 @@ from .constants import VERSION
 from .utils import get_icon
 
 
-CONFIG_FILENAME = '.fastwqcfg.json'     #Config File Path
+__all__ = ['APP_ICON', 'config']
+
+
 APP_ICON = get_icon('wqicon.png')       #Addon Icon
 
 
@@ -33,8 +35,10 @@ class Config(object):
     Addon Config
     """
 
+    _CONFIG_FILENAME = '.fastwqcfg.json'     #Config File Path
+
     def __init__(self, window):
-        self.path = CONFIG_FILENAME
+        self.path = self._CONFIG_FILENAME
         self.window = window
         self.version = '0'
         self.read()

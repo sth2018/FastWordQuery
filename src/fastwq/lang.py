@@ -24,7 +24,7 @@ __all__ = ['_', '_cl', '_sl']
 
 
 #Language Define, [Key, zh_CN, en]
-arr = [
+_arr = [
     ['CHECK_FILENAME_LABEL', u'使用文件名作为标签', u'Use Filename As Label'],
     ['EXPORT_MEDIA', u'导出媒体文件', u'Export Media Files'],
     ['DICTS_FOLDERS', u'字典文件夹', u'Dictionary Folder'],
@@ -76,21 +76,24 @@ arr = [
     ['IMAGE', u'图片', u'Image'],
 ]
 
-trans = {item[0]: {'zh_CN': item[1], 'en': item[2]} for item in arr}
+_trans = {item[0]: {'zh_CN': item[1], 'en': item[2]} for item in _arr}
+
 
 def _(key, lang=currentLang):
+    '''get local language string'''
     if lang != 'zh_CN' and lang != 'en':
         lang = 'en'
 
     def disp(s):
         return s.lower().capitalize()
     
-    if key not in trans or lang not in trans[key]:
+    if key not in _trans or lang not in _trans[key]:
         return disp(key)
-    return trans[key][lang]
+    return _trans[key][lang]
 
 
 def _cl(labels, lang=currentLang):
+    '''get local language string from labels'''
     if isinstance(labels, basestring):
         return _(labels)
     if lang != 'zh_CN' and lang != 'en':
@@ -99,4 +102,4 @@ def _cl(labels, lang=currentLang):
 
 
 def _sl(key):
-    return trans[key].values()
+    return _trans[key].values()

@@ -17,212 +17,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import sys
-import json
-import types
-from collections import namedtuple
-
+from PyQt4 import QtCore, QtGui
 import anki
 import aqt
 import aqt.models
 from aqt import mw
-from PyQt4 import QtCore, QtGui
 from aqt.studydeck import StudyDeck
-from aqt.utils import shortcut, showInfo
-from .constants import VERSION, Endpoint, Template
-from .context import APP_ICON, config
-from .lang import _, _sl
-from .service import service_manager, service_pool
-from .utils import MapDict, get_icon, get_model_byId, get_ord_from_fldname
+from .base import Dialog, WIDGET_SIZE
+from .setting import SettingDialog
+from ..context import config
+from ..lang import _, _sl
+from ..service import service_manager, service_pool
+from ..utils import get_model_byId
+from ..constants import Endpoint
 
 
-__all__ = ['WIDGET_SIZE', 'Dialog', 'ParasDialog', 
-    'FoldersManageDialog', 'OptionsDialog', 'check_updates',
-    'show_options', 'show_fm_dialog'
-]
-
-
-class WIDGET_SIZE:
-    dialog_width = 700 
-    dialog_height_margin = 120 
-    map_min_height = 0
-    map_max_height = 31
-    map_fld_width = 100
-    map_dictname_width = 150
-    map_dictfield_width = 160
-
-
-class Dialog(QtGui.QDialog):
-    '''
-    Base used for all dialog windows.
-    '''
-
-    def __init__(self, parent, title):
-        '''
-        Set the modal status for the dialog, sets its layout to the
-        return value of the _ui() method, and sets a default title.
-        '''
-
-        self._title = title
-        self._parent = parent
-        super(Dialog, self).__init__(parent)
-
-        self.setModal(True)
-        self.setWindowFlags(
-            self.windowFlags() &
-            ~QtCore.Qt.WindowContextHelpButtonHint
-        )
-        self.setWindowIcon(APP_ICON)
-        self.setWindowTitle(
-            title if "FastWQ" in title
-            else "FastWQ - " + title
-        )
-
-
-class ParasDialog(Dialog):
-    '''
-    Setting window, some golbal params for query function.
-    '''
-
-    def __init__(self, parent, title=u'Setting'):
-        super(ParasDialog, self).__init__(parent, title)
-        self.setFixedWidth(400)
-        self.check_force_update = None
-        self.input_thread_number = None
-        self.build()
-
-    def build(self):
-        layout = QtGui.QVBoxLayout()
-
-        check_force_update = QtGui.QCheckBox(_("FORCE_UPDATE"))
-        check_force_update.setChecked(config.force_update)
-        layout.addWidget(check_force_update)
-        layout.addSpacing(10)
-
-        check_ignore_accents = QtGui.QCheckBox(_("IGNORE_ACCENTS"))
-        check_ignore_accents.setChecked(config.ignore_accents)
-        layout.addWidget(check_ignore_accents)
-        layout.addSpacing(10)
-
-        hbox = QtGui.QHBoxLayout()
-        input_thread_number = QtGui.QSpinBox(parent=self)
-        input_thread_number.setRange(1, 120)
-        input_thread_number.setValue(config.thread_number)
-        input_label = QtGui.QLabel(_("THREAD_NUMBER") + ":", parent=self)
-        hbox.addWidget(input_label)
-        hbox.setStretchFactor(input_label, 1)
-        hbox.addWidget(input_thread_number)
-        hbox.setStretchFactor(input_thread_number, 2)
-        layout.addLayout(hbox)
-
-        buttonBox = QtGui.QDialogButtonBox(parent=self)
-        buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Ok)
-        buttonBox.accepted.connect(self.accept) # 确定
-        
-        layout.addSpacing(48)
-        layout.addWidget(buttonBox)
-        
-        self.check_force_update = check_force_update
-        self.check_ignore_accents = check_ignore_accents
-        self.input_thread_number = input_thread_number
-
-        layout.setAlignment(QtCore.Qt.AlignTop|QtCore.Qt.AlignLeft)
-        self.setLayout(layout)
-
-    def accept(self):
-        self.save()
-        super(ParasDialog, self).accept()
-    
-    def save(self):
-        data = {
-            'force_update': self.check_force_update.isChecked(),
-            'ignore_accents': self.check_ignore_accents.isChecked(),
-            'thread_number': self.input_thread_number.value()
-        }
-        config.update(data)
-
-
-class FoldersManageDialog(Dialog):
-    '''
-    Dictionary folder manager window. add or remove dictionary folders.
-    '''
-
-    def __init__(self, parent, title=u'Dictionary Folder Manager'):
-        super(FoldersManageDialog, self).__init__(parent, title)
-        #self._dict_paths = []
-        self.build()
-
-    def build(self):
-        layout = QtGui.QVBoxLayout()
-        btn_layout = QtGui.QHBoxLayout()
-        add_btn = QtGui.QPushButton("+")
-        remove_btn = QtGui.QPushButton("-")
-        btn_layout.addWidget(add_btn)
-        btn_layout.addWidget(remove_btn)
-        add_btn.clicked.connect(self.add_folder)
-        remove_btn.clicked.connect(self.remove_folder)
-        self.folders_lst = QtGui.QListWidget()
-        self.folders_lst.addItems(config.dirs)
-        self.chk_use_filename = QtGui.QCheckBox(_('CHECK_FILENAME_LABEL'))
-        self.chk_export_media = QtGui.QCheckBox(_('EXPORT_MEDIA'))
-        self.chk_use_filename.setChecked(config.use_filename)
-        self.chk_export_media.setChecked(config.export_media)
-        chk_layout = QtGui.QHBoxLayout()
-        chk_layout.addWidget(self.chk_use_filename)
-        chk_layout.addWidget(self.chk_export_media)
-        btnbox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok, QtCore.Qt.Horizontal, self)
-        btnbox.accepted.connect(self.accept)
-        layout.addLayout(btn_layout)
-        layout.addWidget(self.folders_lst)
-        layout.addLayout(chk_layout)
-        layout.addWidget(btnbox)
-        self.setLayout(layout)
-
-    def add_folder(self):
-        dir_ = QtGui.QFileDialog.getExistingDirectory(
-            self,
-            caption=u"Select Folder", 
-            directory=config.last_folder, 
-            options=QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks
-        )
-        if dir_:
-            self.folders_lst.addItem(dir_)
-            config.update({'last_folder': dir_})
-
-    def remove_folder(self):
-        item = self.folders_lst.takeItem(self.folders_lst.currentRow())
-        del item
-
-    '''
-    def find_mdxes(self):
-        for each in self.dirs:
-            for dirpath, dirnames, filenames in os.walk(each):
-                self._dict_paths.extend([os.path.join(dirpath, filename)
-                                         for filename in filenames if filename.lower().endswith(u'.mdx')])
-        return list(set(self._dict_paths))
-
-    @property
-    def dict_paths(self):
-        return self.find_mdxes()
-    '''
-
-    @property
-    def dirs(self):
-        return [self.folders_lst.item(i).text()
-                for i in range(self.folders_lst.count())]
-
-    def accept(self):
-        self.save()
-        super(FoldersManageDialog, self).accept()
-
-    def save(self):
-        data = {
-            'dirs': self.dirs,
-            'use_filename': self.chk_use_filename.isChecked(),
-            'export_media': self.chk_export_media.isChecked()
-        }
-        config.update(data)
+__all__ = ['OptionsDialog']
 
 
 class OptionsDialog(Dialog):
@@ -250,6 +60,7 @@ class OptionsDialog(Dialog):
         self.___last_checkeds___ = None
         self.___options___ = list()
         self.model_id = model_id if model_id != -1 else config.last_model_id
+        self.current_model = None
         # size and signal
         self.resize(WIDGET_SIZE.dialog_width, 4 * WIDGET_SIZE.map_max_height + WIDGET_SIZE.dialog_height_margin)
         self.emit(QtCore.SIGNAL('before_build'))
@@ -257,6 +68,8 @@ class OptionsDialog(Dialog):
     def _before_build(self):
         for cls in service_manager.services:
             service = service_pool.get(cls.__unique__)
+            if service:
+                service_pool.put(service)
         self.emit(QtCore.SIGNAL('after_build'))
 
     def _after_build(self):
@@ -289,7 +102,7 @@ class OptionsDialog(Dialog):
         about_btn.clicked.connect(self.show_about)
         # about_btn.clicked.connect(self.show_paras)
         chk_update_btn = QtGui.QPushButton(_('UPDATE'))
-        chk_update_btn.clicked.connect(check_updates)
+        chk_update_btn.clicked.connect(self.check_updates)
         home_label = QtGui.QLabel(
             '<a href="{url}">User Guide</a>'.format(url=Endpoint.user_guide))
         home_label.setOpenExternalLinks(True)
@@ -317,22 +130,34 @@ class OptionsDialog(Dialog):
             self.build_mappings_layout(self.current_model)
 
     def show_paras(self):
-        dialog = ParasDialog(self, u'Setting')
+        '''open setting dialog'''
+        dialog = SettingDialog(self, u'Setting')
         dialog.exec_()
 
+    def check_updates(self):
+        '''check addon version'''
+        from .common import check_updates
+        check_updates()
+
     def show_fm_dialog(self):
+        '''open folder manager dialog'''
+        from .common import show_fm_dialog
         self.save()
         self.close()
         show_fm_dialog(self._parent)
 
     def show_about(self):
-        QtGui.QMessageBox.about(self, _('ABOUT'), Template.tmpl_about)
+        '''open about dialog'''
+        from .common import show_about_dialog
+        show_about_dialog(self)
 
     def accept(self):
+        '''on button was clicked'''
         self.save()
         super(OptionsDialog, self).accept()
 
     def btn_models_pressed(self):
+        '''on choose model button was clicker'''
         self.save()
         self.current_model = self.show_models()
         if self.current_model:
@@ -602,39 +427,3 @@ class OptionsDialog(Dialog):
         data[current_model_id] = maps
         data['last_model'] = self.current_model['id']
         config.update(data)
-
-
-def check_updates():
-    '''check add-on last version'''
-    try:
-        import libs.ankihub
-        if not libs.ankihub.update([Endpoint.check_version], False, Endpoint.version):
-            showInfo(_('LATEST_VERSION'))
-    except:
-        showInfo(_('CHECK_FAILURE'))
-        pass
-
-
-def show_options(browser = None, model_id = -1, callback = None, *args, **kwargs):
-    '''open options window'''
-    parent = mw if browser is None else browser
-    config.read()
-    opt_dialog = OptionsDialog(parent, u'Options', model_id)
-    opt_dialog.activateWindow()
-    opt_dialog.raise_()
-    if opt_dialog.exec_() == QtGui.QDialog.Accepted:
-        if isinstance(callback, types.FunctionType):
-            callback(*args, **kwargs)
-
-
-def show_fm_dialog(browser = None):
-    '''open dictionary folder manager window'''
-    parent = mw if browser is None else browser
-    fm_dialog = FoldersManageDialog(parent, u'Dictionary Folder Manager')
-    fm_dialog.activateWindow()
-    fm_dialog.raise_()
-    if fm_dialog.exec_() == QtGui.QDialog.Accepted:
-        # update local services
-        service_manager.update_services()
-    # reshow options window
-    show_options(browser)
