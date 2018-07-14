@@ -19,15 +19,11 @@
 
 import inspect
 import os
-from functools import wraps
 from hashlib import md5
 
-from aqt import mw
-from aqt.qt import QThread
-from aqt.utils import showInfo
 from .base import LocalService, MdxService, StardictService, WebService, service_wrap
 from ..context import config
-from ..utils import MapDict, importlib
+from ..utils import importlib
 
 
 class ServiceManager(object):

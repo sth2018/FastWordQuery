@@ -19,8 +19,6 @@
 
 import inspect
 import os
-import sys
-import types
 # use ntpath module to ensure the windows-style (e.g. '\\LDOCE.css')
 # path can be processed on Unix platform.
 # However, anki version on mac platforms doesn't including this package?
@@ -193,6 +191,7 @@ class Service(object):
             if self._exporters else (None, None)
         # query interval: default 500ms
         self.query_interval = 0.5
+        self.word = ''
 
     def cache_this(self, result):
         self.cache[self.word].update(result)
@@ -291,7 +290,7 @@ class WebService(Service):
         socket.setdefaulttimeout(timeout)
         try:
             return urllib.urlretrieve(url, filename)
-        except Exception as e:
+        except:
             pass
 
     class TinyDownloadError(ValueError):
