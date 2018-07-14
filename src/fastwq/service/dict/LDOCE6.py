@@ -1,7 +1,7 @@
 #-*- coding:utf-8 -*-
 import re
 import FastWQ
-from .base import MdxService, export, register, with_styles, parse_html
+from ..base import MdxService, export, register, with_styles, parse_html
 
 PATH = FastWQ.LDOCE6_PATH
 

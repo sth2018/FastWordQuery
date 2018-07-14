@@ -2,7 +2,7 @@
 import json
 import os
 from collections import defaultdict
-from .base import WebService, export, register
+from ..base import WebService, export, register
 
 
 @register([u'百词斩', u'Baicizhan'])

@@ -1,7 +1,7 @@
 #-*- coding:utf-8 -*-
 import json
 import re
-from .base import WebService, export, register, with_styles
+from ..base import WebService, export, register, with_styles
 
 bing_download_mp3 = True
 

@@ -8,9 +8,9 @@ Created: 12/20/2017
 """
 import os
 from warnings import filterwarnings
-from ..libs.bs4 import BeautifulSoup, Tag
+from ...libs.bs4 import BeautifulSoup, Tag
 
-from .base import WebService, export, register, with_styles
+from ..base import WebService, export, register, with_styles
 
 filterwarnings('ignore')
 import sys

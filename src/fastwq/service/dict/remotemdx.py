@@ -26,7 +26,7 @@ import urlparse
 from collections import defaultdict
 
 from aqt.utils import showInfo, showText
-from .base import QueryResult, WebService, export, register, with_styles
+from ..base import QueryResult, WebService, export, register, with_styles
 
 
 @register('MDX_SERVER')

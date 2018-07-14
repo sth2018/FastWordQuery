@@ -4,16 +4,16 @@ import urllib2
 import xml.etree.ElementTree
 
 from aqt.utils import showInfo
-from .base import WebService, export, register, with_styles
+from ..base import WebService, export, register, with_styles
 
 
-@register([u'有道词典-法语', u'Youdao-French'])
-class Youdaofr(WebService):
+@register([u'有道词典-韩语', u'Youdao-Korean'])
+class Youdaoko(WebService):
 
     def __init__(self):
-        super(Youdaofr, self).__init__()
+        super(Youdaoko, self).__init__()
 
-    def _get_from_api(self, lang='fr'):
+    def _get_from_api(self, lang='ko'):
         url = (u'http://dict.youdao.com/fsearch?client=deskdict'
                     '&keyfrom=chrome.extension&pos=-1'
                     '&doctype=xml&xmlVersion=3.2'
@@ -42,7 +42,7 @@ class Youdaofr(WebService):
             self._get_from_api().get('explains', '')
 
     @with_styles(cssfile='_youdao.css', need_wrap_css=True, wrap_class='youdao')
-    def _get_singledict(self, single_dict, lang='fr'):
+    def _get_singledict(self, single_dict, lang='ko'):
         url = u"http://m.youdao.com/singledict?q={0}&dict={1}&le={2}&more=false".format(
             self.word, single_dict, lang
         )

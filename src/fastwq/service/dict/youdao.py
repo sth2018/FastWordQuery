@@ -4,7 +4,7 @@ import urllib2
 import xml.etree.ElementTree
 
 from aqt.utils import showInfo
-from .base import WebService, export, register, with_styles
+from ..base import WebService, export, register, with_styles
 
 js = '''
 var initVoice = function () {

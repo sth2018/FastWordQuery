@@ -1,6 +1,6 @@
 #-*- coding:utf-8 -*-
 import re
-from .base import WebService, export, register, with_styles, parse_html
+from ..base import WebService, export, register, with_styles, parse_html
 
 bing_download_mp3 = True
 

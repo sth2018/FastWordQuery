@@ -76,17 +76,20 @@ class ServiceManager(object):
         get service from service packages, available type is
         WebService, LocalService
         """
+        service_path = u'dict'
         web_services, local_custom_services = list(), list()
-        mypath = os.path.dirname(os.path.realpath(__file__))
+        mypath = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + service_path
         files = [f for f in os.listdir(mypath)
-                 if f not in ('__init__.py', 'base.py', 'manager.py', 'pool.py') and not f.endswith('.pyc') and not os.path.isdir(mypath+os.sep+f)]
+                 if f not in ('__init__.py') and not f.endswith('.pyc') and not os.path.isdir(mypath+os.sep+f)]
         base_class = (WebService, LocalService,
                       MdxService, StardictService)
 
         for f in files:
             #try:
-            module = importlib.import_module(
-                '.%s' % os.path.splitext(f)[0], __package__)
+            module = importlib.import_module( 
+                u'.%s.%s' % (service_path, os.path.splitext(f)[0]), 
+                __package__
+            )
             for name, cls in inspect.getmembers(module, predicate=inspect.isclass):
                 if cls in base_class:
                     continue

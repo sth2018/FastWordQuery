@@ -2,7 +2,7 @@
 import re
 
 from aqt.utils import showInfo, showText
-from .base import LocalService, export, register, with_styles
+from ..base import LocalService, export, register, with_styles
 
 path = u'D:\\dicts\\LDOCE\\d.txt'
 

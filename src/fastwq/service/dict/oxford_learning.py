@@ -1,7 +1,7 @@
 # coding=utf-8
 #from warnings import filterwarnings
-from ..libs.bs4 import Tag
-from .base import WebService, export, register, with_styles, parse_html
+from ...libs.bs4 import Tag
+from ..base import WebService, export, register, with_styles, parse_html
 
 #filterwarnings('ignore')
 

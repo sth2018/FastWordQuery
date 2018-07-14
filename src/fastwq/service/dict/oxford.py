@@ -3,7 +3,7 @@ import urllib2
 from urllib2 import quote
 import json
 from aqt.utils import showInfo
-from .base import WebService, export, register, with_styles
+from ..base import WebService, export, register, with_styles
 
 
 @register("Oxford")

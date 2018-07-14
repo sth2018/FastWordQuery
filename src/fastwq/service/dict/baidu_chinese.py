@@ -1,6 +1,6 @@
 #-*- coding:utf-8 -*-
 from hashlib import sha1
-from .base import WebService, export, register, with_styles, parse_html
+from ..base import WebService, export, register, with_styles, parse_html
 
 baidu_download_mp3 = True
 
