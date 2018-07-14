@@ -198,20 +198,7 @@ def query_from_browser(browser):
              for note_id in browser.selectedNotes()]
     
     if len(notes) == 1:
-        tooltip(_('PLS_SET_DICTIONARY_FIELDS'))
-        maps = config.get_maps(browser.editor.note.model()['id'])
-        nomaps = True
-        for each in maps:
-            dict_unique = each.get('dict_unique', '').strip()
-            ignore = each.get('ignore', True)
-            if dict_unique and not ignore:
-                nomaps = False
-                break
-        if nomaps:
-            from .ui import show_options
-            show_options(browser, query_from_browser, browser)
-        else:
-            query_from_editor_all_fields(browser.editor)
+        query_from_editor_all_fields(browser.editor)
     else:
         query_all(notes)
         # browser.model.reset()
@@ -225,9 +212,27 @@ def query_from_editor_all_fields(editor):
     if not editor or not editor.note:
         return
     
-    query_all([editor.note])
-    editor.setNote(editor.note, focus=True)
-    editor.saveNow()
+    maps = config.get_maps(editor.note.model()['id'])
+    nomaps = True
+    for each in maps:
+        dict_unique = each.get('dict_unique', '').strip()
+        ignore = each.get('ignore', True)
+        if dict_unique and not ignore:
+            nomaps = False
+            break
+    if nomaps:
+        from .ui import show_options
+        tooltip(_('PLS_SET_DICTIONARY_FIELDS'))
+        show_options(
+            editor.parentWindow, 
+            editor.note.model()['id'], 
+            query_from_editor_all_fields, 
+            editor
+        )
+    else:
+        query_all([editor.note])
+        editor.setNote(editor.note, focus=True)
+        editor.saveNow()
 
    
 def query_all(notes):
@@ -391,7 +396,7 @@ def query_all_flds(note):
             s = services.get(dict_unique, None)
             if s is None:
                 s = service_pool.get(dict_unique)
-                if s.support:
+                if s and s.support:
                     services[dict_unique] = s
             if s and s.support:
                 tasks.append({'k': dict_unique, 'w': word, 'f': dict_fld_ord, 'i': fld_ord})

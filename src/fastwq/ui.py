@@ -132,7 +132,7 @@ class ParasDialog(Dialog):
 
     def accept(self):
         self.save()
-        self.close()
+        super(ParasDialog, self).accept()
     
     def save(self):
         data = {
@@ -150,7 +150,7 @@ class FoldersManageDialog(Dialog):
 
     def __init__(self, parent, title=u'Dictionary Folder Manager'):
         super(FoldersManageDialog, self).__init__(parent, title)
-        self._dict_paths = []
+        #self._dict_paths = []
         self.build()
 
     def build(self):
@@ -194,6 +194,7 @@ class FoldersManageDialog(Dialog):
         item = self.folders_lst.takeItem(self.folders_lst.currentRow())
         del item
 
+    '''
     def find_mdxes(self):
         for each in self.dirs:
             for dirpath, dirnames, filenames in os.walk(each):
@@ -204,11 +205,16 @@ class FoldersManageDialog(Dialog):
     @property
     def dict_paths(self):
         return self.find_mdxes()
+    '''
 
     @property
     def dirs(self):
         return [self.folders_lst.item(i).text()
                 for i in range(self.folders_lst.count())]
+
+    def accept(self):
+        self.save()
+        super(FoldersManageDialog, self).accept()
 
     def save(self):
         data = {
@@ -230,9 +236,8 @@ class OptionsDialog(Dialog):
         'after_build'
     ]
 
-    def __init__(self, parent, browser=None, title=u'Options'):
+    def __init__(self, parent, title=u'Options', model_id = -1):
         super(OptionsDialog, self).__init__(parent, title)
-        self.browser = browser
         self.connect(self, QtCore.SIGNAL('before_build'), self._before_build, QtCore.Qt.QueuedConnection)
         self.connect(self, QtCore.SIGNAL('after_build'), self._after_build, QtCore.Qt.QueuedConnection)
         # initlizing info
@@ -244,16 +249,17 @@ class OptionsDialog(Dialog):
         #initlize properties
         self.___last_checkeds___ = None
         self.___options___ = list()
+        self.model_id = model_id if model_id != -1 else config.last_model_id
         # size and signal
         self.resize(WIDGET_SIZE.dialog_width, 4 * WIDGET_SIZE.map_max_height + WIDGET_SIZE.dialog_height_margin)
-        self.emit(QtCore.SIGNAL('before_build'), self.browser)
+        self.emit(QtCore.SIGNAL('before_build'))
     
-    def _before_build(self, browser=None):
+    def _before_build(self):
         for cls in service_manager.services:
             service = service_pool.get(cls.__unique__)
-        self.emit(QtCore.SIGNAL('after_build'), browser)
+        self.emit(QtCore.SIGNAL('after_build'))
 
-    def _after_build(self, browser=None):
+    def _after_build(self):
         self.main_layout.removeWidget(self.loading_label)
         models_layout = QtGui.QHBoxLayout()
         # add buttons
@@ -302,14 +308,8 @@ class OptionsDialog(Dialog):
         self.main_layout.addLayout(bottom_layout)
         # init from saved data
         self.current_model = None
-        model_id = config.last_model_id
-        if browser:
-            for note_id in browser.selectedNotes():
-                note = browser.mw.col.getNote(note_id)
-                model_id = note.model()['id']
-                break
-        if model_id:
-            self.current_model = get_model_byId(mw.col.models, model_id)
+        if self.model_id:
+            self.current_model = get_model_byId(mw.col.models, self.model_id)
         if self.current_model:
             self.models_button.setText(
                 u'%s [%s]' % (_('CHOOSE_NOTE_TYPES'),  self.current_model['name']))
@@ -323,14 +323,14 @@ class OptionsDialog(Dialog):
     def show_fm_dialog(self):
         self.save()
         self.close()
-        show_fm_dialog(self.browser)
+        show_fm_dialog(self._parent)
 
     def show_about(self):
         QtGui.QMessageBox.about(self, _('ABOUT'), Template.tmpl_about)
 
     def accept(self):
         self.save()
-        self.close()
+        super(OptionsDialog, self).accept()
 
     def btn_models_pressed(self):
         self.save()
@@ -615,16 +615,16 @@ def check_updates():
         pass
 
 
-def show_options(browser = None, callback = None, *args, **kwargs):
+def show_options(browser = None, model_id = -1, callback = None, *args, **kwargs):
     '''open options window'''
     parent = mw if browser is None else browser
     config.read()
-    opt_dialog = OptionsDialog(parent, browser, u'Options')
+    opt_dialog = OptionsDialog(parent, u'Options', model_id)
     opt_dialog.activateWindow()
     opt_dialog.raise_()
-    opt_dialog.exec_()
-    if isinstance(callback, types.FunctionType):
-        callback(*args, **kwargs)
+    if opt_dialog.exec_() == QtGui.QDialog.Accepted:
+        if isinstance(callback, types.FunctionType):
+            callback(*args, **kwargs)
 
 
 def show_fm_dialog(browser = None):
@@ -634,8 +634,6 @@ def show_fm_dialog(browser = None):
     fm_dialog.activateWindow()
     fm_dialog.raise_()
     if fm_dialog.exec_() == QtGui.QDialog.Accepted:
-        dict_paths = fm_dialog.dict_paths
-        fm_dialog.save()
         # update local services
         service_manager.update_services()
     # reshow options window

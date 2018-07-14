@@ -30,6 +30,12 @@ from .context import config, APP_ICON
 from .lang import _
 
 
+__all__ = [
+    'wrap_method', 'add_query_button', 'browser_menu', 
+    'customize_addcards', 'config_menu', 'window_shortcut'
+]
+
+
 have_setup = False
 my_shortcut = ''
 
@@ -42,7 +48,11 @@ def wrap_method(func, *args, **kwargs):
         return func(*args, **kwargs)
     return callback
 
+
 def add_query_button(self):
+    '''
+    add a button in add card window
+    '''
     bb = self.form.buttonBox
     ar = QDialogButtonBox.ActionRole
     self.queryButton = bb.addButton(_(u"Query"), ar)
@@ -71,7 +81,14 @@ def browser_menu():
         menu.addAction(action)
         #Options
         action = QAction("Options", browser)
-        action.triggered.connect(wrap_method(show_options, browser))
+        def _show_options():
+            model_id = -1
+            for note_id in browser.selectedNotes():
+                note = browser.mw.col.getNote(note_id)
+                model_id = note.model()['id']
+                break
+            show_options(browser, model_id)
+        action.triggered.connect(_show_options)
         menu.addAction(action)
 
     anki.hooks.addHook('browser.setupMenus', on_setup_menus)
