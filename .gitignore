@@ -113,3 +113,4 @@ addons/
 *.pyc
 release.zip
 README.txt
+.fastwq.ankihub.json

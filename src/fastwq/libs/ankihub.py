@@ -13,10 +13,12 @@ import aqt
 from aqt import mw
 from anki.hooks import addHook
 from anki.utils import isMac, isWin
+from ..context import APP_ICON
 
-'''
+
 # taken from Anki's aqt/profiles.py
 def defaultBase():
+    '''
     print(mw.pm.addonFolder())
     if isWin:
         loc = QtGui.QDesktopServices.storageLocation(QtGui.QDesktopServices.DocumentsLocation)
@@ -34,10 +36,13 @@ def defaultBase():
                 return os.path.expanduser("~/Documents/Anki")
             else:
                 return os.path.join(loc, "Anki")
-'''
+    '''
+    path = mw.pm.addonFolder()
+    return path[:path.rindex(os.path.sep)]
+
 
 headers = {"User-Agent": "AnkiHub"}
-dataPath = '.ankihub.json' #os.path.join(defaultBase(),'.ankihub.json')
+dataPath = os.path.join(defaultBase(),'.fastwq.ankihub.json')
 
 
 class DialogUpdates(QtGui.QDialog, Ui_DialogUpdates):
@@ -48,9 +53,9 @@ class DialogUpdates(QtGui.QDialog, Ui_DialogUpdates):
             self.windowFlags() &
             ~QtCore.Qt.WindowContextHelpButtonHint
         )
+        self.setWindowIcon(APP_ICON)
         self.setupUi(self)
         totalSize = sum(map(lambda x:x['size'],data['assets']))
-
         def answer(doUpdate,answ):
             self.update.setEnabled(False)
             #self.dont.setEnabled(False)
@@ -100,7 +105,9 @@ def installZipFile(data, fname):
     base = mw.pm.addonFolder()#os.path.join(defaultBase(),'addons')
     if fname.endswith(".py"):
         path = os.path.join(base, fname)
-        open(path, "wb").write(data)
+        with open(path, "wb") as file:
+            file.write(data)
+            file.close()
         return True
     # .zip file
     try:
@@ -164,6 +171,7 @@ def updateSingle(repositories,path,data):
                         repositories[path]['update'] = answer
                         with open(dataPath,'w') as file:
                             json.dump(repositories,file,indent=2)
+                            file.close()
                         if install:
                             appendHtml('Executing new scripts...<br/>')
                             newFiles = set(aqt.mw.addonManager.files()) - set(filesBefore)
@@ -190,6 +198,7 @@ def updateSingle(repositories,path,data):
             repositories[path]['update'] = answer
             with open(dataPath,'w') as file:
                 json.dump(repositories,file,indent=2)
+                file.close()
             onReady()
     return callback
 
@@ -200,6 +209,7 @@ def update(add=[],install=False, VERSION='v0.0.0'):
     try:
         with open(dataPath,'r') as file:
             repositories = json.load(file)
+            file.close()
     except:
         repositories = {}
         #    'dayjaby/AnkiHub': {
@@ -288,6 +298,7 @@ def update(add=[],install=False, VERSION='v0.0.0'):
     
     with open(dataPath,'w') as file:
         json.dump(repositories,file,indent=2)
+        file.close()
     return ret
 
 #update()
