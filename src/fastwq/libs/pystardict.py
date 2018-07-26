@@ -1,11 +1,12 @@
 #-*- coding:utf-8 -*-
-from struct import unpack
-from warnings import warn
 import gzip
 import hashlib
+import os
 import re
 import warnings
-import os
+from struct import unpack
+
+import six
 
 
 class _StarDictIfo(object):
@@ -49,10 +50,11 @@ class _StarDictIfo(object):
     def __init__(self, dict_prefix, container):
 
         ifo_filename = '%s.ifo' % dict_prefix
+
         try:
             _file = open(ifo_filename)
-        except IOError:
-            raise Exception('.ifo file does not exists')
+        except Exception as e:
+            raise Exception('ifo file opening error: "{}"'.format(e))
 
         _file.readline()
 
@@ -131,8 +133,7 @@ class _StarDictIdx(object):
         try:
             file = open_file(idx_filename, idx_filename_gz)
         except Exception as e:
-            # warn(e.message)
-            raise Exception('.idx file does not exists')
+            raise Exception('idx file opening error: "{}"'.format(e))
 
         self._file = file.read()
 
@@ -158,10 +159,12 @@ class _StarDictIdx(object):
 
         """ unpack parsed records """
         for matched_record in matched_records:
-            c = matched_record.find(b'\x00') + 1
+            c = matched_record.find(b'\x00')
+            if c == 0:
+                continue
             record_tuple = unpack(
-                '!%sc%sL' % (c, idx_offset_format), matched_record)
-            word, cords = record_tuple[:c - 1], record_tuple[c:]
+                '!%sc%sL' % (c + 1, idx_offset_format), matched_record)
+            word, cords = record_tuple[:c], record_tuple[c + 1:]
             self._idx[b''.join(word)] = cords
 
     def __getitem__(self, word):
@@ -197,14 +200,14 @@ class _StarDictIdx(object):
         if not self._container.in_memory:
             warnings.warn(
                 'Iter dict items with in_memory=False may cause serious performance problem')
-        for key in self._idx.iterkeys():
+        for key in six.iterkeys(self._idx):
             yield key.decode('utf-8')
 
     def keys(self):
         """
         returns keys
         """
-        if sys.version_info[0] == 3:
+        if six.PY3:
             return self.iterkeys()
 
         if not self._container.in_memory:
@@ -360,18 +363,16 @@ class _StarDictDict(object):
         dict_filename = '%s.dict' % dict_prefix
         dict_filename_dz = '%s.dz' % dict_filename
 
+        try:
+            f = open_file(dict_filename, dict_filename_dz)
+        except Exception as e:
+            raise Exception('dict file opening error: "{}"'.format(e))
+
         if in_memory:
-            try:
-                f = open_file(dict_filename, dict_filename_dz)
-                self._file = f.read()
-                f.close()
-            except:
-                raise Exception('.dict file does not exists')
+            self._file = f.read()
+            f.close()
         else:
-            try:
-                self._file = open_file(dict_filename, dict_filename_dz)
-            except:
-                raise Exception('.dict file does not exists')
+            self._file = f
 
     def __getitem__(self, word):
         """
@@ -414,8 +415,8 @@ class Dictionary(dict):
     but changes are not stored anywhere and available in runtime only.
 
     We assume in this documentation that "x" or "y" is instances of the
-    StarDictDict class and "x.{ifo,idx{,.gz},dict{,.dz),syn}" or
-    "y.{ifo,idx{,.gz},dict{,.dz),syn}" is files of the corresponding stardict
+    StarDictDict class and "x.{ifo,idx{,.gz},dict{,.dz},syn}" or
+    "y.{ifo,idx{,.gz},dict{,.dz},syn}" is files of the corresponding stardict
     dictionaries.
 
 
@@ -424,9 +425,9 @@ class Dictionary(dict):
 
     """
 
-    def __init__(self, filename, in_memory=False):
+    def __init__(self, filename_prefix, in_memory=False):
         """
-        filename: path to dictionary files, '.ifo' file
+        filename_prefix: path to dictionary files without files extensions
 
         initializes new StarDictDict instance from stardict dictionary files
         provided by filename_prefix
@@ -434,39 +435,21 @@ class Dictionary(dict):
 
         self.in_memory = in_memory
 
-        self.filename_prefix = os.path.splitext(filename)[0]
+        # reading somedict.ifo
+        self.ifo = _StarDictIfo(dict_prefix=filename_prefix, container=self)
+
+        # reading somedict.idx or somedict.idx.gz
+        self.idx = _StarDictIdx(dict_prefix=filename_prefix, container=self)
+
+        # reading somedict.dict or somedict.dict.dz
+        self.dict = _StarDictDict(
+            dict_prefix=filename_prefix, container=self, in_memory=in_memory)
+
+        # reading somedict.syn (optional)
+        self.syn = _StarDictSyn(dict_prefix=filename_prefix, container=self)
 
         # initializing cache
         self._dict_cache = {}
-
-        self.ifo = None
-        self.idx = None
-
-    def get_header(self):
-        # reading somedict.ifo
-        self.ifo = _StarDictIfo(
-            dict_prefix=self.filename_prefix, container=self)
-
-    def check_build(self):
-        if not self.ifo:
-            self.get_header()
-
-        if not self.idx:
-            # reading somedict.idx or somedict.idx.gz
-            self.idx = _StarDictIdx(
-                dict_prefix=self.filename_prefix, container=self)
-
-            # reading somedict.dict or somedict.dict.dz
-            self.dict = _StarDictDict(
-                dict_prefix=self.filename_prefix, container=self, in_memory=self.in_memory)
-
-            # reading somedict.syn (optional)
-            self.syn = _StarDictSyn(
-                dict_prefix=self.filename_prefix, container=self)
-
-    @staticmethod
-    def get_filename_prefix(path):
-        return os.path.splitext(path)[0]
 
     def __cmp__(self, y):
         """
@@ -662,12 +645,16 @@ def open_file(regular, gz):
     Open regular file if it exists, gz file otherwise.
     If no file exists, raise ValueError.
     """
-    try:
-        return open(regular, 'rb')
-    except IOError as e:
-        # warn(e.message)
+    if os.path.exists(regular):
+        try:
+            return open(regular, 'rb')
+        except Exception as e:
+            raise Exception('regular file opening error: "{}"'.format(e))
+
+    if os.path.exists(gz):
         try:
             return gzip.open(gz, 'rb')
-        except IOError:
-            # warn(e.message)
-            raise ValueError('Neither regular nor gz file exists')
+        except Exception as e:
+            raise Exception('gz file opening error: "{}"'.format(e))
+
+    raise ValueError('Neither regular nor gz file exists')

@@ -680,12 +680,13 @@ class StardictService(LocalService):
         super(StardictService, self).__init__(dict_path)
         self.query_interval = 0.05
         if StardictService.check(self.dict_path):
+            dict_path = dict_path[:-4]
             self.builder = self._get_builer(
                 dict_path,
                 service_wrap(StardictBuilder, dict_path, in_memory=False)
             )
-            if self.builder:
-                self.builder.get_header()
+            #if self.builder:
+            #    self.builder.get_header()
 
     @staticmethod
     def check(dict_path):
