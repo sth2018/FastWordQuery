@@ -38,14 +38,14 @@ class Baidu_Chinese(WebService):
         if element:
             tag = element.find_all('div', {'class': 'tab-content'})
             if tag:
-                result['basicmean'] = u''.join(str(x) for x in tag)
+                result['basicmean'] = u''.join(str(x).decode('utf-8') for x in tag)
 
         #详细释义
         element = soup.find('div', id='detailmean-wrapper')
         if element:
             tag = element.find_all('div', {'class': 'tab-content'})
             if tag:
-                result['detailmean'] = u''.join(str(x) for x in tag)
+                result['detailmean'] = u''.join(str(x).decode('utf-8') for x in tag)
 
         #英文翻译
         element = soup.find('div', id='fanyi-wrapper')
