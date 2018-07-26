@@ -6,8 +6,6 @@ import re
 import warnings
 from struct import unpack
 
-import six
-
 
 class _StarDictIfo(object):
     """
@@ -200,14 +198,14 @@ class _StarDictIdx(object):
         if not self._container.in_memory:
             warnings.warn(
                 'Iter dict items with in_memory=False may cause serious performance problem')
-        for key in six.iterkeys(self._idx):
+        for key in self._idx.iterkeys():
             yield key.decode('utf-8')
 
     def keys(self):
         """
         returns keys
         """
-        if six.PY3:
+        if sys.version_info[0] == 3:
             return self.iterkeys()
 
         if not self._container.in_memory:
