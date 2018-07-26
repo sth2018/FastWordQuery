@@ -421,10 +421,14 @@ class WebService(Service):
         Downloads a file to the given path from the specified target(s).
         See net_stream() for information about available options.
         """
-
-        payload = self.net_stream(*args, **kwargs)
-        with open(path, 'wb') as response_output:
-            response_output.write(payload)
+        try:
+            payload = self.net_stream(*args, **kwargs)
+            with open(path, 'wb') as response_output:
+                response_output.write(payload)
+                response_output.close()
+            return True
+        except:
+            return False
 
 
 class _DictBuildWorker(QThread):

@@ -25,9 +25,9 @@ class BingXtk(WebService):
         url = u'http://xtk.azurewebsites.net/BingDictService.aspx?Word={}'.format(word)
         try:
             result.update(json.loads(self.get_response(url, headers=headers, timeout=10)))
-            return self.cache_this(result)
         except:
-            return result
+            pass
+        return self.cache_this(result)
 
     def _get_field(self, key, default=u''):
         return self.cache_result(key) if self.cached(key) else self._get_content().get(key, default)
@@ -35,12 +35,12 @@ class BingXtk(WebService):
     @export('AME_PHON')
     def fld_phonetic_us(self):
         seg = self._get_field('pronunciation')
-        return seg.get('AmE', u'')
+        return seg.get('AmE', u'') if seg else u''
 
     @export('BRE_PHON')
     def fld_phonetic_uk(self):
         seg = self._get_field('pronunciation')
-        return seg.get('BrE', u'')
+        return seg.get('BrE', u'') if seg else u''
 
     def _fld_mp3(self, fld):
         audio_url = self._get_field('pronunciation')[fld]

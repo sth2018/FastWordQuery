@@ -76,12 +76,12 @@ class Bing(WebService):
     @export('AME_PHON')
     def fld_phonetic_us(self):
         seg = self._get_field('pronunciation')
-        return seg.get('AmE', u'')
+        return seg.get('AmE', u'') if seg else u''
 
     @export('BRE_PHON')
     def fld_phonetic_uk(self):
         seg = self._get_field('pronunciation')
-        return seg.get('BrE', u'')
+        return seg.get('BrE', u'') if seg else u''
 
     def _fld_mp3(self, fld):
         audio_url = self._get_field('pronunciation')[fld]
