@@ -22,3 +22,6 @@
   - **Youdao-French**, [http://dict.youdao.com/...](http://dict.youdao.com/fsearch?client=deskdict&keyfrom=chrome.extension&pos=-1&doctype=xml&xmlVersion=3.2&dogVersion=1.0&vendor=unknown&appVer=3.1.17.4208&le=fr&q=word)
   - **Youdao-Korean**, [http://dict.youdao.com/...](http://dict.youdao.com/fsearch?client=deskdict&keyfrom=chrome.extension&pos=-1&doctype=xml&xmlVersion=3.2&dogVersion=1.0&vendor=unknown&appVer=3.1.17.4208&le=ko&q=대한민국)
   - **MDX Server**, You have to run mdx server by yourself first.
+  - **Yahoo Dictionary**, [https://tw.dictionary...](https://tw.dictionary.search.yahoo.com/search?p=test)
+  - **Baidu Hanyu**, [http://dict.baidu.com/...](http://dict.baidu.com/s?wd=%E4%B8%AD%E5%9B%BD#basicmean)
+  - **Cambridge**, [https://dictionary.cambridge.org/...](https://dictionary.cambridge.org/dictionary/english/test)
