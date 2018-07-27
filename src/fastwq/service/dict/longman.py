@@ -1,165 +1,161 @@
-# -*- coding: utf-8 -*-
-# Copyright: khuang6 <upday7@163.com>
-# License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
+#-*- coding:utf-8 -*-
 
-"""
-Project : wq
-Created: 12/20/2017
-"""
-import os
-from warnings import filterwarnings
-from ...libs.bs4 import BeautifulSoup, Tag
-
-from ..base import WebService, export, register, with_styles
-
-filterwarnings('ignore')
-import sys
-
-reload(sys)
-sys.setdefaultencoding('utf8')
+from hashlib import sha1
+from ..base import WebService, export, register, with_styles, parse_html
+from ...libs.bs4 import Tag
 
 
-@register(u'朗文')
+longman_download_mp3 = True
+
+
+@register([u'朗文', u'Longman'])
 class Longman(WebService):
 
     def __init__(self):
         super(Longman, self).__init__()
 
-    def _get_singledict(self, single_dict):
-        """
+    def _get_field(self, key, default=u''):
+        return self.cache_result(key) if self.cached(key) else self._get_content().get(key, default)
+    
+    def _get_content(self):
+        url = 'https://www.ldoceonline.com/dictionary/{}'.format(self.word)
+        data = self.get_response(url)
+        soup = parse_html(data)
+        # Top Container
+        dictlinks = soup.find_all('span', {'class': 'dictlink'})
+        body_html = ""
+        word_info = {}
+        head_finded = False
+        for dic_link in dictlinks:
+            assert isinstance(dic_link, Tag)
 
-        :type word: str
-        :return:
-        """
+            # remove sound tag
+            am_s_tag = dic_link.find('span', title='Play American pronunciation of {}'.format(self.word))
+            br_s_tag = dic_link.find('span', title='Play British pronunciation of {}'.format(self.word))
+            if am_s_tag:
+                word_info['am_mp3'] = am_s_tag.get('data-src-mp3', u'')
+                am_s_tag.decompose()
+            if br_s_tag:
+                word_info['br_mp3'] = br_s_tag.get('data-src-mp3', u'')
+                br_s_tag.decompose()
 
-        if not (self.cached(single_dict) and self.cache_result(single_dict)):
-            rsp = rq.get("https://www.ldoceonline.com/dictionary/{}".format(self.word), headers={
-                'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1623.0 Safari/537.36'
-            })
+            # Remove related Topics Container
+            related_topic_tag = dic_link.find('div', {'class': "topics_container"})
+            if related_topic_tag:
+                related_topic_tag.decompose()
 
-            if rsp.status_code == 200:
-                bs = BeautifulSoup(rsp.content.decode('utf-8'), 'html.parser', from_encoding="utf-8")
-                # Top Container
-                dictlinks = bs.find_all('span', {'class': 'dictlink'})
-                body_html = ""
+            # Remove Tail
+            tail_tag = dic_link.find("span", {'class': 'Tail'})
+            if tail_tag:
+                tail_tag.decompose()
 
-                word_info = {
-                }
-                ee_ = ''
-                for dic_link in dictlinks:
-                    assert isinstance(dic_link, Tag)
+            # Remove SubEntry
+            sub_entries = dic_link.find_all('span', {'class': 'SubEntry'})
+            for sub_entry in sub_entries:
+                sub_entry.decompose()
 
-                    # Remove related Topics Container
-                    related_topic_tag = dic_link.find('div', {'class': "topics_container"})
-                    if related_topic_tag:
-                        related_topic_tag.decompose()
+            # word elements
+            head_tag = dic_link.find('span', {'class': "Head"})
+            if head_tag and not head_finded:
+                try:
+                    hyphenation = head_tag.find("span", {'class': 'HYPHENATION'}).string  # Hyphenation
+                except:
+                    hyphenation = u''
+                try:
+                    pron_codes = u''.join(
+                        list(head_tag.find("span", {'class': 'PronCodes'}).strings))  # Hyphenation
+                except:
+                    pron_codes = u''
+                try:
+                    POS = head_tag.find("span", {'class': 'POS'}).string  # Hyphenation
+                except:
+                    POS = u''
 
-                    # Remove Tail
-                    tail_tag = dic_link.find("span", {'class': 'Tail'})
-                    if tail_tag:
-                        tail_tag.decompose()
+                try:
+                    Inflections = head_tag.find('span', {'class': 'Inflections'})
+                    if Inflections:
+                        Inflections = str(Inflections)
+                    else:
+                        Inflections = u''
+                except:
+                    Inflections = u''
 
-                    # Remove SubEntry
-                    sub_entries = dic_link.find_all('span', {'class': 'SubEntry'})
-                    for sub_entry in sub_entries:
-                        sub_entry.decompose()
+                word_info['phonetic'] = pron_codes
+                word_info['hyphenation'] = hyphenation
+                word_info['pos'] = POS
+                word_info['inflections'] = Inflections
+                head_finded = True
+                #self.cache_this(word_info)
+            if head_tag:
+                head_tag.decompose()
 
-                    # word elements
-                    head_tag = dic_link.find('span', {'class': "Head"})
-                    if head_tag and not word_info:
-                        try:
-                            hyphenation = head_tag.find("span", {'class': 'HYPHENATION'}).string  # Hyphenation
-                        except:
-                            hyphenation = ''
-                        try:
-                            pron_codes = "".join(
-                                list(head_tag.find("span", {'class': 'PronCodes'}).strings))  # Hyphenation
-                        except:
-                            pron_codes = ''
-                        try:
-                            POS = head_tag.find("span", {'class': 'POS'}).string  # Hyphenation
-                        except:
-                            POS = ''
+            # remove script tag
+            script_tags = dic_link.find_all('script')
+            for t in script_tags:
+                t.decompose()
 
-                        try:
-                            Inflections = head_tag.find('span', {'class': 'Inflections'})
-                            if Inflections:
-                                Inflections = str(Inflections)
-                            else:
-                                Inflections = ''
-                        except:
-                            Inflections = ''
+            # remove img tag
+            img_tags = dic_link.find_all('img')
+            for t in img_tags:
+                t.decompose()
 
-                        word_info = {
-                            'phonetic': pron_codes,
-                            'hyphenation': hyphenation,
-                            'pos': POS,
-                            'inflections': Inflections,
-                        }
-                        self.cache_this(word_info)
-                    if head_tag:
-                        head_tag.decompose()
+            # remove example sound tag
+            emp_s_tags = dic_link.find_all('span', {'class': 'speaker exafile fa fa-volume-up'})
+            for t in emp_s_tags:
+                t.decompose()
 
-                    # remove script tag
-                    script_tags = dic_link.find_all('script')
-                    for t in script_tags:
-                        t.decompose()
+            body_html += str(dic_link)
 
-                    # remove img tag
-                    img_tags = dic_link.find_all('img')
-                    for t in img_tags:
-                        self.cache_this({'img': 'https://www.ldoceonline.com' + t['src']})
-                        t.decompose()
-
-                    # remove sound tag
-                    am_s_tag = dic_link.find("span", title='Play American pronunciation of {}'.format(self.word))
-                    br_s_tag = dic_link.find("span", title='Play British pronunciation of {}'.format(self.word))
-                    if am_s_tag:
-                        am_s_tag.decompose()
-                    if br_s_tag:
-                        br_s_tag.decompose()
-
-                    # remove example sound tag
-                    emp_s_tags = dic_link.find_all('span', {'class': 'speaker exafile fa fa-volume-up'})
-                    for t in emp_s_tags:
-                        t.decompose()
-
-                    body_html += str(dic_link)
-                    ee_ = body_html
-                self.cache_this({
-                    'ee': ee_
-                })
-
-            else:
-                return ''
-        return self.cache_result(single_dict)
+        word_info['ee'] = body_html
+        return self.cache_this(word_info)
 
     @export(u'音标')
     def fld_phonetic(self):
-        return self._get_singledict('phonetic')
+        return self._get_field('phonetic')
+    
+    def _fld_mp3(self, fld):
+        audio_url = self._get_field(fld)
+        if longman_download_mp3 and audio_url:
+            filename = u'_longman_{}_.mp3'.format(self.word)
+            hex_digest = sha1(
+                self.word.encode('utf-8') if isinstance(self.word, unicode)
+                else self.word
+            ).hexdigest().lower()
+            assert len(hex_digest) == 40, "unexpected output from hash library"
+            filename = '.'.join([
+                '-'.join([
+                    self.unique.lower(
+                    ), hex_digest[:8], hex_digest[8:16],
+                    hex_digest[16:24], hex_digest[24:32], hex_digest[32:],
+                ]),
+                'mp3',
+            ])
+            if self.net_download(filename, audio_url):
+                return self.get_anki_label(filename, 'audio')
+        return ''
+
+    @export(u'美音')
+    def fld_mp3_us(self):
+        return self._fld_mp3('am_mp3')
+
+    @export(u'英音')
+    def fld_mp3_uk(self):
+        return self._fld_mp3('br_mp3')
 
     @export(u'断字单词')
     def fld_hyphenation(self):
-        return self._get_singledict('hyphenation')
+        return self._get_field('hyphenation')
 
     @export(u'词性')
     def fld_pos(self):
-        return self._get_singledict('pos')
+        return self._get_field('pos')
 
     @export(u'英英解释')
     @with_styles(cssfile='_longman.css')
     def fld_ee(self):
-        return self._get_singledict('ee')
-
-    @export(u'图片')
-    def fld_pic(self):
-        url = self._get_singledict('img')
-        filename = u'longman_img_{}'.format(os.path.basename(url))
-        if url and self.download(url, filename):
-            return self.get_anki_label(filename, 'img')
-        return ''
+        return self._get_field('ee')
 
     @export(u'变形')
     @with_styles(cssfile='_longman.css')
     def fld_inflections(self):
-        return self._get_singledict('inflections')
+        return self._get_field('inflections')

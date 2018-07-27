@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import sys
 import inspect
 import os
 from hashlib import md5
@@ -24,6 +25,10 @@ from hashlib import md5
 from .base import LocalService, MdxService, StardictService, WebService, service_wrap
 from ..context import config
 from ..utils import importlib
+
+
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 
 class ServiceManager(object):
