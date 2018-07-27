@@ -1,6 +1,6 @@
 #-*- coding:utf-8 -*-
 #
-# Copyright © 2016–2017 sthoo <sth201807@gmail.com>
+# Copyright (C) 2018 sthoo <sth201807@gmail.com>
 #
 # Support: Report an issue at https://github.com/sth2018/FastWordQuery/issues
 #

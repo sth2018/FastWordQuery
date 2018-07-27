@@ -1,6 +1,6 @@
 #-*- coding:utf-8 -*-
 #
-# Copyright © 2016–2017 Liang Feng <finalion@gmail.com>
+# Copyright (C) 2018 Liang Feng <finalion@gmail.com>
 #
 # Support: Report an issue at https://github.com/finalion/WordQuery/issues
 #
