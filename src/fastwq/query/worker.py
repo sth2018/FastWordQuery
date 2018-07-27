@@ -99,7 +99,8 @@ class QueryWorkerManager(object):
 
     def start(self):
         self.total = self.queue.qsize()
-        self.progress.start(self.total, min=0)
+        self.progress.start(max=self.total, min=0)
+        self.update_progress()
         if self.total > 1:
             for _ in range(0, min(config.thread_number, self.total)):
                 self.get_worker()
@@ -109,6 +110,7 @@ class QueryWorkerManager(object):
         else:
             worker = self.get_worker()
             worker.run()
+            self.update_progress()
 
     def update(self, note, results, success_num, missed_css):
         self.mutex.lock()
@@ -128,6 +130,16 @@ class QueryWorkerManager(object):
             self.handle_flush(note)
             return False
 
+    def update_progress(self):
+        self.progress.update_labels(MapDict(
+            type='count',
+            words_number=self.counter,
+            skips_number=self.skips,
+            fails_number=self.fails,
+            fields_number=self.fields
+        ))
+        mw.app.processEvents()
+
     def join(self):
         for worker in self.workers:
             while not worker.finished:
@@ -135,12 +147,7 @@ class QueryWorkerManager(object):
                     worker.exit = True
                     break
                 else:
-                    self.progress.update_labels(MapDict(
-                        type='count',
-                        words_number=self.counter,
-                        skips_number=self.skips,
-                        fails_number=self.fails,
-                        fields_number=self.fields))
+                    self.update_progress()
                 mw.app.processEvents()
                 worker.wait(100)
         self.progress.finish()

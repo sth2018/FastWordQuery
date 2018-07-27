@@ -47,7 +47,6 @@ class ProgressWindow(object):
         self.app = QtGui.QApplication.instance()
         self._win = None
         self._msg_count = defaultdict(int)
-        self._last_number_info = u''
         self._last_update = 0
         self._first_time = 0
         self._disabled = False
@@ -74,10 +73,6 @@ class ProgressWindow(object):
             fails_number
         )
 
-        if self._last_number_info == number_info:
-            return
-        
-        self._last_number_info = number_info
         self._update(label=number_info, value=words_number+skips_number+fails_number)
         self._win.adjustSize()
 
