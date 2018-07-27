@@ -47,6 +47,10 @@ class ProgressWindow(object):
         self.app = QtGui.QApplication.instance()
         self._win = None
         self._msg_count = defaultdict(int)
+        self._last_number_info = u''
+        self._last_update = 0
+        self._first_time = 0
+        self._disabled = False
 
     def update_labels(self, data):
         if self.abort():
@@ -70,6 +74,10 @@ class ProgressWindow(object):
             fails_number
         )
 
+        if self._last_number_info == number_info:
+            return
+        
+        self._last_number_info = number_info
         self._update(label=number_info, value=words_number+skips_number+fails_number)
         self._win.adjustSize()
 
@@ -88,16 +96,18 @@ class ProgressWindow(object):
         self._win.setCancelButton(None)
         self._win.canceled.connect(self.finish)
         self._win.setWindowTitle("Querying...")
+        self._win.setAutoReset(True)
+        self._win.setAutoClose(True)
+        self._win.setMinimum(0)
+        self._win.setMaximum(max)
         # we need to manually manage minimum time to show, as qt gets confused
         # by the db handler
         # self._win.setMinimumDuration(100000)
-        self._counter = min
-        self._min = min
-        self._max = max
-        self._firstTime = time.time()
-        self._lastUpdate = time.time()
+        self._first_time = time.time()
+        self._last_update = time.time()
         self._disabled = False
         self._win.show()
+        self._win.setValue(0)
         self.app.processEvents()
 
     def abort(self):
@@ -106,24 +116,23 @@ class ProgressWindow(object):
 
     def finish(self):
         self._win.hide()
-        self._unsetBusy()
+        self._unset_busy()
         self._win.destroy()
 
-    def _update(self, label=None, value=None, process=True, maybeShow=True):
-        elapsed = time.time() - self._lastUpdate
+    def _update(self, label, value, process=True):
+        elapsed = time.time() - self._last_update
         if label:
             self._win.setLabelText(label)
-        if self._max:
-            self._counter = value or (self._counter + 1)
-            self._win.setValue(self._counter)
+        if value:
+            self._win.setValue(value)
         if process and elapsed >= 0.2:
             self.app.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
-            self._lastUpdate = time.time()
+            self._last_update = time.time()
 
-    def _setBusy(self):
+    def _set_busy(self):
         self._disabled = True
         self.mw.app.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
 
-    def _unsetBusy(self):
+    def _unset_busy(self):
         self._disabled = False
         self.app.restoreOverrideCursor()
