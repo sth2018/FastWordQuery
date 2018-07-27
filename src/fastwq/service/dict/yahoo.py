@@ -21,11 +21,11 @@ class Yahoo_Dict(WebService):
             'phon': '',
             'def': '',
             'audio_url': '',
+            'detail': '',
         }
 
         # 基本
-        element = soup.find(
-            'div', class_='dd cardDesign dictionaryWordCard sys_dict_word_card')
+        element = soup.find('div', class_='dd cardDesign dictionaryWordCard sys_dict_word_card')
         if element:
             # 音标
             tag = element.find('div', class_='compList ml-25 d-ib')
@@ -41,6 +41,13 @@ class Yahoo_Dict(WebService):
             if tag:
                 result['def'] = u'<div class="dd cardDesign">' + \
                     str(tag.find('ul')).decode('utf-8') + u'</div>'
+
+        # 释义
+        tag = soup.find('div', class_='grp grp-tab-content-explanation tabsContent tab-content-explanation tabActived')
+        if tag:
+            result['detail'] = u'<div class="dd cardDesign">' + \
+                str(tag.find('ul')).decode('utf-8') + u'</div>'
+        
 
         return self.cache_this(result)
 
@@ -81,6 +88,13 @@ class Yahoo_Dict(WebService):
     @export(u'中文释义')
     def fld_basic(self):
         val = self._get_field('def')
+        if val is None or val == '':
+            return ''
+        return self._css(val)
+
+    @export(u'详细释义')
+    def fld_detail(self):
+        val = self._get_field('detail')
         if val is None or val == '':
             return ''
         return self._css(val)

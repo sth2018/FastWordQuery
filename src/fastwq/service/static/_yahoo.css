@@ -63,6 +63,10 @@ ul, menu, dir {
     font-size: 14px;
 }
 
+.dd .fz-16, .fz-16 {
+    font-size: 16px;
+}
+
 .dd .fl-l, .fl-l {
     float: left;
 }
