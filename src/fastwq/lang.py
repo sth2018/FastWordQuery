@@ -57,7 +57,7 @@ _arr = [
     ['UPDATE', u'更新', u'Update'],
     ['FORCE_UPDATE', u'强制更新字段', u'Forced Updates of all fields'],
     ['IGNORE_ACCENTS', u'忽略声调', u'Ignore Accents'],
-    ['SKIP_VALUED', u'跳过有值项', u'Skip non-empty Fields'],
+    ['SKIP_VALUED', u'跳过有值项', u'Skip non-empty'],
     ['SKIPED', u'略过', 'Skipped'],
     ['SETTINGS', u'参数', u'Settings'],
     ['THREAD_NUMBER', u'线程数', u'Number of Threads'],
