@@ -31,7 +31,8 @@ class Cambridge(WebService):
                     for tag in tags:
                         reg = str(tag.find('span', class_='region').get_text()).decode('utf-8')
                         pn = 'AmE' if reg=='us' else 'BrE'
-                        result['pronunciation'][pn] = str(tag.find('span', class_='pron').get_text()).decode('utf-8')
+                        p = tag.find('span', class_='pron')
+                        result['pronunciation'][pn] = str(p.get_text()).decode('utf-8') if p else u''
                         snd = tag.find('span', class_='circle circle-btn sound audio_play_button')
                         if snd:
                             result['pronunciation'][pn+'mp3'] = u'https://dictionary.cambridge.org' + snd.get('data-src-mp3')
@@ -42,13 +43,16 @@ class Cambridge(WebService):
                 if tags:
                     l = []
                     for tag in tags:
+                        i = tag.find('span', class_='def-info')
+                        d = tag.find('b', class_='def')
+                        e = tag.find('div', class_='examp emphasized')
                         l.append(
                             u'<li><span class="epp-xref">{0}</span>\
                             <b class="def">{1}</b>\
                             <div class="examp">{2}</div></li>'.format(
-                                str(tag.find('span', class_='def-info').get_text()).decode('utf-8'),
-                                str(tag.find('b', class_='def').get_text()).decode('utf-8'),
-                                str(tag.find('div', class_='examp emphasized').get_text()).decode('utf-8')
+                                str(i.get_text()).decode('utf-8') if i else u'',
+                                str(d.get_text()).decode('utf-8') if d else u'',
+                                str(e.get_text()).decode('utf-8') if e else u''
                             )
                         )
                     result['def'] = u'<ul>' + u''.join(s for s in l) + u'</ul>'
