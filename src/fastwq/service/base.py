@@ -639,6 +639,8 @@ class MdxService(LocalService):
         basename = os.path.basename(filepath_in_mdx.replace('\\', os.path.sep))
         if savepath is None:
             savepath = '_' + basename
+        if os.path.exists(savepath):
+            return savepath
         try:
             src_fn = self.dict_path.replace(self._filename+u'.mdx', basename)
             if os.path.exists(src_fn):
@@ -646,10 +648,10 @@ class MdxService(LocalService):
                 return savepath
             else:
                 bytes_list = self.builder.mdd_lookup(filepath_in_mdx)
-                if bytes_list and not os.path.exists(savepath):
+                if bytes_list:
                     with open(savepath, 'wb') as f:
                         f.write(bytes_list[0])
-                        return savepath
+                    return savepath
         except sqlite3.OperationalError as e:
             pass
 
