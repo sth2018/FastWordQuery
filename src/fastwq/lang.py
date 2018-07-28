@@ -1,4 +1,4 @@
-#-*- coding:utf-8 -*-
+﻿#-*- coding:utf-8 -*-
 #
 # Copyright (C) 2018 sthoo <sth201807@gmail.com>
 #
@@ -25,7 +25,7 @@ __all__ = ['_', '_cl', '_sl']
 
 #Language Define, [Key, zh_CN, en]
 _arr = [
-    ['CHECK_FILENAME_LABEL', u'使用文件名作为标签', u'Use Filename As Label'],
+    ['CHECK_FILENAME_LABEL', u'使用文件名作为标签', u'Use the Filename as Label'],
     ['EXPORT_MEDIA', u'导出媒体文件', u'Export Media Files'],
     ['DICTS_FOLDERS', u'字典文件夹', u'Dictionary Folder'],
     ['CHOOSE_NOTE_TYPES', u'选择笔记类型', u'Choose Note Type'],
@@ -40,40 +40,40 @@ _arr = [
     ['FIELDS', u'字段', u'Fields'],
     ['WORDS', u'单词', u'Words'],
     ['NOT_DICT_FIELD', u'忽略', u'Ignore'],   #不是字典字段
-    ['NOTE_TYPE_FIELDS', u'<b>笔记字段</b>', u'<b>Note fields</b>'],
+    ['NOTE_TYPE_FIELDS', u'<b>笔记字段</b>', u'<b>Note Fields</b>'],
     ['DICTS', u'<b>字典</b>', u'<b>Dictionary</b>'],
     ['DICT_FIELDS', u'<b>字典字段</b>', u'<b>Fields</b>'],
-    ['RADIOS_DESC', u'<b>单选框选中为待查询单词字段</b>', u'<b>Word field needs to be selected.</b>'],
-    ['NO_QUERY_WORD', u'查询字段无单词', u'No word is found in the query field'],
-    ['CSS_NOT_FOUND', u'没有找到CSS文件，请手动选择', u'No valid css stylesheets found, please choose the file'],
+    ['RADIOS_DESC', u'<b>单选框选中为待查询单词字段</b>', u'<b> Select the field to be queried with single selection.</b>'],
+    ['NO_QUERY_WORD', u'查询字段无单词', u'The query field is empty'],
+    ['CSS_NOT_FOUND', u'没有找到CSS文件，请手动选择', u'No CSS file found, please select one manually.'],
     ['ABOUT', u'关于', u'About'],
     ['REPOSITORY', u'项目地址', u'Project Repo'],
     ['FEEDBACK', u'反馈', u'Feedback'],
-    ['VERSION', u'版本', u'Version'],
-    ['LATEST_VERSION', u'已经是最新版本.', u'It\'s the lastest version.'],
+    ['VERSION', u'版本', u'Current Version'],
+    ['LATEST_VERSION', u'已经是最新版本.', u'You are using the lastest version.'],
     ['ABNORMAL_VERSION', u'当前版本异常.', u'The current version is abnormal.'],
-    ['CHECK_FAILURE', u'版本检查失败.', u'Version check failure.'],
-    ['NEW_VERSION', u'检查到新版本:', u'New version:'],
+    ['CHECK_FAILURE', u'版本检查失败.', u'Version check failed.'],
+    ['NEW_VERSION', u'检查到新版本:', u'New version available:'],
     ['UPDATE', u'更新', u'Update'],
-    ['FORCE_UPDATE', u'强制更新字段', u'Force Update Fields'],
+    ['FORCE_UPDATE', u'强制更新字段', u'Forced Updates of all fields'],
     ['IGNORE_ACCENTS', u'忽略声调', u'Ignore Accents'],
-    ['SKIP_VALUED', u'跳过有值项', u'Skip Valued'],
-    ['SKIPED', u'略过', 'Skip'],
+    ['SKIP_VALUED', u'跳过有值项', u'Skip non-empty Fields'],
+    ['SKIPED', u'略过', 'Skipped'],
     ['SETTINGS', u'参数', u'Settings'],
-    ['THREAD_NUMBER', u'线程数', u'Thread Number'],
+    ['THREAD_NUMBER', u'线程数', u'Number of Threads'],
     ['INITLIZING_DICT', u'初始化词典...', u'Initlizing Dictionary...'],
-    ['PLS_SET_DICTIONARY_FIELDS', u'请设置字典和字段', u'Please set dictionary and fields.'],
+    ['PLS_SET_DICTIONARY_FIELDS', u'请设置字典和字段', u'Please set the dictionary and fields.'],
 
     ['BRE_PRON', u'英式发音', u'British Pronunciation'],
     ['AME_PRON', u'美式发音', u'American Pronunciation'],
-    ['PRON', u'发音', u'Pronunciation'],
-    ['EXAMPLE', u'例句', u'Example'],
+    ['PRON', u'发音', u'Audio Pronunciation'],
+    ['EXAMPLE', u'例句', u'Examples'],
     ['TRANS', u'翻译', u'Translation'],
     ['DEF', u'释义', u'Definition'],
-    ['PHON', u'音标', u'Phonetic'],
-    ['BRE_PHON', u'英式音标', u'British Phonetic'],
-    ['AME_PHON', u'美式音标', u'American Phonetic'],
-    ['IMAGE', u'图片', u'Image'],
+    ['PHON', u'音标', u'Phonetic Symbols'],
+    ['BRE_PHON', u'英式音标', u'Phonetic Symbols (UK)'],
+    ['AME_PHON', u'美式音标', u'Phonetic Symbols (US)'],
+    ['IMAGE', u'图片', u'Images'],
 ]
 
 _trans = {item[0]: {'zh_CN': item[1], 'en': item[2]} for item in _arr}
