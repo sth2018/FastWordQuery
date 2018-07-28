@@ -640,11 +640,16 @@ class MdxService(LocalService):
         if savepath is None:
             savepath = '_' + basename
         try:
-            bytes_list = self.builder.mdd_lookup(filepath_in_mdx)
-            if bytes_list and not os.path.exists(savepath):
-                with open(savepath, 'wb') as f:
-                    f.write(bytes_list[0])
-                    return savepath
+            src_fn = self.dict_path.replace(self._filename+u'.mdx', basename)
+            if os.path.exists(src_fn):
+                shutil.copy(src_fn, savepath)
+                return savepath
+            else:
+                bytes_list = self.builder.mdd_lookup(filepath_in_mdx)
+                if bytes_list and not os.path.exists(savepath):
+                    with open(savepath, 'wb') as f:
+                        f.write(bytes_list[0])
+                        return savepath
         except sqlite3.OperationalError as e:
             pass
 
