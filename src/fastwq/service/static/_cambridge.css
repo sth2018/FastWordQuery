@@ -22,3 +22,25 @@ b.def {
     display: block;
     margin: 0
 }
+
+li {
+    display: list-item;
+    list-style: none;
+    text-align: -webkit-match-parent;
+}
+
+menu, ol, ul {
+    padding: 0;
+    list-style: none;
+    list-style-position: outside;
+}
+
+ol {
+    display: block;
+    list-style: none;
+    list-style-type: decimal;
+}
+
+dl, menu, ol, ul, dd, p {
+    margin: 0;
+}
