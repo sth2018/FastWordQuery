@@ -36,10 +36,9 @@ It forks from WordQuery, added **multi-thread feature**, and some other features
       ![](screenshots/setting_config_01.png)
 
   2. Click **Settings** button in the Options window  
-      ![](screenshots/setting_config_02.png)
-
-   - **Force Update** : Update all fields even if it's None
-   - **Thread** : The number of threads running at the same time
+      ![](screenshots/setting_config_02.png)  
+      - **Force Update** : Update all fields even if it's None
+      - **Thread** : The number of threads running at the same time
   
   
 ## Usage
