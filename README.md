@@ -20,7 +20,7 @@ It forks from WordQuery, added **multi-thread feature**, and some other features
 
    1. Place src folder of this repository to anki addon folder.  
     **OR**
-   2. Use the installation code: 1807206748
+   2. Use the installation code: **1807206748**
 
 
 ## Setting
@@ -29,10 +29,6 @@ It forks from WordQuery, added **multi-thread feature**, and some other features
   1. Click Menu **"Tools -> Add-ons -> FastWQ -> Edit..."**  
       ![](screenshots/setting_menu.png)
   2. Edit the code and click **Save**  
-      ```python
-      # shortcut
-      shortcut = 'Ctrl+Q'
-      ```
       ![](screenshots/setting_shortcut.png)
 
 ### Config
@@ -70,6 +66,7 @@ It forks from WordQuery, added **multi-thread feature**, and some other features
       ![](screenshots/use_02.png)
   2. Edit key field and click Query button  
       ![](screenshots/use_03.png)
+
 
 ## Other Projects Used
   - [mdict-query](https://github.com/mmjang/mdict-query)
