@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt4 import QtCore, QtGui
+from aqt.qt import *
 from .base import Dialog, WIDGET_SIZE
 from ..context import config
 from ..lang import _
@@ -39,31 +39,31 @@ class SettingDialog(Dialog):
         self.build()
 
     def build(self):
-        layout = QtGui.QVBoxLayout()
+        layout = QVBoxLayout()
 
-        check_force_update = QtGui.QCheckBox(_("FORCE_UPDATE"))
+        check_force_update = QCheckBox(_("FORCE_UPDATE"))
         check_force_update.setChecked(config.force_update)
         layout.addWidget(check_force_update)
         layout.addSpacing(10)
 
-        check_ignore_accents = QtGui.QCheckBox(_("IGNORE_ACCENTS"))
+        check_ignore_accents = QCheckBox(_("IGNORE_ACCENTS"))
         check_ignore_accents.setChecked(config.ignore_accents)
         layout.addWidget(check_ignore_accents)
         layout.addSpacing(10)
 
-        hbox = QtGui.QHBoxLayout()
-        input_thread_number = QtGui.QSpinBox(parent=self)
+        hbox = QHBoxLayout()
+        input_thread_number = QSpinBox(parent=self)
         input_thread_number.setRange(1, 120)
         input_thread_number.setValue(config.thread_number)
-        input_label = QtGui.QLabel(_("THREAD_NUMBER") + ":", parent=self)
+        input_label = QLabel(_("THREAD_NUMBER") + ":", parent=self)
         hbox.addWidget(input_label)
         hbox.setStretchFactor(input_label, 1)
         hbox.addWidget(input_thread_number)
         hbox.setStretchFactor(input_thread_number, 2)
         layout.addLayout(hbox)
 
-        buttonBox = QtGui.QDialogButtonBox(parent=self)
-        buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Ok)
+        buttonBox = QDialogButtonBox(parent=self)
+        buttonBox.setStandardButtons(QDialogButtonBox.Ok)
         buttonBox.accepted.connect(self.accept) # 确定
         
         layout.addSpacing(48)
@@ -73,7 +73,7 @@ class SettingDialog(Dialog):
         self.check_ignore_accents = check_ignore_accents
         self.input_thread_number = input_thread_number
 
-        layout.setAlignment(QtCore.Qt.AlignTop|QtCore.Qt.AlignLeft)
+        layout.setAlignment(Qt.AlignTop|Qt.AlignLeft)
         self.setLayout(layout)
 
     def accept(self):

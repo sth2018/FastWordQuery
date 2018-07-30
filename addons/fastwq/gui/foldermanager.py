@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt4 import QtCore, QtGui
+from aqt.qt import *
 from .base import Dialog, WIDGET_SIZE
 from ..context import config
 from ..lang import _, _sl
@@ -37,24 +37,24 @@ class FoldersManageDialog(Dialog):
         self.build()
 
     def build(self):
-        layout = QtGui.QVBoxLayout()
-        btn_layout = QtGui.QHBoxLayout()
-        add_btn = QtGui.QPushButton("+")
-        remove_btn = QtGui.QPushButton("-")
+        layout = QVBoxLayout()
+        btn_layout = QHBoxLayout()
+        add_btn = QPushButton("+")
+        remove_btn = QPushButton("-")
         btn_layout.addWidget(add_btn)
         btn_layout.addWidget(remove_btn)
         add_btn.clicked.connect(self.add_folder)
         remove_btn.clicked.connect(self.remove_folder)
-        self.folders_lst = QtGui.QListWidget()
+        self.folders_lst = QListWidget()
         self.folders_lst.addItems(config.dirs)
-        self.chk_use_filename = QtGui.QCheckBox(_('CHECK_FILENAME_LABEL'))
-        self.chk_export_media = QtGui.QCheckBox(_('EXPORT_MEDIA'))
+        self.chk_use_filename = QCheckBox(_('CHECK_FILENAME_LABEL'))
+        self.chk_export_media = QCheckBox(_('EXPORT_MEDIA'))
         self.chk_use_filename.setChecked(config.use_filename)
         self.chk_export_media.setChecked(config.export_media)
-        chk_layout = QtGui.QHBoxLayout()
+        chk_layout = QHBoxLayout()
         chk_layout.addWidget(self.chk_use_filename)
         chk_layout.addWidget(self.chk_export_media)
-        btnbox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok, QtCore.Qt.Horizontal, self)
+        btnbox = QDialogButtonBox(QDialogButtonBox.Ok, Qt.Horizontal, self)
         btnbox.accepted.connect(self.accept)
         layout.addLayout(btn_layout)
         layout.addWidget(self.folders_lst)
@@ -63,11 +63,11 @@ class FoldersManageDialog(Dialog):
         self.setLayout(layout)
 
     def add_folder(self):
-        dir_ = QtGui.QFileDialog.getExistingDirectory(
+        dir_ = QFileDialog.getExistingDirectory(
             self,
             caption=u"Select Folder", 
             directory=config.last_folder, 
-            options=QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks
+            options=QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks
         )
         if dir_:
             self.folders_lst.addItem(dir_)

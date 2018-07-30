@@ -21,7 +21,7 @@
 import time
 from collections import defaultdict
 
-from PyQt4 import QtCore, QtGui
+from aqt.qt import *
 from ..lang import _
 
 
@@ -44,7 +44,7 @@ class ProgressWindow(object):
 
     def __init__(self, mw):
         self.mw = mw
-        self.app = QtGui.QApplication.instance()
+        self.app = QApplication.instance()
         self._win = None
         self._msg_count = defaultdict(int)
         self._last_update = 0
@@ -86,8 +86,8 @@ class ProgressWindow(object):
         # setup window
         label = label or _("Processing...")
         parent = parent or self.app.activeWindow() or self.mw
-        self._win = QtGui.QProgressDialog(label, '', min, max, parent)
-        self._win.setWindowModality(QtCore.Qt.ApplicationModal)
+        self._win = QProgressDialog(label, '', min, max, parent)
+        self._win.setWindowModality(Qt.ApplicationModal)
         self._win.setCancelButton(None)
         self._win.canceled.connect(self.finish)
         self._win.setWindowTitle("Querying...")
@@ -121,12 +121,12 @@ class ProgressWindow(object):
         if value:
             self._win.setValue(value)
         if process and elapsed >= 0.2:
-            self.app.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
+            self.app.processEvents(QEventLoop.ExcludeUserInputEvents)
             self._last_update = time.time()
 
     def _set_busy(self):
         self._disabled = True
-        self.mw.app.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
+        self.mw.app.setOverrideCursor(QCursor(Qt.WaitCursor))
 
     def _unset_busy(self):
         self._disabled = False

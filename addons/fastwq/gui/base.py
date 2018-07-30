@@ -17,14 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt4 import QtCore, QtGui
+from aqt.qt import *
 from ..context import APP_ICON
 
 
 __all__ = ['Dialog', 'WIDGET_SIZE']
 
 
-class Dialog(QtGui.QDialog):
+class Dialog(QDialog):
     '''
     Base used for all dialog windows.
     '''
@@ -42,7 +42,7 @@ class Dialog(QtGui.QDialog):
         self.setModal(True)
         self.setWindowFlags(
             self.windowFlags() &
-            ~QtCore.Qt.WindowContextHelpButtonHint
+            ~Qt.WindowContextHelpButtonHint
         )
         self.setWindowIcon(APP_ICON)
         self.setWindowTitle(
@@ -58,7 +58,7 @@ class WidgetSize(object):
     dialog_width = 700 
     dialog_height_margin = 120 
     map_min_height = 0
-    map_max_height = 31
+    map_max_height = 32
     map_fld_width = 100
     map_dictname_width = 150
     map_dictfield_width = 160

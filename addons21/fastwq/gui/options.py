@@ -20,6 +20,7 @@
 import anki
 import aqt
 import aqt.models
+import sip
 from aqt import mw
 from aqt.qt import *
 from aqt.studydeck import StudyDeck
@@ -78,7 +79,10 @@ class OptionsDialog(Dialog):
     def _after_build(self, s):
         if s != 'after_build':
             return
-        self.main_layout.removeWidget(self.loading_label)
+        if self.loading_label:
+            self.main_layout.removeWidget(self.loading_label)
+            sip.delete(self.loading_label)
+            self.loading_label = None
         models_layout = QHBoxLayout()
         # add buttons
         mdx_button = QPushButton(_('DICTS_FOLDERS'))
@@ -205,13 +209,15 @@ class OptionsDialog(Dialog):
                         self.add_dict_layout(j, **each)
                         break
                 else:
-                    self.add_dict_layout(i, fld_name=name, fld_ord=ord)
+                    self.add_dict_layout(i, fld_name=name, fld_ord=ord, word_checked=i==0)
             else:
-                self.add_dict_layout(i, fld_name=name, fld_ord=ord)
+                self.add_dict_layout(i, fld_name=name, fld_ord=ord, word_checked=i==0)
 
         #self.setLayout(self.main_layout)
-        self.resize(WIDGET_SIZE.dialog_width,
-                    max(3, (i + 1)) * WIDGET_SIZE.map_max_height + WIDGET_SIZE.dialog_height_margin)
+        self.resize(
+            WIDGET_SIZE.dialog_width,
+            max(3, (i + 1)) * WIDGET_SIZE.map_max_height + WIDGET_SIZE.dialog_height_margin
+        )
         self.save()
 
     def show_models(self):
@@ -298,7 +304,7 @@ class OptionsDialog(Dialog):
         """
         add dictionary fields row
         """
-        word_checked = i == 0
+        word_checked = kwargs.get('word_checked', False)
 
         fld_name, fld_ord = (
             kwargs.get('fld_name', ''),                                 #笔记类型的字段名

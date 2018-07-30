@@ -17,11 +17,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt4 import QtCore, QtGui
 import anki
 import aqt
 import aqt.models
+import sip
 from aqt import mw
+from aqt.qt import *
 from aqt.studydeck import StudyDeck
 from .base import Dialog, WIDGET_SIZE
 from .setting import SettingDialog
@@ -45,15 +46,16 @@ class OptionsDialog(Dialog):
         'begore_build',
         'after_build'
     ]
+    _signal = pyqtSignal(str)
 
     def __init__(self, parent, title=u'Options', model_id = -1):
         super(OptionsDialog, self).__init__(parent, title)
-        self.connect(self, QtCore.SIGNAL('before_build'), self._before_build, QtCore.Qt.QueuedConnection)
-        self.connect(self, QtCore.SIGNAL('after_build'), self._after_build, QtCore.Qt.QueuedConnection)
+        self._signal.connect(self._before_build)
+        self._signal.connect(self._after_build)
         # initlizing info
-        self.main_layout = QtGui.QVBoxLayout()
-        self.loading_label = QtGui.QLabel(_('INITLIZING_DICT'))
-        self.main_layout.addWidget(self.loading_label, 0, QtCore.Qt.AlignCenter)
+        self.main_layout = QVBoxLayout()
+        self.loading_label = QLabel(_('INITLIZING_DICT'))
+        self.main_layout.addWidget(self.loading_label, 0, Qt.AlignCenter)
         #self.loading_layout.addLayout(models_layout)
         self.setLayout(self.main_layout)
         #initlize properties
@@ -63,53 +65,60 @@ class OptionsDialog(Dialog):
         self.current_model = None
         # size and signal
         self.resize(WIDGET_SIZE.dialog_width, 4 * WIDGET_SIZE.map_max_height + WIDGET_SIZE.dialog_height_margin)
-        self.emit(QtCore.SIGNAL('before_build'))
+        self._signal.emit('before_build')
     
-    def _before_build(self):
+    def _before_build(self, s):
+        if s != 'before_build':
+            return
         for cls in service_manager.services:
             service = service_pool.get(cls.__unique__)
             if service:
                 service_pool.put(service)
-        self.emit(QtCore.SIGNAL('after_build'))
+        self._signal.emit('after_build')
 
-    def _after_build(self):
-        self.main_layout.removeWidget(self.loading_label)
-        models_layout = QtGui.QHBoxLayout()
+    def _after_build(self, s):
+        if s != 'after_build':
+            return
+        if self.loading_label:
+            self.main_layout.removeWidget(self.loading_label)
+            sip.delete(self.loading_label)
+            self.loading_label = None
+        models_layout = QHBoxLayout()
         # add buttons
-        mdx_button = QtGui.QPushButton(_('DICTS_FOLDERS'))
+        mdx_button = QPushButton(_('DICTS_FOLDERS'))
         mdx_button.clicked.connect(self.show_fm_dialog)
-        self.models_button = QtGui.QPushButton(_('CHOOSE_NOTE_TYPES'))
+        self.models_button = QPushButton(_('CHOOSE_NOTE_TYPES'))
         self.models_button.clicked.connect(self.btn_models_pressed)
         models_layout.addWidget(mdx_button)
         models_layout.addWidget(self.models_button)
         self.main_layout.addLayout(models_layout)
         # add dicts mapping
-        dicts_widget = QtGui.QWidget()
-        self.dicts_layout = QtGui.QGridLayout()
-        self.dicts_layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
+        dicts_widget = QWidget()
+        self.dicts_layout = QGridLayout()
+        self.dicts_layout.setSizeConstraint(QLayout.SetMinAndMaxSize)
         dicts_widget.setLayout(self.dicts_layout)
 
-        scroll_area = QtGui.QScrollArea()
+        scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
         scroll_area.setWidget(dicts_widget)
 
         self.main_layout.addWidget(scroll_area)
         # add description of radio buttons AND ok button
-        bottom_layout = QtGui.QHBoxLayout()
-        paras_btn = QtGui.QPushButton(_('SETTINGS'))
+        bottom_layout = QHBoxLayout()
+        paras_btn = QPushButton(_('SETTINGS'))
         paras_btn.clicked.connect(self.show_paras)
-        about_btn = QtGui.QPushButton(_('ABOUT'))
+        about_btn = QPushButton(_('ABOUT'))
         about_btn.clicked.connect(self.show_about)
         # about_btn.clicked.connect(self.show_paras)
-        chk_update_btn = QtGui.QPushButton(_('UPDATE'))
+        chk_update_btn = QPushButton(_('UPDATE'))
         chk_update_btn.clicked.connect(self.check_updates)
-        home_label = QtGui.QLabel(
+        home_label = QLabel(
             '<a href="{url}">User Guide</a>'.format(url=Endpoint.user_guide))
         home_label.setOpenExternalLinks(True)
         # shop_label = QLabel(
         #     '<a href="{url}">Service Shop</a>'.format(url=Endpoint.service_shop))
         # shop_label.setOpenExternalLinks(True)
-        btnbox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok, QtCore.Qt.Horizontal, self)
+        btnbox = QDialogButtonBox(QDialogButtonBox.Ok, Qt.Horizontal, self)
         btnbox.accepted.connect(self.accept)
         bottom_layout.addWidget(paras_btn)
         bottom_layout.addWidget(chk_update_btn)
@@ -183,12 +192,12 @@ class OptionsDialog(Dialog):
 
         labels = ['', '', 'DICTS', 'DICT_FIELDS', '']
         for i, s in enumerate(labels):
-            label = QtGui.QLabel(_(s))
-            label.setSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
+            label = QLabel(_(s))
+            label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
             self.dicts_layout.addWidget(label, 0, i)
 
         maps = config.get_maps(model['id'])
-        self.radio_group = QtGui.QButtonGroup()
+        self.radio_group = QButtonGroup()
         for i, fld in enumerate(model['flds']):
             ord = fld['ord']
             name = fld['name']
@@ -200,20 +209,22 @@ class OptionsDialog(Dialog):
                         self.add_dict_layout(j, **each)
                         break
                 else:
-                    self.add_dict_layout(i, fld_name=name, fld_ord=ord)
+                    self.add_dict_layout(i, fld_name=name, fld_ord=ord, word_checked=i==0)
             else:
-                self.add_dict_layout(i, fld_name=name, fld_ord=ord)
+                self.add_dict_layout(i, fld_name=name, fld_ord=ord, word_checked=i==0)
 
         #self.setLayout(self.main_layout)
-        self.resize(WIDGET_SIZE.dialog_width,
-                    max(3, (i + 1)) * WIDGET_SIZE.map_max_height + WIDGET_SIZE.dialog_height_margin)
+        self.resize(
+            WIDGET_SIZE.dialog_width,
+            max(3, (i + 1)) * WIDGET_SIZE.map_max_height + WIDGET_SIZE.dialog_height_margin
+        )
         self.save()
 
     def show_models(self):
         '''
         show choose note type window
         '''
-        edit = QtGui.QPushButton(anki.lang._("Manage"),
+        edit = QPushButton(anki.lang._("Manage"),
                            clicked=lambda: aqt.models.Models(mw, self))
         ret = StudyDeck(mw, names=lambda: sorted(mw.col.models.allNames()),
                         accept=anki.lang._("Choose"), title=anki.lang._("Choose Note Type"),
@@ -276,7 +287,7 @@ class OptionsDialog(Dialog):
             text = dict_fld_name if dict_fld_name else 'http://'
             field_combo.setEditable(True)
             field_combo.setEditText(text)
-            field_combo.setFocus(QtCore.Qt.MouseFocusReason)  # MouseFocusReason
+            field_combo.setFocus(Qt.MouseFocusReason)  # MouseFocusReason
         else:
             unique = dict_combo_itemdata
             service = service_pool.get(unique)
@@ -293,7 +304,7 @@ class OptionsDialog(Dialog):
         """
         add dictionary fields row
         """
-        word_checked = i == 0
+        word_checked = kwargs.get('word_checked', False)
 
         fld_name, fld_ord = (
             kwargs.get('fld_name', ''),                                 #笔记类型的字段名
@@ -312,38 +323,38 @@ class OptionsDialog(Dialog):
             kwargs.get('skip_valued', True),                            #略过有值项标志
         )
         # check
-        word_check_btn = QtGui.QRadioButton(fld_name)
+        word_check_btn = QRadioButton(fld_name)
         word_check_btn.setMinimumSize(WIDGET_SIZE.map_fld_width, 0)
         word_check_btn.setMaximumSize(
             WIDGET_SIZE.map_fld_width,
             WIDGET_SIZE.map_max_height
         )
-        word_check_btn.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        word_check_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         word_check_btn.setCheckable(True)
         word_check_btn.setChecked(word_checked)
         self.radio_group.addButton(word_check_btn)
         # dict combox
-        dict_combo = QtGui.QComboBox()
+        dict_combo = QComboBox()
         dict_combo.setMinimumSize(WIDGET_SIZE.map_dictname_width, 0)
         dict_combo.setFocusPolicy(
-            QtCore.Qt.TabFocus | QtCore.Qt.ClickFocus | QtCore.Qt.StrongFocus | QtCore.Qt.WheelFocus
+            Qt.TabFocus | Qt.ClickFocus | Qt.StrongFocus | Qt.WheelFocus
         )
         dict_combo.setEnabled(not word_checked and not ignore)
         self.fill_dict_combo_options(dict_combo, dict_unique)
         dict_unique = dict_combo.itemData(dict_combo.currentIndex())
         # field combox
-        field_combo = QtGui.QComboBox()
+        field_combo = QComboBox()
         field_combo.setMinimumSize(WIDGET_SIZE.map_dictfield_width, 0)
         field_combo.setEnabled(not word_checked and not ignore)
         self.fill_field_combo_options(field_combo, dict_name, dict_unique, dict_fld_name, dict_fld_ord)
 
         # ignore
-        ignore_check_btn = QtGui.QCheckBox(_("NOT_DICT_FIELD"))
+        ignore_check_btn = QCheckBox(_("NOT_DICT_FIELD"))
         ignore_check_btn.setEnabled(not word_checked)
         ignore_check_btn.setChecked(ignore)
 
         # Skip valued
-        skip_check_btn = QtGui.QCheckBox(_("SKIP_VALUED"))
+        skip_check_btn = QCheckBox(_("SKIP_VALUED"))
         skip_check_btn.setEnabled(not word_checked and not ignore)
         skip_check_btn.setChecked(skip)
 

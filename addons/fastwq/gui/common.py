@@ -18,8 +18,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import types
-from PyQt4 import QtGui
 from aqt import mw
+from aqt.qt import *
 from aqt.utils import showInfo
 from .options import OptionsDialog
 from .foldermanager import FoldersManageDialog
@@ -48,7 +48,7 @@ def show_fm_dialog(browser = None):
     fm_dialog = FoldersManageDialog(parent, u'Dictionary Folder Manager')
     fm_dialog.activateWindow()
     fm_dialog.raise_()
-    if fm_dialog.exec_() == QtGui.QDialog.Accepted:
+    if fm_dialog.exec_() == QDialog.Accepted:
         # update local services
         service_manager.update_services()
     # reshow options window
@@ -62,11 +62,11 @@ def show_options(browser = None, model_id = -1, callback = None, *args, **kwargs
     opt_dialog = OptionsDialog(parent, u'Options', model_id)
     opt_dialog.activateWindow()
     opt_dialog.raise_()
-    if opt_dialog.exec_() == QtGui.QDialog.Accepted:
+    if opt_dialog.exec_() == QDialog.Accepted:
         if isinstance(callback, types.FunctionType):
             callback(*args, **kwargs)
 
 
 def show_about_dialog(parent):
     '''open about dialog'''
-    QtGui.QMessageBox.about(parent, _('ABOUT'), Template.tmpl_about)
+    QMessageBox.about(parent, _('ABOUT'), Template.tmpl_about)
