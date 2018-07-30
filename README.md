@@ -18,7 +18,7 @@ It forks from WordQuery, added **multi-thread feature**, and some other features
 
 ## Install
 
-   1. Place [addons or addons21] folder of this repository to anki addon folder.  
+   1. Place addons or addons21 folder of this repository to anki addon folder.  
     **OR**
    2. Use the installation code: **1807206748**
 
