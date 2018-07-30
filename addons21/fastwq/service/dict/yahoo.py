@@ -11,7 +11,7 @@ class Yahoo_Dict(WebService):
     def __init__(self):
         super(Yahoo_Dict, self).__init__()
 
-    def _get_content(self):
+    def _get_from_api(self):
         url = u"https://tw.dictionary.search.yahoo.com/search?p={}".format(
             self.quote_word)
         html = self.get_response(url, timeout=10)
@@ -50,9 +50,6 @@ class Yahoo_Dict(WebService):
 
         return self.cache_this(result)
 
-    def _get_field(self, key, default=u''):
-        return self.cache_result(key) if self.cached(key) else self._get_content().get(key, default)
-
     @with_styles(need_wrap_css=True, cssfile='_yahoo.css')
     def _css(self, val):
         return val
@@ -65,8 +62,7 @@ class Yahoo_Dict(WebService):
     def fld_pron(self):
         audio_url = self._get_field('audio_url')
         if yahoo_download_mp3 and audio_url:
-            filename = u'_yahoo_dict_{}_.mp3'.format(self.word)
-            filename = get_hex_name(self.unique.lower(), filename, 'mp3')
+            filename = get_hex_name(self.unique.lower(), audio_url, 'mp3')
             if os.path.exists(filename) or self.download(audio_url, filename, 5):
                 return self.get_anki_label(filename, 'audio')
 

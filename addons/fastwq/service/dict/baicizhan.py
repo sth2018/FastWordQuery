@@ -2,7 +2,7 @@
 import json
 import os
 from collections import defaultdict
-from ..base import WebService, export, register
+from ..base import *
 
 
 @register([u'百词斩', u'Baicizhan'])
@@ -15,8 +15,7 @@ class Baicizhan(WebService):
         super(Baicizhan, self).__init__()
 
     def _get_from_api(self):
-        word = self.word.replace(' ', '_')
-        url = u"http://mall.baicizhan.com/ws/search?w={}".format(word)
+        url = u"http://mall.baicizhan.com/ws/search?w={}".format(self.quote_word)
         result = {
             "accent": u"",
             "img": u"",
@@ -33,18 +32,14 @@ class Baicizhan(WebService):
         except:
             pass
         return self.cache_this(result)
-    
-    def _get_field(self, key, default=u''):
-        return self.cache_result(key) if self.cached(key) else self._get_from_api().get(key, default)
 
     @export('PRON')
     def fld_phonetic(self):
-        word = self.word.replace(' ', '_')
-        url = u'http://baicizhan.qiniucdn.com/word_audios/{}.mp3'.format(word)
+        url = u'http://baicizhan.qiniucdn.com/word_audios/{}.mp3'.format(self.quote_word)
         audio_name = 'bcz_%s.mp3' % self.word
+        audio_name = get_hex_name(self.unique.lower(), audio_name, 'mp3')
         if self.bcz_download_mp3:
             if os.path.exists(audio_name) or self.download(url, audio_name, 5):
-                # urllib.urlretrieve(url, audio_name)
                 with open(audio_name, 'rb') as f:
                     if f.read().strip() == '{"error":"Document not found"}':
                         res = ''

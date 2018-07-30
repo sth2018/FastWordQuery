@@ -1,10 +1,7 @@
 #-*- coding:utf-8 -*-
-import re
-import urllib2
-import xml.etree.ElementTree
 
-from aqt.utils import showInfo
-from ..base import WebService, export, register, with_styles
+import xml.etree.ElementTree
+from ..base import *
 
 
 @register([u'有道词典-法语', u'Youdao-French'])
@@ -19,7 +16,7 @@ class Youdaofr(WebService):
                     '&doctype=xml&xmlVersion=3.2'
                     '&dogVersion=1.0&vendor=unknown'
                     '&appVer=3.1.17.4208'
-                    '&le={0}&q={1}').format(lang, self.word)
+                    '&le={0}&q={1}').format(lang, self.quote_word)
         result ={
             'phonetic': '',
             'explains':'',
@@ -44,10 +41,10 @@ class Youdaofr(WebService):
     @with_styles(cssfile='_youdao.css', need_wrap_css=True, wrap_class='youdao')
     def _get_singledict(self, single_dict, lang='fr'):
         url = u"http://m.youdao.com/singledict?q={0}&dict={1}&le={2}&more=false".format(
-            self.word, single_dict, lang
+            self.quote_word, single_dict, lang
         )
         try:
-            html = urllib2.urlopen(url, timeout=5).read()
+            html = self.get_response(url, timeout=5)
             return (u'<div id="{0}_contentWrp" class="content-wrp dict-container">'
                         '<div id="{1}" class="trans-container {2} ">{3}</div>'
                         '</div>'
@@ -57,7 +54,7 @@ class Youdaofr(WebService):
                 single_dict,
                 single_dict,
                 single_dict,
-                html
+                html.decode('utf-8')
             )
         except:
             return ''

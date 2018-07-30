@@ -76,8 +76,7 @@ class Cambridge(WebService):
     def _fld_mp3(self, fld):
         audio_url = self._get_field('pronunciation')[fld]
         if cambridge_download_mp3 and audio_url:
-            filename = u'_cambridge_{}_.mp3'.format(self.word)
-            filename = get_hex_name(self.unique.lower(), filename, 'mp3')
+            filename = get_hex_name(self.unique.lower(), audio_url, 'mp3')
             if os.path.exists(filename) or self.net_download(filename, audio_url):
                 return self.get_anki_label(filename, 'audio')
         return ''

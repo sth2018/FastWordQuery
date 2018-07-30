@@ -1,10 +1,8 @@
 #-*- coding:utf-8 -*-
-import re
-import urllib2
-import xml.etree.ElementTree
 
-from aqt.utils import showInfo
-from ..base import WebService, export, register, with_styles
+import os
+import xml.etree.ElementTree
+from ..base import *
 
 js = '''
 var initVoice = function () {
@@ -38,7 +36,7 @@ class Youdao(WebService):
                     '&doctype=xml&xmlVersion=3.2'
                     '&dogVersion=1.0&vendor=unknown'
                     '&appVer=3.1.17.4208'
-                    '&le={0}&q={1}').format(lang, self.word)
+                    '&le={0}&q={1}').format(lang, self.quote_word)
         result ={
             'phonetic': '',
             'explains':'',
@@ -66,9 +64,6 @@ class Youdao(WebService):
             pass
         return self.cache_this(result)
 
-    def _get_field(self, key, default=u''):
-        return self.cache_result(key) if self.cached(key) else self._get_from_api().get(key, default)
-
     @export(u'音标')
     def fld_phonetic(self):
         return self._get_field('phonetic')
@@ -80,12 +75,12 @@ class Youdao(WebService):
     @with_styles(cssfile='_youdao.css', js=js, need_wrap_css=True, wrap_class='youdao')
     def _get_singledict(self, single_dict, lang='eng'):
         url = u"http://m.youdao.com/singledict?q={0}&dict={1}&le={2}&more=false".format(
-            self.word,
+            self.quote_word,
             single_dict,
             lang
         )
         try:
-            result = urllib2.urlopen(url, timeout=5).read()
+            result = self.get_response(url, timeout=5)
             return (u'<div id="{0}_contentWrp" class="content-wrp dict-container">'
                         '<div id="{0}" class="trans-container {0} ">{1}</div>'
                         '</div>'
@@ -100,19 +95,19 @@ class Youdao(WebService):
 
     @export(u'英式发音')
     def fld_british_audio(self):
-        audio_url = u'http://dict.youdao.com/dictvoice?audio={}&type=1'.format(self.word)
+        audio_url = u'http://dict.youdao.com/dictvoice?audio={}&type=1'.format(self.quote_word)
         if youdao_download_mp3:
-            filename = u'_youdao_{}_uk.mp3'.format(self.word)
-            if self.download(audio_url, filename):
+            filename = get_hex_name(self.unique.lower(), audio_url, 'mp3')
+            if os.path.exists(filename) or self.download(audio_url, filename):
                 return self.get_anki_label(filename, 'audio')
         return audio_url
 
     @export(u'美式发音')
     def fld_american_audio(self):
-        audio_url = u'http://dict.youdao.com/dictvoice?audio={}&type=2'.format(self.word)
+        audio_url = u'http://dict.youdao.com/dictvoice?audio={}&type=2'.format(self.quote_word)
         if youdao_download_mp3:
-            filename = u'_youdao_{}_us.mp3'.format(self.word)
-            if self.download(audio_url, filename):
+            filename = get_hex_name(self.unique.lower(), audio_url, 'mp3')
+            if os.path.exists(filename) or self.download(audio_url, filename):
                 return self.get_anki_label(filename, 'audio')
         return audio_url
 

@@ -305,8 +305,10 @@ class WebService(Service):
         return getattr(self, '__register_label__', self.unique)
 
     def get_response(self, url, data=None, headers=None, timeout=10):
-        default_headers = {'User-Agent': 'Anki WordQuery',
-                           'Accept-Encoding': 'gzip'}
+        default_headers = {
+            'User-Agent': 'Mozilla/5.0',
+            'Accept-Encoding': 'gzip'
+        }
         if headers:
             default_headers.update(headers)
 

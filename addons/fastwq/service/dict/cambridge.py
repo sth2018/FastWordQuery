@@ -1,6 +1,6 @@
 #-*- coding:utf-8 -*-
-from hashlib import sha1
-from ..base import WebService, export, register, with_styles, parse_html
+import os
+from ..base import *
 
 cambridge_download_mp3 = True
 
@@ -10,9 +10,8 @@ class Cambridge(WebService):
     def __init__(self):
         super(Cambridge, self).__init__()
 
-    def _get_content(self):
-        word = self.word.replace(' ', '_')
-        data = self.get_response(u"https://dictionary.cambridge.org/dictionary/english/{}".format(word))
+    def _get_from_api(self):
+        data = self.get_response(u"https://dictionary.cambridge.org/dictionary/english/{}".format(self.quote_word))
         soup = parse_html(data)
         result = {
             'pronunciation': {'AmE': '', 'BrE': '', 'AmEmp3': '', 'BrEmp3': ''},
@@ -29,7 +28,8 @@ class Cambridge(WebService):
                 tags = header.find_all('span', class_='pron-info')
                 if tags:
                     for tag in tags:
-                        reg = str(tag.find('span', class_='region').get_text()).decode('utf-8')
+                        r = tag.find('span', class_='region')
+                        reg = str(r.get_text()).decode('utf-8') if r else u''
                         pn = 'AmE' if reg=='us' else 'BrE'
                         p = tag.find('span', class_='pron')
                         result['pronunciation'][pn] = str(p.get_text()).decode('utf-8') if p else u''
@@ -58,9 +58,6 @@ class Cambridge(WebService):
                     result['def'] = u'<ul>' + u''.join(s for s in l) + u'</ul>'
 
         return self.cache_this(result)
-
-    def _get_field(self, key, default=u''):
-        return self.cache_result(key) if self.cached(key) else self._get_content().get(key, default)
     
     @with_styles(need_wrap_css=True, cssfile='_cambridge.css')
     def _css(self, val):
@@ -79,22 +76,8 @@ class Cambridge(WebService):
     def _fld_mp3(self, fld):
         audio_url = self._get_field('pronunciation')[fld]
         if cambridge_download_mp3 and audio_url:
-            filename = u'_cambridge_{}_.mp3'.format(self.word)
-            hex_digest = sha1(
-                self.word.encode('utf-8') if isinstance(self.word, unicode)
-                else self.word
-            ).hexdigest().lower()
-            assert len(hex_digest) == 40, "unexpected output from hash library"
-            filename = '.'.join([
-                '-'.join([
-                    self.unique.lower(
-                    ), hex_digest[:8], hex_digest[8:16],
-                    hex_digest[16:24], hex_digest[24:32], hex_digest[32:],
-                ]),
-                'mp3',
-            ])
-
-            if filename and self.net_download(filename, audio_url):
+            filename = get_hex_name(self.unique.lower(), audio_url, 'mp3')
+            if os.path.exists(filename) or self.net_download(filename, audio_url):
                 return self.get_anki_label(filename, 'audio')
         return ''
 

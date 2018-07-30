@@ -1,7 +1,7 @@
 #-*- coding:utf-8 -*-
 import re
 import FastWQ
-from ..base import MdxService, export, register, with_styles, parse_html
+from ..base import *
 
 PATH = FastWQ.LDOCE6_PATH
 
@@ -33,24 +33,11 @@ class Ldoce6(MdxService):
 
     def _fld_voice(self, html, voice):
         """获取发音字段"""
-        from hashlib import sha1
         for regexp in LANG_TO_REGEXPS[voice]:
             match = regexp.search(html)
             if match:
                 val = '/' + match.group(1)
-                hex_digest = sha1(
-                    val.encode('utf-8') if isinstance(val, unicode)
-                    else val
-                ).hexdigest().lower()
-
-                assert len(hex_digest) == 40, "unexpected output from hash library"
-                name = '.'.join([
-                        '-'.join([
-                            'mdx', self.unique.lower(), hex_digest[:8], hex_digest[8:16],
-                            hex_digest[16:24], hex_digest[24:32], hex_digest[32:],
-                        ]),
-                        'mp3',
-                    ])
+                name = get_hex_name('mdx-'+self.unique.lower(), val, 'mp3')
                 name = self.save_file(val, name)
                 if name:
                     return self.get_anki_label(name, 'audio')

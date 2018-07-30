@@ -1,14 +1,9 @@
 # coding=utf-8
 #from warnings import filterwarnings
+
+from ..base import *
 from ...libs.bs4 import Tag
-from ..base import WebService, export, register, with_styles, parse_html
 
-#filterwarnings('ignore')
-
-import sys
-
-#reload(sys)
-#sys.setdefaultencoding('utf8')
 
 @register([u'牛津学习词典', u'Oxford Learner'])
 class OxfordLearning(WebService):
@@ -36,7 +31,7 @@ class OxfordLearning(WebService):
 
     def _get_single_dict(self, single_dict):
         if not (self.cached(single_dict) and self.cache_result(single_dict)):
-            web_word = self.query(self.word)
+            web_word = self.query(self.quote_word)
             if web_word:
                 self.cache_this(
                     {

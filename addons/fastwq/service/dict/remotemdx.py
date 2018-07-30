@@ -21,12 +21,10 @@ import os
 # import ntpath
 import re
 import urllib
-import urllib2
-import urlparse
 from collections import defaultdict
 
 from aqt.utils import showInfo, showText
-from ..base import QueryResult, WebService, export, register, with_styles
+from ..base import *
 
 
 @register('MDX_SERVER')
@@ -41,8 +39,8 @@ class RemoteMdx(WebService):
         self.url = dict_path + \
             '/' if not dict_path.endswith('/') else dict_path
         try:
-            req = urllib2.urlopen(self.url + word)
-            result, js = self.adapt_to_anki(req.read())
+            html = self.get_response(self.url + word)
+            result, js = self.adapt_to_anki(html)
             return QueryResult(result=result, js=js)
         except:
             return QueryResult.default()
@@ -54,12 +52,12 @@ class RemoteMdx(WebService):
         for each in diff:
             basename = os.path.basename(each.replace('\\', os.path.sep))
             saved_basename = '_' + basename
-            abs_url = urlparse.urljoin(self.url, each)
+            abs_url = urllib.parse.urljoin(self.url, each)
             if basename.endswith('.css') or basename.endswith('.js'):
                 styles.append(saved_basename)
             if not os.path.exists(saved_basename):
                 try:
-                    urllib.urlretrieve(abs_url, saved_basename)
+                    self.download(abs_url, saved_basename)
                 except:
                     errors.append(each)
         return errors, styles

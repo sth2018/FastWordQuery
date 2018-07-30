@@ -97,7 +97,7 @@ class Youdao(WebService):
     def fld_british_audio(self):
         audio_url = u'http://dict.youdao.com/dictvoice?audio={}&type=1'.format(self.quote_word)
         if youdao_download_mp3:
-            filename = u'_youdao_{}_uk.mp3'.format(self.word)
+            filename = get_hex_name(self.unique.lower(), audio_url, 'mp3')
             if os.path.exists(filename) or self.download(audio_url, filename):
                 return self.get_anki_label(filename, 'audio')
         return audio_url
@@ -106,7 +106,7 @@ class Youdao(WebService):
     def fld_american_audio(self):
         audio_url = u'http://dict.youdao.com/dictvoice?audio={}&type=2'.format(self.quote_word)
         if youdao_download_mp3:
-            filename = u'_youdao_{}_us.mp3'.format(self.word)
+            filename = get_hex_name(self.unique.lower(), audio_url, 'mp3')
             if os.path.exists(filename) or self.download(audio_url, filename):
                 return self.get_anki_label(filename, 'audio')
         return audio_url

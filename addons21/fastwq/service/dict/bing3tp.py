@@ -42,8 +42,7 @@ class BingXtk(WebService):
     def _fld_mp3(self, fld):
         audio_url = self._get_field('pronunciation')[fld]
         if bing_download_mp3 and audio_url:
-            filename = u'bing_' + u''.join(re.findall(r'\w*\.mp3', audio_url))
-            filename = get_hex_name('bing', filename, 'mp3')
+            filename = get_hex_name('bing', audio_url, 'mp3')
             if os.path.exists(filename) or self.net_download(filename, audio_url):
                 return self.get_anki_label(filename, 'audio')
         return ''

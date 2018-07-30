@@ -1,6 +1,6 @@
 #-*- coding:utf-8 -*-
 
-from ..base import WebService, export, register, with_styles, parse_html
+from ..base import *
 
 
 @register(u'海词迷你词典')
@@ -9,8 +9,8 @@ class MiniDict(WebService):
     def __init__(self):
         super(MiniDict, self).__init__()
 
-    def _get_content(self):
-        data = self.get_response(u"http://apii.dict.cn/mini.php?q={}".format(self.word))
+    def _get_from_api(self):
+        data = self.get_response(u"http://apii.dict.cn/mini.php?q={}".format(self.quote_word))
         soup = parse_html(data)
         result = {
             'expressions': u'', 
@@ -44,9 +44,6 @@ class MiniDict(WebService):
             tag.decompose()
 
         return self.cache_this(result)
-
-    def _get_field(self, key, default=u''):
-        return self.cache_result(key) if self.cached(key) else self._get_content().get(key, default)
 
     @export(u'音标')
     def fld_phonetic(self):

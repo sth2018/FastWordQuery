@@ -1,7 +1,7 @@
 #-*- coding:utf-8 -*-
 
-from hashlib import sha1
-from ..base import WebService, export, register, with_styles, parse_html
+import os
+from ..base import *
 from ...libs.bs4 import Tag
 
 
@@ -14,11 +14,8 @@ class Longman(WebService):
     def __init__(self):
         super(Longman, self).__init__()
 
-    def _get_field(self, key, default=u''):
-        return self.cache_result(key) if self.cached(key) else self._get_content().get(key, default)
-    
-    def _get_content(self):
-        url = 'https://www.ldoceonline.com/dictionary/{}'.format(self.word)
+    def _get_from_api(self):
+        url = 'https://www.ldoceonline.com/dictionary/{}'.format(self.quote_word)
         data = self.get_response(url)
         soup = parse_html(data)
         # Top Container
@@ -116,21 +113,8 @@ class Longman(WebService):
     def _fld_mp3(self, fld):
         audio_url = self._get_field(fld)
         if longman_download_mp3 and audio_url:
-            filename = u'_longman_{}_.mp3'.format(self.word)
-            hex_digest = sha1(
-                self.word.encode('utf-8') if isinstance(self.word, unicode)
-                else self.word
-            ).hexdigest().lower()
-            assert len(hex_digest) == 40, "unexpected output from hash library"
-            filename = '.'.join([
-                '-'.join([
-                    self.unique.lower(
-                    ), hex_digest[:8], hex_digest[8:16],
-                    hex_digest[16:24], hex_digest[24:32], hex_digest[32:],
-                ]),
-                'mp3',
-            ])
-            if self.net_download(filename, audio_url):
+            filename = get_hex_name(self.unique.lower(), audio_url, 'mp3')
+            if os.path.exists(filename) or self.net_download(filename, audio_url):
                 return self.get_anki_label(filename, 'audio')
         return ''
 

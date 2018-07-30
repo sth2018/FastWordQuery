@@ -33,6 +33,7 @@ import random
 from collections import defaultdict
 from functools import wraps
 from hashlib import md5
+from hashlib import sha1
 
 import cookielib
 from aqt import mw
@@ -50,10 +51,28 @@ except ImportError:
 
 
 __all__ = [
-    'register', 'export', 'copy_static_file', 'with_styles', 'parse_html', 'service_wrap',
+    'register', 'export', 'copy_static_file', 'with_styles', 'parse_html', 'service_wrap', 'get_hex_name',
     'Service', 'WebService', 'LocalService', 'MdxService', 'StardictService', 'QueryResult'
 ]
 
+
+def get_hex_name(prefix, val, suffix):
+    ''' get sha1 hax name '''
+    hex_digest = sha1(
+        val.encode('utf-8') if isinstance(val, unicode)
+        else val
+    ).hexdigest().lower()
+    name = '.'.join([
+            '-'.join([
+                prefix, hex_digest[:8], hex_digest[8:16],
+                hex_digest[16:24], hex_digest[24:32], hex_digest[32:],
+            ]),
+            suffix,
+        ])
+    return name
+
+def _is_method_or_func(object):
+    return inspect.isfunction(object) or inspect.ismethod(object)
 
 def register(labels):
     """
@@ -62,7 +81,7 @@ def register(labels):
     def _deco(cls):
         cls.__register_label__ = _cl(labels)
 
-        methods = inspect.getmembers(cls, predicate=inspect.ismethod)
+        methods = inspect.getmembers(cls, predicate=_is_method_or_func)
         exports = []
         for method in methods:
             attrs = getattr(method[1], '__export_attrs__', None)
@@ -198,10 +217,16 @@ class Service(object):
         return result
 
     def cached(self, key):
-        return (self.word in self.cache) and self.cache[self.word].has_key(key)
+        return (self.word in self.cache) and (key in self.cache[self.word])
 
     def cache_result(self, key):
         return self.cache[self.word].get(key, u'')
+    
+    def _get_from_api(self):
+        return {}
+
+    def _get_field(self, key, default=u''):
+        return self.cache_result(key) if self.cached(key) else self._get_from_api().get(key, default)
 
     @property
     def unique(self):
@@ -210,6 +235,13 @@ class Service(object):
     @unique.setter
     def unique(self, value):
         self._unique = value
+    
+    @property
+    def quote_word(self):
+        return urllib2.quote(
+            self.word.encode('utf-8') if isinstance(self.word, unicode)
+            else self.word
+        )
 
     @property
     def support(self):
@@ -269,8 +301,10 @@ class WebService(Service):
         return getattr(self, '__register_label__', self.unique)
 
     def get_response(self, url, data=None, headers=None, timeout=10):
-        default_headers = {'User-Agent': 'Anki WordQuery',
-                           'Accept-Encoding': 'gzip'}
+        default_headers = {
+            'User-Agent': 'Mozilla/5.0',
+            'Accept-Encoding': 'gzip'
+        }
         if headers:
             default_headers.update(headers)
 
@@ -282,7 +316,7 @@ class WebService(Service):
                 data = zlib.decompress(data, 16 + zlib.MAX_WBITS)
             return data
         except:
-            return ''
+            return u''
 
     @classmethod
     def download(cls, url, filename, timeout=15):

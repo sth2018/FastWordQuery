@@ -1,12 +1,11 @@
 #-*- coding:utf-8 -*-
 import os
 import re
-import urllib2
 import json
 from collections import defaultdict
 from aqt.utils import showInfo, showText
 
-from ..base import WebService, export, with_styles, register
+from ..base import *
 from ...utils import ignore_exception
 
 iciba_download_mp3 = True
@@ -18,16 +17,19 @@ class ICIBA(WebService):
     def __init__(self):
         super(ICIBA, self).__init__()
 
-    def _get_content(self):
+    def _get_from_api(self):
         resp = defaultdict(str)
         headers = {
             'Accept-Language': 'en-US,zh-CN;q=0.8,zh;q=0.6,en;q=0.4',
             'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
             'Accept': 'text/javascript, application/javascript, application/ecmascript, application/x-ecmascript, */*; q=0.01'}
         # try:
-        request = urllib2.Request(
-            'http://www.iciba.com/index.php?a=getWordMean&c=search&word=' + self.word.encode('utf-8'), headers=headers)
-        resp = json.loads(urllib2.urlopen(request).read())
+        html = self.get_response(
+            'http://www.iciba.com/index.php?a=getWordMean&c=search&word=' + self.quote_word, 
+            headers=headers,
+            timeout=5
+        )
+        resp = json.loads(html)
         # self.cache_this(resp['baesInfo']['symbols'][0])
         # self.cache_this(resp['sentence'])
         # showText(str(self.cache[self.word]))
@@ -35,9 +37,6 @@ class ICIBA(WebService):
         return self.cache_this(resp)
         # except Exception as e:
         #     return resp
-
-    def _get_field(self, key, default=u''):
-        return self.cache_result(key) if self.cached(key) else self._get_content().get(key, default)
 
     @ignore_exception
     @export(u'美式音标')
@@ -130,12 +129,11 @@ class ICIBA(WebService):
     @ignore_exception
     @export(u'英文例句')
     def fld_st(self):
-	sentences = ''
+        sentences = ''
         segs = self._get_field('sentence')
         for i, seg in enumerate(segs):
             sentences = u"""{}""".format(seg['Network_en'])
-	    break
-	
+            break
         return sentences
     
     @ignore_exception

@@ -1,12 +1,11 @@
 #-*- coding:utf-8 -*-
+
 import urllib2
-from urllib2 import quote
 import json
-from aqt.utils import showInfo
-from ..base import WebService, export, register, with_styles
+from ..base import *
 
 
-@register("Oxford")
+@register(u"Oxford")
 class Oxford(WebService):
 
     def __init__(self):
@@ -19,7 +18,7 @@ class Oxford(WebService):
         app_key = "bb36fd6a1259e5baf8df6110a2f7fc8f"
         headers = {"app_id": app_id, "app_key": app_key}
 
-        word_id = quote(word.lower().replace(" ", "_"))
+        word_id = urllib2.quote(word.lower().replace(" ", "_"))
         url = baseurl + "/entries/" + lang + "/" + word_id
         url = urllib2.Request(url, headers=headers)
         response = json.loads(urllib2.urlopen(url).read())

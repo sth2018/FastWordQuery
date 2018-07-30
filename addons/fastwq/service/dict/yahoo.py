@@ -1,7 +1,6 @@
 # -*- coding:utf-8 -*-
 import os
-from hashlib import sha1
-from ..base import WebService, export, register, with_styles, parse_html
+from ..base import *
 
 yahoo_download_mp3 = True
 
@@ -12,9 +11,9 @@ class Yahoo_Dict(WebService):
     def __init__(self):
         super(Yahoo_Dict, self).__init__()
 
-    def _get_content(self):
+    def _get_from_api(self):
         url = u"https://tw.dictionary.search.yahoo.com/search?p={}".format(
-            self.word)
+            self.quote_word)
         html = self.get_response(url, timeout=10)
         soup = parse_html(html)
         result = {
@@ -51,9 +50,6 @@ class Yahoo_Dict(WebService):
 
         return self.cache_this(result)
 
-    def _get_field(self, key, default=u''):
-        return self.cache_result(key) if self.cached(key) else self._get_content().get(key, default)
-
     @with_styles(need_wrap_css=True, cssfile='_yahoo.css')
     def _css(self, val):
         return val
@@ -66,20 +62,7 @@ class Yahoo_Dict(WebService):
     def fld_pron(self):
         audio_url = self._get_field('audio_url')
         if yahoo_download_mp3 and audio_url:
-            filename = u'_yahoo_dict_{}_.mp3'.format(self.word)
-            hex_digest = sha1(
-                self.word.encode('utf-8') if isinstance(self.word, unicode)
-                else self.word
-            ).hexdigest().lower()
-            assert len(hex_digest) == 40, "unexpected output from hash library"
-            filename = '.'.join([
-                '-'.join([
-                    self.unique.lower(
-                    ), hex_digest[:8], hex_digest[8:16],
-                    hex_digest[16:24], hex_digest[24:32], hex_digest[32:],
-                ]),
-                'mp3',
-            ])
+            filename = get_hex_name(self.unique.lower(), audio_url, 'mp3')
             if os.path.exists(filename) or self.download(audio_url, filename, 5):
                 return self.get_anki_label(filename, 'audio')
 

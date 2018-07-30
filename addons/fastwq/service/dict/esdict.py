@@ -1,18 +1,12 @@
 #-*- coding:utf-8 -*-
+
 import base64
 import re
-import urllib
 import urllib2
-
-from aqt.utils import showInfo
-from BeautifulSoup import BeautifulSoup
-from ..base import WebService, export, register, with_styles
-
-# Anki buit-in BeautifulSoup is bs3 not bs4
-
+import os
+from ..base import *
 
 css = ''
-
 
 @register(u'西语助手')
 class Esdict(WebService):
@@ -20,13 +14,12 @@ class Esdict(WebService):
     def __init__(self):
         super(Esdict, self).__init__()
 
-    def _get_content(self):
-        url = 'https://www.esdict.cn/mdicts/es/{word}'.format(
-            word=urllib.quote(self.word.encode('utf-8')))
+    def _get_from_api(self):
+        url = 'https://www.esdict.cn/mdicts/es/{}'.format(self.quote_word)
         try:
             result = {}
-            html = urllib2.urlopen(url, timeout=5).read()
-            soup = BeautifulSoup(html)
+            html = self.get_response(url, timeout=5)
+            soup = parse_html(html)
 
             def _get_from_element(dict, key, soup, tag, id=None, class_=None):
                 baseURL = 'https://www.esdict.cn/'
@@ -62,21 +55,15 @@ class Esdict(WebService):
         except Exception as e:
             return {}
 
-    def _get_field(self, key, default=u''):
-        return self.cache_result(key) if self.cached(key) else self._get_content().get(key, default)
-
     @export(u'真人发音')
     def fld_sound(self):
-        # base64.b64encode('bonjour') == 'Ym9uam91cg=='
-        # https://api.frdic.com/api/v2/speech/speakweb?langid=fr&txt=QYNYm9uam91cg%3d%3d
         url = 'https://api.frdic.com/api/v2/speech/speakweb?langid=es&txt=QYN{word}'.format(
-            word=urllib.quote(base64.b64encode(self.word.encode('utf-8'))))
-        audio_name = u'esdict_{word}.mp3'.format(word=self.word)
-        try:
-            urllib.urlretrieve(url, audio_name)
-            return self.get_anki_label(audio_name, 'audio')
-        except Exception as e:
-            return ''
+            word=urllib2.quote(base64.b64encode(self.word.encode('utf-8')))
+        )
+        filename = get_hex_name(self.unique.lower(), url, 'mp3')
+        if os.path.exists(filename) or self.net_download(filename, url):
+                return self.get_anki_label(filename, 'audio')
+        return ''
 
     @export(u'音标')
     def fld_phonetic(self):

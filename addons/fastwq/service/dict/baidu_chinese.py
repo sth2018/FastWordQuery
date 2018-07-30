@@ -1,6 +1,6 @@
 #-*- coding:utf-8 -*-
-from hashlib import sha1
-from ..base import WebService, export, register, with_styles, parse_html
+import os
+from ..base import *
 
 baidu_download_mp3 = True
 
@@ -11,7 +11,7 @@ class Baidu_Chinese(WebService):
         super(Baidu_Chinese, self).__init__()
 
     def _get_content(self):
-        url = u"http://dict.baidu.com/s?wd={}#basicmean".format(self.word)
+        url = u"http://dict.baidu.com/s?wd={}#basicmean".format(self.quote_word)
         html = self.get_response(url, timeout=10)
         soup = parse_html(html)
         result = {
@@ -72,26 +72,14 @@ class Baidu_Chinese(WebService):
         audio_url = self._get_field('audio_url')
         if baidu_download_mp3 and audio_url:
             filename = u'_baidu_chinese_{}_.mp3'.format(self.word)
-            hex_digest = sha1(
-                self.word.encode('utf-8') if isinstance(self.word, unicode)
-                else self.word
-            ).hexdigest().lower()
-            assert len(hex_digest) == 40, "unexpected output from hash library"
-            filename = '.'.join([
-                '-'.join([
-                    self.unique.lower(
-                    ), hex_digest[:8], hex_digest[8:16],
-                    hex_digest[16:24], hex_digest[24:32], hex_digest[32:],
-                ]),
-                'mp3',
-            ])
+            filename = get_hex_name(self.unique.lower(), filename, 'mp3')
             try:
-                self.net_download(
+                if os.path.exists(filename) or self.net_download(
                     filename,
                     audio_url,
-                    require=dict(mime='audio/mp3', size=512),
-                )
-                return self.get_anki_label(filename, 'audio')
+                    require=dict(mime='audio/mp3', size=512)
+                ):
+                    return self.get_anki_label(filename, 'audio')
             except:
                 pass
         return ''
