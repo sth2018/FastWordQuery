@@ -142,6 +142,7 @@ class OptionsDialog(Dialog):
         '''open setting dialog'''
         dialog = SettingDialog(self, u'Setting')
         dialog.exec_()
+        dialog.destroy()
 
     def check_updates(self):
         '''check addon version'''
@@ -153,6 +154,7 @@ class OptionsDialog(Dialog):
         from .common import show_fm_dialog
         self.save()
         self.close()
+        self.destroy()
         show_fm_dialog(self._parent)
 
     def show_about(self):

@@ -51,6 +51,7 @@ def show_fm_dialog(browser = None):
     if fm_dialog.exec_() == QDialog.Accepted:
         # update local services
         service_manager.update_services()
+    fm_dialog.destroy()
     # reshow options window
     show_options(browser)
 
@@ -65,6 +66,7 @@ def show_options(browser = None, model_id = -1, callback = None, *args, **kwargs
     if opt_dialog.exec_() == QDialog.Accepted:
         if isinstance(callback, types.FunctionType):
             callback(*args, **kwargs)
+    opt_dialog.destroy()
 
 
 def show_about_dialog(parent):
