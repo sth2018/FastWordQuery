@@ -36,8 +36,11 @@ __all__ = ['show_options', 'check_updates', 'show_fm_dialog', 'show_about_dialog
 def check_updates():
     '''check add-on last version'''
     try:
-        if not ankihub.update([Endpoint.check_version], False, Endpoint.version):
+        state = ankihub.update([Endpoint.check_version], False, Endpoint.version)
+        if state == 0:
             showInfo(_('LATEST_VERSION'))
+        elif state == -1:
+            showInfo(_('CHECK_FAILURE'))
     except:
         showInfo(_('CHECK_FAILURE'))
 

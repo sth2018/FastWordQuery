@@ -24,25 +24,6 @@ from .AnkiHub.markdown2 import markdown
 
 # taken from Anki's aqt/profiles.py
 def defaultBase():
-    '''
-    print(mw.pm.addonFolder())
-    if isWin:
-        loc = QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
-        return os.path.join(loc, "Anki")
-    elif isMac:
-        return os.path.expanduser("~/Documents/Anki")
-    else:
-        p = os.path.expanduser("~/Anki")
-        if os.path.exists(p):
-            return p
-        else:
-            loc = QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
-            if loc[:-1] == QDesktopServices.storageLocation(
-                    QDesktopServices.HomeLocation):
-                return os.path.expanduser("~/Documents/Anki")
-            else:
-                return os.path.join(loc, "Anki")
-    '''
     path = mw.pm.addonFolder()
     return os.path.dirname(os.path.abspath(path))
 
@@ -52,7 +33,8 @@ dataPath = os.path.join(defaultBase(),'.fastwq_2.1.x_ankihub.json')
 
 
 class DialogUpdates(QDialog, Ui_DialogUpdates):
-    def __init__(self, parent, data, oldData, callback, automaticAnswer=None,install=False):
+
+    def __init__(self, parent, data, oldData, callback, install=False):
         QDialog.__init__(self,parent)
         self.setModal(True)
         self.setWindowFlags(
@@ -62,32 +44,15 @@ class DialogUpdates(QDialog, Ui_DialogUpdates):
         self.setWindowIcon(APP_ICON)
         self.setupUi(self)
         totalSize = sum(map(lambda x:x['size'],data['assets']))
-        def answer(doUpdate,answ):
+        def answer():
             self.update.setEnabled(False)
-            #self.dont.setEnabled(False)
-            #self.always.setEnabled(False)
-            #self.never.setEnabled(False)
-            callback(doUpdate,answ,self.appendHtml,self.finish,install)
+            callback(self.appendHtml, self.finish, install)
 
         self.html = u''
         self.appendHtml(markdown(data['body']))
 
         #if not automaticAnswer:
-        self.update.clicked.connect(lambda:answer(True,'ask'))
-        #self.connect(self.update,SIGNAL('clicked()'),
-        #               lambda:answer(True,'ask'))
-            #self.connect(self.dont,SIGNAL('clicked()'),
-            #         lambda:answer(False,'ask'))
-            #self.connect(self.always,SIGNAL('clicked()'),
-            #         lambda:answer(True,'always'))
-            #self.connect(self.never,SIGNAL('clicked()'),
-            #         lambda:answer(False,'never'))
-        #else:
-            #self.update.setEnabled(False)
-            #self.dont.setEnabled(False)
-            #self.always.setEnabled(False)
-            #self.never.setEnabled(False)
-        #    answer(True,automaticAnswer)
+        self.update.clicked.connect(lambda:answer())
 
         fromVersion = ''
         if 'tag_name' in oldData:
@@ -97,7 +62,6 @@ class DialogUpdates(QDialog, Ui_DialogUpdates):
                 data['name'],
                 fromVersion,
                 data['tag_name']))
-
 
     def appendHtml(self,html='',temp=''):
         self.html += html
@@ -129,101 +93,77 @@ def installZipFile(data, fname):
         z.extract(n, base)
     return True
 
+
 def asset(a):
     return {
         'url': a['browser_download_url'],
         'size': a['size']
     }
 
-profileLoaded = True
-def _profileLoaded():
-    profileLoaded = True
 
-addHook("profileLoaded",_profileLoaded)
+def updateSingle(repositories, path, data):
+    def callback(appendHtml, onReady, install):
+        for asset in data['assets']:
+            code = asset['url']
+            p, fname = os.path.split(code)
+            appendHtml(temp='<br />Downloading {1}: {0}%<br/>'.format(0,fname))
+            urlthread = UrlThread(code)
+            urlthread.start()
+            urlthread.join()
+            response = urlthread.response#urllib2.urlopen(code)
+            meta = response.info()
+            file_size = int(meta.get("Content-Length"))
+            d = b''
+            dl = 0
+            i = 0
+            lastPercent = None
+            while True:
+                dkb = response.read(1024)
+                if not dkb:
+                    break
+                dl += len(dkb)
+                d += dkb
+                if dl*100/file_size>i:
+                    lastPercent = int(dl*100/file_size)
+                    i = lastPercent+1
+                    appendHtml(temp='<br />Downloading {1}: {0}%<br/>'.format(lastPercent,fname))
+                QApplication.instance().processEvents()
+            appendHtml('<br />Downloading {1}: 100%<br/>'.format(int(dl*100/file_size),fname))
+            appendHtml('Installing ...<br/>')
+            if not installZipFile(d, fname):
+                appendHtml('Corrupt file<br/>')
+            else:
+                repositories[path] = data
+                repositories[path]['update'] = 'ask'
+                with open(dataPath,'w') as f:
+                    json.dump(repositories,f,indent=2)
+                    f.close()
+                appendHtml('Done.<br/>Please restart Anki.<br/>')
+                onReady() # close the AnkiHub update window
 
-def updateSingle(repositories,path,data):
-    def callback(doUpdate,answer,appendHtml,onReady,install):
-        if doUpdate:
-            for asset in data['assets']:
-                code = asset['url']
-                p, fname = os.path.split(code)
-                response = urllib2.urlopen(code)
-                meta = response.info()
-                file_size = int(meta.get("Content-Length"))
-                d = b''
-                dl = 0
-                i = 0
-                lastPercent = None
-                while True:
-                    dkb = response.read(1024)
-                    if not dkb:
-                        break
-                    dl += len(dkb)
-                    d += dkb
-                    if dl*100/file_size>i:
-                        lastPercent = int(dl*100/file_size)
-                        i = lastPercent+1
-                        appendHtml(temp='<br />Downloading {1}: {0}%<br/>'.format(lastPercent,fname))
-                    QApplication.instance().processEvents()
-                appendHtml('<br />Downloading {1}: 100%<br/>'.format(int(dl*100/file_size),fname))
-                def installData():
-                    if install:
-                        filesBefore = aqt.mw.addonManager.files()
-                        #directoriesBefore = aqt.mw.addonManager.directories()
-                    appendHtml('Installing ...<br/>')
-                    if not installZipFile(d,fname):
-                        appendHtml('Corrupt file<br/>')
-                    else:
-                        repositories[path] = data
-                        repositories[path]['update'] = answer
-                        with open(dataPath,'w') as file:
-                            json.dump(repositories,file,indent=2)
-                            file.close()
-                        if install:
-                            appendHtml('Executing new scripts...<br/>')
-                            newFiles = set(aqt.mw.addonManager.files()) - set(filesBefore)
-                            #newDirectories = set(aqt.mw.addonManager.directories()) - set(directoriesBefore)
-                            for file in newFiles:
-                                try:
-                                    __import__(file.replace(".py", ""))
-                                except:
-                                    traceback.print_exc()
-                            #for directory in newDirectories:
-                            #    try:
-                            #        __import__(directory)
-                            #    except:
-                            #        traceback.print_exc()
-                            aqt.mw.addonManager.rebuildAddonsMenu()
-                            appendHtml('Done.<br/>')
-                            onReady() # close the AnkiHub update window       
-                        else:
-                            appendHtml('Done.<br/>Please restart Anki.<br/>')
-                            onReady() # close the AnkiHub update window
-                        
-                installData()
-        else:
-            repositories[path]['update'] = answer
-            with open(dataPath,'w') as file:
-                json.dump(repositories,file,indent=2)
-                file.close()
-            onReady()
     return callback
 
-datas = []
 
-def update(add=[],install=False, VERSION='v0.0.0'):
+def update(add=[], install=False, VERSION='v0.0.0'):
+    # progress win
+    progresswin = QProgressDialog('Update Checking...', 'FastWQ - Updater', 0, 0, mw)
+    progresswin.setWindowModality(Qt.ApplicationModal)
+    progresswin.setCancelButton(None)
+    progresswin.setWindowFlags(
+        progresswin.windowFlags() &
+        ~Qt.WindowContextHelpButtonHint
+    )
+    progresswin.setWindowIcon(APP_ICON)
+    progresswin.resize(280, 60)
+    progresswin.show()
+    #
     conn = httplib.HTTPSConnection("api.github.com")
     try:
-        with open(dataPath,'r') as file:
-            repositories = json.load(file)
-            file.close()
+        with open(dataPath,'r') as f:
+            repositories = json.load(f)
+            f.close()
     except:
         repositories = {}
-        #    'dayjaby/AnkiHub': {
-        #        'id': 4089471,
-        #        'update': 'ask'
-        #    }
-        #}
         
     for a in add:
         if a not in repositories:
@@ -232,95 +172,115 @@ def update(add=[],install=False, VERSION='v0.0.0'):
                 'update': 'ask'
             }
 
-    ret = False
     for path,repository in repositories.items():
         username,repositoryName = path.split('/')
-        if repository['update'] != 'never':
-            try:
-                url = "https://api.github.com/repos/{0}/releases/latest".format(path)
-                responseData = urllib2.urlopen(url, timeout=10).read()
-                release = json.loads(responseData)
-                datas.append(responseData)
-            except Exception as e:
-                datas.append(e)
-                release = {}
+        try:
+            urlthread = UrlThread("https://api.github.com/repos/{0}/releases/latest".format(path))
+            urlthread.start()
+            urlthread.join()
+            release = json.loads(urlthread.response.read())
+        except Exception as e:
+            release = {}
 
-            if 'id' in release:
-                if release['id'] != repository['id']:
-                    data = {
-                        'id': release['id'],
-                        'name': repositoryName,
-                        'tag_name': release['tag_name'],
-                        'body': '### {0}\n'.format(release['name']) + release['body'],
-                        'assets': [asset(release['assets'][1])],#map(asset,release['assets']),
-                        'update': 'ask'
-                    }
-                    if 'tag_name' in repository:
-                        oldVersion = map(int,repository['tag_name'][1:].split('.'))
-                        oldVersion = [x for x in oldVersion]
-                        while len(oldVersion)<3:
-                            oldVersion.append(0)
-                    else:
-                        oldVersion = map(int,VERSION[1:].split('.'))#[0,0,0]
-                        oldVersion = [x for x in oldVersion]
-                    newVersion = map(int,data['tag_name'][1:].split('.'))
-                    newVersion = [x for x in newVersion]
-                    isMinor = len(newVersion)>2 and newVersion[2]>0
-                    while len(newVersion)<3:
-                        newVersion.append(0)
-                    i = oldVersion[2]+1
-                    if oldVersion[0]<newVersion[0] or oldVersion[1]<newVersion[1]:
-                        if isMinor:
-                            i = 1
-                    while i<newVersion[2]:
+        if 'id' in release:
+            if release['id'] != repository['id']:
+                data = {
+                    'id': release['id'],
+                    'name': repositoryName,
+                    'tag_name': release['tag_name'],
+                    'body': '### {0}\n'.format(release['name']) + release['body'],
+                    'assets': [asset(release['assets'][1])],
+                    'update': 'ask'
+                }
+                if 'tag_name' in repository:
+                    oldVersion = map(int,repository['tag_name'][1:].split('.'))
+                    oldVersion = [x for x in oldVersion]
+                    while len(oldVersion)<3:
+                        oldVersion.append(0)
+                else:
+                    oldVersion = map(int,VERSION[1:].split('.'))#[0,0,0]
+                    oldVersion = [x for x in oldVersion]
+                newVersion = map(int,data['tag_name'][1:].split('.'))
+                newVersion = [x for x in newVersion]
+                isMinor = len(newVersion)>2 and newVersion[2]>0
+                while len(newVersion)<3:
+                    newVersion.append(0)
+                i = oldVersion[2]+1
+                if oldVersion[0]<newVersion[0] or oldVersion[1]<newVersion[1]:
+                    if isMinor:
+                        i = 1
+                while i<newVersion[2]:
+                    if progresswin.wasCanceled():
+                        break
+                    try:
+                        minorTagName = 'v{0}.{1}.{2}'.format(newVersion[0],oldVersion[1],i)
+                        urlthread = UrlThread("https://api.github.com/repos/{0}/releases/tags/{1}".format(path,minorTagName))
+                        urlthread.start()
+                        urlthread.join()
+                        responseData = urlthread.response.read()
+                        minor = json.loads(responseData)
+                        data['body'] += '\n\n### {0}\n'.format(minor['name']) + minor['body']
+                    except:
+                        pass
+                    i += 1
+                if oldVersion[0]<newVersion[0] or oldVersion[1]<newVersion[1]:
+                    # new major release necessary!
+                    # if the newest version is minor, fetch the additional assets from the major
+                    if isMinor and not progresswin.wasCanceled(): 
                         try:
-                            minorTagName = 'v{0}.{1}.{2}'.format(newVersion[0],oldVersion[1],i)
-                            response = urllib2.urlopen("https://api.github.com/repos/{0}/releases/tags/{1}".format(path,minorTagName))
-                            responseData = response.read()
-                            minor = json.loads(responseData)
-                            data['body'] += '\n\n### {0}\n'.format(minor['name']) + minor['body']
-                            #data['assets'] += map(asset,minor['assets'])
-                        except:
-                            pass
-                    
-                        i += 1
-                    if oldVersion[0]<newVersion[0] or oldVersion[1]<newVersion[1]:
-                        # new major release necessary!
-                        if isMinor: # if the newest version is minor, fetch the additional assets from the major
                             majorTagName = 'v{0}.{1}'.format(newVersion[0],newVersion[1])
-                            try:
-                                response = urllib2.urlopen("https://api.github.com/repos/{0}/releases/tags/{1}".format(path,majorTagName))
-                            except:
-                                response = urllib2.urlopen("https://api.github.com/repos/{0}/releases/tags/{1}.0".format(path,majorTagName))
-                            responseData = response.read()
+                            urlthread = UrlThread(
+                                "https://api.github.com/repos/{0}/releases/tags/{1}".format(path,majorTagName),
+                                "https://api.github.com/repos/{0}/releases/tags/{1}.0".format(path,majorTagName)
+                            )
+                            urlthread.start()
+                            urlthread.join()
+                            responseData = urlthread.response.read()
                             major = json.loads(responseData)
                             data['body'] += '\n\n### {0}\n'.format(major['name']) + major['body']
-                            #data['assets'] += map(asset,major['assets'])
-                        
-                    if repository['update'] == 'always':
-                        dialog = DialogUpdates(None,data,repository,updateSingle(repositories,path,data),'always')
-                    elif install:
-                        dialog = DialogUpdates(None,data,repository,updateSingle(repositories,path,data),'ask',install=True)
-                    else:
-                        dialog = DialogUpdates(None,data,repository,updateSingle(repositories,path,data))
+                        except:
+                            pass
+                
+                if not progresswin.wasCanceled():
+                    progresswin.hide()
+                    progresswin.destroy()
+                    dialog = DialogUpdates(None, data, repository, updateSingle(repositories, path, data))
                     dialog.exec_()
-                    ret = True
+                    dialog.destroy()
+                else:
+                    progresswin.hide()
+                    progresswin.destroy()
+                return 1
+            else:
+                progresswin.hide()
+                progresswin.destroy()
+                return 0
+    progresswin.hide()
+    progresswin.destroy()
+    return -1
+
+
+class UrlThread(QThread):
+
+    def __init__(self, url, backurl=None):
+        super(UrlThread, self).__init__()
+        self.response = None
+        self.url = url
+        self.backurl = backurl
+        self.finished = False
     
-    with open(dataPath,'w') as file:
-        json.dump(repositories,file,indent=2)
-        file.close()
-    return ret
+    def run(self):
+        try:
+            self.response = urllib2.urlopen(self.url)
+        except:
+            if self.backurl:
+                try:
+                    self.response = urllib2.urlopen(self.backurl)
+                except:
+                    pass
+        self.finished = True
 
-#update()
-
-#def addRepository():
-#    repo, ok = QInputDialog.getText(aqt.mw,'Add GitHub repository',
-#                                          'Path:',text='<name>/<repository>')
-#    if repo and ok:
-#        update([repo],install=True)
-#
-#firstAction = aqt.mw.form.menuPlugins.actions()[0]
-#action = QAction('From GitHub', aqt.mw)
-#action.setIconVisibleInMenu(True)
-#action.triggered.connect(addRepository)
-#aqt.mw.form.menuPlugins.insertAction(firstAction,action)
+    def join(self):
+        while not self.finished:
+            QApplication.instance().processEvents()
+            self.wait(30)
