@@ -48,7 +48,7 @@ def defaultBase():
 
 
 headers = {"User-Agent": "AnkiHub"}
-dataPath = os.path.join(defaultBase(),'.fastwq.ankihub.json')
+dataPath = os.path.join(defaultBase(),'.fastwq_2.1.x_ankihub.json')
 
 
 class DialogUpdates(QDialog, Ui_DialogUpdates):

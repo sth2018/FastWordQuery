@@ -112,4 +112,4 @@ User*/
 *.pyc
 release*.zip
 README.txt
-.fastwq.ankihub.json
+.fastwq_*_ankihub.json
