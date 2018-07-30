@@ -1,19 +1,25 @@
-from PyQt4 import QtCore,QtGui
-import httplib
-import urllib2
+try:
+    import httplib
+except:
+    import http.client as httplib
+try:
+    import urllib2
+except:
+    import urllib.request as urllib2
 import json
 import os
 import sys
 import zipfile
 import traceback
 import io
-from AnkiHub.updates import Ui_DialogUpdates
-from AnkiHub.markdown2 import markdown
 import aqt
 from aqt import mw
+from aqt.qt import *
 from anki.hooks import addHook
 from anki.utils import isMac, isWin
 from ..context import APP_ICON
+from .AnkiHub.updates import Ui_DialogUpdates
+from .AnkiHub.markdown2 import markdown
 
 
 # taken from Anki's aqt/profiles.py
@@ -21,7 +27,7 @@ def defaultBase():
     '''
     print(mw.pm.addonFolder())
     if isWin:
-        loc = QtGui.QDesktopServices.storageLocation(QtGui.QDesktopServices.DocumentsLocation)
+        loc = QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
         return os.path.join(loc, "Anki")
     elif isMac:
         return os.path.expanduser("~/Documents/Anki")
@@ -30,9 +36,9 @@ def defaultBase():
         if os.path.exists(p):
             return p
         else:
-            loc = QtGui.QDesktopServices.storageLocation(QtGui.QDesktopServices.DocumentsLocation)
-            if loc[:-1] == QtGui.QDesktopServices.storageLocation(
-                    QtGui.QDesktopServices.HomeLocation):
+            loc = QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
+            if loc[:-1] == QDesktopServices.storageLocation(
+                    QDesktopServices.HomeLocation):
                 return os.path.expanduser("~/Documents/Anki")
             else:
                 return os.path.join(loc, "Anki")
@@ -45,13 +51,13 @@ headers = {"User-Agent": "AnkiHub"}
 dataPath = os.path.join(defaultBase(),'.fastwq.ankihub.json')
 
 
-class DialogUpdates(QtGui.QDialog, Ui_DialogUpdates):
+class DialogUpdates(QDialog, Ui_DialogUpdates):
     def __init__(self, parent, data, oldData, callback, automaticAnswer=None,install=False):
-        QtGui.QDialog.__init__(self,parent)
+        QDialog.__init__(self,parent)
         self.setModal(True)
         self.setWindowFlags(
             self.windowFlags() &
-            ~QtCore.Qt.WindowContextHelpButtonHint
+            ~Qt.WindowContextHelpButtonHint
         )
         self.setWindowIcon(APP_ICON)
         self.setupUi(self)
@@ -67,13 +73,14 @@ class DialogUpdates(QtGui.QDialog, Ui_DialogUpdates):
         self.appendHtml(markdown(data['body']))
 
         #if not automaticAnswer:
-        self.connect(self.update,QtCore.SIGNAL('clicked()'),
-                        lambda:answer(True,'ask'))
-            #self.connect(self.dont,QtCore.SIGNAL('clicked()'),
+        self.update.clicked.connect(lambda:answer(True,'ask'))
+        #self.connect(self.update,SIGNAL('clicked()'),
+        #               lambda:answer(True,'ask'))
+            #self.connect(self.dont,SIGNAL('clicked()'),
             #         lambda:answer(False,'ask'))
-            #self.connect(self.always,QtCore.SIGNAL('clicked()'),
+            #self.connect(self.always,SIGNAL('clicked()'),
             #         lambda:answer(True,'always'))
-            #self.connect(self.never,QtCore.SIGNAL('clicked()'),
+            #self.connect(self.never,SIGNAL('clicked()'),
             #         lambda:answer(False,'never'))
         #else:
             #self.update.setEnabled(False)
@@ -86,7 +93,7 @@ class DialogUpdates(QtGui.QDialog, Ui_DialogUpdates):
         if 'tag_name' in oldData:
             fromVersion = u'from {0} '.format(oldData['tag_name'])
         self.labelUpdates.setText(
-            unicode(self.labelUpdates.text()).format(
+            str(self.labelUpdates.text()).format(
                 data['name'],
                 fromVersion,
                 data['tag_name']))
@@ -157,7 +164,7 @@ def updateSingle(repositories,path,data):
                         lastPercent = int(dl*100/file_size)
                         i = lastPercent+1
                         appendHtml(temp='<br />Downloading {1}: {0}%<br/>'.format(lastPercent,fname))
-                    QtGui.QApplication.instance().processEvents()
+                    QApplication.instance().processEvents()
                 appendHtml('<br />Downloading {1}: 100%<br/>'.format(int(dl*100/file_size),fname))
                 def installData():
                     if install:
@@ -245,16 +252,19 @@ def update(add=[],install=False, VERSION='v0.0.0'):
                         'name': repositoryName,
                         'tag_name': release['tag_name'],
                         'body': '### {0}\n'.format(release['name']) + release['body'],
-                        'assets': map(asset,release['assets']),
+                        'assets': [asset(release['assets'][1])],#map(asset,release['assets']),
                         'update': 'ask'
                     }
                     if 'tag_name' in repository:
                         oldVersion = map(int,repository['tag_name'][1:].split('.'))
+                        oldVersion = [x for x in oldVersion]
                         while len(oldVersion)<3:
                             oldVersion.append(0)
                     else:
                         oldVersion = map(int,VERSION[1:].split('.'))#[0,0,0]
+                        oldVersion = [x for x in oldVersion]
                     newVersion = map(int,data['tag_name'][1:].split('.'))
+                    newVersion = [x for x in newVersion]
                     isMinor = len(newVersion)>2 and newVersion[2]>0
                     while len(newVersion)<3:
                         newVersion.append(0)
@@ -304,13 +314,13 @@ def update(add=[],install=False, VERSION='v0.0.0'):
 #update()
 
 #def addRepository():
-#    repo, ok = QtGui.QInputDialog.getText(aqt.mw,'Add GitHub repository',
+#    repo, ok = QInputDialog.getText(aqt.mw,'Add GitHub repository',
 #                                          'Path:',text='<name>/<repository>')
 #    if repo and ok:
 #        update([repo],install=True)
 #
 #firstAction = aqt.mw.form.menuPlugins.actions()[0]
-#action = QtGui.QAction('From GitHub', aqt.mw)
+#action = QAction('From GitHub', aqt.mw)
 #action.setIconVisibleInMenu(True)
 #action.triggered.connect(addRepository)
 #aqt.mw.form.menuPlugins.insertAction(firstAction,action)

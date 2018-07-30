@@ -1,0 +1,733 @@
+.entry {
+    line-height: 150%;
+    color: black;
+    display: block;
+}
+.abbr {
+    font-weight: bold;
+}
+.ac,.ac {
+    padding-left: 2px;
+    padding-right: 2px;
+    border-radius: 2px 2px 2px 2px;
+    border-style: solid;
+    border-width: 1px;
+    font-variant: small-caps;
+    font-size: 80%;
+    font-weight: bold;
+    color: blue;
+}
+.amequiv {
+    font-weight: bold;
+}
+.brequiv {
+    font-weight: bold;
+}
+.collo {
+    font-weight: bold;
+}
+.colloexa {
+    display: block;
+}
+.colloinexa {
+    font-style: italic;
+    font-weight: bold;
+}
+.comp {
+    font-weight: bold;
+}
+.deriv {
+    font-weight: bold;
+    color: blue;
+}
+.errorbox {
+    display: block;
+}
+.etymsense {
+    display: block;
+}
+.etymrefhwd {
+    font-style: italic;
+}
+.etymrefhom {
+    font-size: 80%;
+    vertical-align: super;
+    font-style: normal;
+}
+.etymorigin {
+    font-style: italic;
+}
+.etymtran {
+    font-weight: bold;
+}
+.etymbox {
+    margin-top: 1em;
+    display: block;
+}
+.example {
+    font-style: italic;
+    display: block;
+    color: blue;
+}
+.freq,.freq {
+    padding-left: 2px;
+    padding-right: 2px;
+    border-radius: 2px 2px 2px 2px;
+    border-style: solid;
+    border-width: 1px;
+    font-variant: small-caps;
+    font-size: 80%;
+    font-weight: bold;
+    color: red;
+}
+.level {
+    color: red;
+    font-size: 160%;
+}
+.fullform {
+    font-weight: bold;
+}
+.geo,span.geo {
+    font-weight: normal;
+    font-style: italic;
+    color: purple;
+}
+.gloss,.collgloss {
+    font-weight: normal;
+    font-style: normal;
+    color: black;
+}
+.gram {
+    color: green;
+}
+.hintbold {
+    font-weight: bold;
+}
+.hintitalic {
+    font-style: italic;
+}
+hinttitle {
+    font-weight: bold;
+}
+.homnum {
+    vertical-align: super;
+    font-size: 8pt;
+    color: blue;
+    font-weight: bold;
+}
+.hwd {
+    display: none;
+}
+.hyphenation {
+    font-weight: bold;
+    font-size: 120%;
+    color: blue;
+}
+.frequent {
+    color: red;
+}
+.lexunit {
+    font-weight: bold;
+}
+.lexvar {
+    font-weight: bold;
+}
+.linkword {
+    font-style: italic;
+}
+note {
+    display: block;
+}
+object {
+    font-weight: normal;
+}
+.opp {
+    font-weight: bold;
+}
+.orthvar {
+    font-weight: bold;
+}
+.pastpart {
+    font-weight: bold;
+}
+pastpartx {
+    font-weight: bold;
+}
+.pasttense {
+    font-weight: bold;
+}
+pasttensex {
+    font-weight: bold;
+}
+.phrvbentry {
+    display: block;
+    margin-top: 10px;
+    margin-left: 10px;
+}
+.phrvbhwd {
+    font-weight: bold;
+    color: blue;
+}
+.pluralform {
+    font-weight: bold;
+}
+.pos {
+    font-style: italic;
+    color: green;
+    font-weight: normal;
+}
+.prespart {
+    font-weight: bold;
+}
+prespartx {
+    font-weight: bold;
+}
+.propform {
+    font-weight: bold;
+    display: block;
+}
+.propformprep {
+    font-weight: bold;
+    display: block;
+}
+.ptandpp {
+    font-weight: bold;
+}
+ptandppx {
+    font-weight: bold;
+}
+.refhomnum {
+    vertical-align: super;
+    font-size: 60%;
+}
+.refhwd,.refsensenum,refsense {
+    font-style: normal;
+    font-variant: small-caps;
+    text-transform: lowercase;
+}
+.refsensenum {
+    font-size: 80%;
+}
+crossrefto .reflex {
+    display: none;
+}
+.reflex {
+    font-weight: bold;
+}
+.registerlab {
+    font-style: italic;
+    color: purple;
+}
+.relatedwd {
+    font-weight: bold;
+}
+.runon {
+    display: block;
+    margin-top: 8px;
+}
+.sense {
+    display: block;
+    margin-bottom: 14px;
+    margin-top: 6px;
+}
+.signpost {
+    color: white;
+    background-color: #35A3FF;
+    margin-left: .5em;
+    font-weight: bold;
+    font-variant: small-caps;
+    text-transform: uppercase;
+    font-size: 80%;
+    padding: 1px 2px 1px 1px;
+}
+.spokensect {
+    border-top: solid;
+    border-bottom: solid;
+    border-width: 2px;
+    display: block;
+    margin-bottom: 1ex;
+    clear: both;
+    margin-top: 1ex;
+    border-color: #00A2E8;
+    padding: 3px;
+}
+.spokensecthead {
+    display: block;
+    color: #00A2E8;
+    font-weight: bold;
+}
+.pronstrong {
+    font-style: italic;
+}
+.subsense {
+    display: block;
+}
+.superl {
+    font-weight: bold;
+}
+.syn {
+    font-weight: bold;
+}
+.t3perssing {
+    font-weight: bold;
+}
+t3perssingx {
+    font-weight: bold;
+}
+unclassified {
+    font-weight: bold;
+}
+span.neutral {
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    color: black;
+    text-decoration: none;
+}
+.cross {
+    color: red;
+    font-weight: bold;
+}
+span.italic {
+    color: black;
+    font-style: italic;
+    font-weight: normal;
+}
+.badexa {
+    text-decoration: line-through;
+    font-style: italic;
+}
+.hint .expl {
+    display: inline;
+}
+span.infllab {
+    font-style: italic;
+    font-weight: normal;
+}
+span.warning {
+    font-style: normal;
+    font-weight: bold;
+    color: red;
+}
+span.sensenum {
+    font-style: normal;
+    font-weight: bold;
+    margin-right: 3px;
+    color: blue;
+}
+span.synopp {
+    padding-left: 3px;
+    padding-right: 3px;
+    border-radius: 2px 2px 2px 2px;
+    border-style: solid;
+    border-width: 1px;
+    font-variant: small-caps;
+    font-size: 80%;
+    font-weight: bold;
+    color: blue;
+}
+.subheading,.secheading {
+    display: block;
+    font-weight: bold;
+    font-weight: bold;
+    color: white;
+    background-color: #8187BF;
+    margin-left: -3px;
+    margin-right: -3px;
+    font-variant: small-caps;
+    padding-left: 3px;
+}
+.collocate,.exponent {
+    display: block;
+    padding-bottom: 5px;
+    margin-top: 5px;
+}
+.collocate.inline {
+    display: inline;
+}
+.expl {
+    display: block;
+    padding: 0 3px;
+}
+.colloc {
+    font-weight: bold;
+}
+.exp {
+    font-weight: bold;
+}
+.expr {
+    font-weight: bold;
+}
+.colloc.key {
+    color: blue;
+}
+span.keycollo {
+    font-weight: bold;
+    color: blue;
+}
+.thespropform {
+    font-weight: bold;
+}
+collexa {
+    font-style: italic;
+}
+collexa .colloinexa {
+    font-weight: normal;
+}
+thesexa {
+    font-style: italic;
+}
+learneritem {
+    display: block;
+}
+.goodcollo {
+    font-weight: bold;
+}
+.badcollo {
+    text-decoration: line-through;
+}
+.defbold {
+    font-weight: bold;
+}
+topic {
+    font-variant: small-caps;
+    color: blue;
+}
+.thesref.newline {
+    display: block;
+}
+.heading.newline {
+    display: block;
+}
+.thesref span.thesaurus {
+    color: blue;
+    font-variant: small-caps;
+}
+.thesref .refhwd,.thesref .refhomnum {
+    color: blue;
+    font-weight: bold;
+}
+i {
+    font-style: italic;
+}
+.imgholder {
+    cursor: pointer;
+    /*float: right;*/
+    display: block;
+    margin-bottom: 1ex;
+    padding: 2px;
+    clear: both}
+.imgholder img {
+    border: 1px solid #DDD;
+}
+.buttons {
+    display: block;
+}
+.popup-button {
+    background-color: #f0f2fc;
+    border-radius: 2px;
+    border: 1px solid #7e92c7;
+    color: #7e92c7;
+    text-transform: uppercase;
+    font-size: 66%;
+    padding: 2px 3px;
+    text-decoration: none;
+}
+.popup-button-hover {
+    background-color: #dfe3f8;
+    cursor: pointer;
+}
+.popverbs {
+    display: block;
+    color: white;
+    font-weight: bold;
+    background-color: #ec008d;
+    padding-left: 3px;
+    margin-bottom: 5px;
+}
+.verbtable .lemma {
+    color: blue;
+    font-size: 120%;
+    font-weight: bold;
+}
+.verbtable table {
+    border-collapse: separate;
+    border-spacing: 1px;
+    margin-top: 10px;
+}
+.verbtable td {
+    padding: 0 5px 0 2px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #D2D2D2;
+}
+.header {
+    font-weight: bold;
+    font-variant: small-caps;
+}
+.verbtable td.col1 {
+    font-weight: bold;
+}
+.verbtable td.col2 {
+    font-style: italic;
+}
+.verbtable .geo {
+    font-style: italic;
+    color: #000;
+    font-size: normal;
+    font-weight: normal;
+}
+.verbtable .aux {
+    font-weight: bold;
+}
+.verbtable .verb_form {
+    color: blue;
+    font-weight: bold;
+}
+.collocations .last {
+    margin-bottom: 20px;
+}
+.collocations .colloc {
+    display: inline-block;
+    font-weight: bold;
+    margin-left: -2px;
+}
+.collobox,.thesbox,.usagebox,.grambox,spoken,.f2nbox {
+    border-radius: 9px 9px 9px 9px;
+    border-style: solid;
+    border-width: 2px;
+    display: block;
+    margin-bottom: 1ex;
+    clear: both;
+    margin-top: 1ex;
+}
+.f2nbox {
+    border-color: #00A2E8;
+}
+.f2nbox .heading {
+    color: #00A2E8;
+}
+.heading {
+    color: white;
+    font-weight: bold;
+    line-height: 100%;
+    padding: 3px;
+}
+.section {
+    display: block;
+    padding: 0 3px;
+}
+.last {
+    border-bottom-left-radius: 9px;
+    border-bottom-right-radius: 9px;
+}
+.thesbox {
+    background-color: #652D91;
+    border-color: #652D91;
+}
+.thesbox .section {
+    background-color: #E8E2F0;
+}
+.collobox {
+    background-color: #1D3E99;
+    border-color: #1D3E99;
+}
+.collobox .section {
+    background-color: #E2F4FD;
+}
+.usagebox {
+    background-color: #00A2E8;
+    border-color: #00A2E8;
+}
+.usagebox .expl {
+    background-color: #E2F4FD;
+}
+.grambox {
+    background-color: #00ADEE;
+    border-color: #00ADEE;
+}
+.grambox .expl,.grambox .compareword {
+    background-color: #E2F4FD;
+    display: block;
+    padding-left: 3px;
+}
+.compareword {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+.gramrefcont {
+    display: block;
+    text-transform: lowercase;
+    font-variant: small-caps;
+    padding-left: 3px;
+    padding-bottom: 1px;
+}
+.thesaurus .sense {
+    padding-left: 3px;
+    padding-right: 3px;
+    margin-top: 0;
+}
+.thesaurus .section,.collocations .section {
+    margin-bottom: 10px;
+}
+.thesaurus .secheading,.thesbox .secheading {
+    background-color: #A186BD;
+}
+.add_exa {
+    font-style: italic;
+    display: block;
+}
+.nodeword {
+    color: blue;
+    font-weight: bold;
+}
+.phrase {
+    display: block;
+}
+.phrasetext {
+    font-weight: bold;
+}
+.expandable {
+    cursor: pointer;
+}
+.entry div.content {
+    display: none;
+    margin-bottom: 10px;
+}
+.group,.w {
+    display: block;
+}
+.group .pos {
+    font-weight: bold;
+    display: block;
+}
+.item {
+    display: block;
+}
+.w {
+    font-weight: bold;
+}
+.popheader {
+    display: block;
+    color: white;
+    font-weight: bold;
+    padding-left: 3px;
+}
+.popheader.popexa {
+    background-color: red;
+}
+.popheader.popphrase {
+    background-color: purple;
+}
+.popheader.popcollo {
+    background-color: #1D3E99;
+}
+.popheader.popthes {
+    background-color: #652D91;
+}
+.popheader.popetym {
+    background-color: green;
+}
+.popheader.popwf {
+    background-color: #FFD448;
+}
+.popheader.pope_menu {
+    background-color: #57C0E0;
+}
+.ws-head {
+    font-weight: bold;
+    color: blue;
+    font-size: larger;
+}
+.ws-head.ref {
+    display: block;
+    margin-top: 10px;
+}
+.wswd {
+    font-weight: bold;
+    display: block;
+}
+.cyan {
+    color: #00A2E8;
+    font-size: larger;
+}
+.menuitem {
+    display: block;
+}
+ul.exas li {
+    font-style: italic;
+    color: blue;
+    margin-bottom: 3px;
+}
+.grammar {
+    display: block;
+}
+.str {
+    font-size: large;
+    font-weight: bold;
+}
+.etymology {
+    margin-top: 10px;
+}
+.group {
+    margin-top: 10px;
+}
+.menuitem .signpost {
+    background-color: #FFF;
+    color: black;
+    margin-left: 0;
+    font-size: 90%;
+}
+.phrvbs {
+    display: block;
+    margin-top: 10px;
+    margin-left: 5px;
+}
+.phrvbs .heading {
+    display: block;
+    color: blue;
+    font-weight: bold;
+}
+.phrv {
+    font-weight: bold;
+}
+.secheading,.subheading {
+    font-variant: normal;
+    text-transform: uppercase;
+}
+.secheading.no_convert {
+    text-transform: none;
+}
+.grambox .heading.newline {
+    background-color: #6CD0F6;
+}
+img[src*="img/spkr_"] {
+    margin-bottom: -5px;
+}
+.chwd {
+    margin-top: 10px;
+    margin-left: 8px;
+    margin-right: 8px;
+}
+.chwd a {
+    display: inline-block;
+    background-color: green;
+    color: white;
+    padding-top: 2px;
+    padding-bottom: 3px;
+    padding-left: 5px;
+    padding-right: 5px;
+    margin-right: 3px;
+    margin-bottom: 3px;
+    text-decoration: none;
+    font-size: 80%;
+    border-radius: 2px;
+}
+.chwd .hw {
+    color: white;
+}
+.entry, .entry.lozenge, .verbtable {
+    margin-top: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+}

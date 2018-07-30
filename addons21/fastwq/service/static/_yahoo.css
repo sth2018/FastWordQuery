@@ -1,0 +1,85 @@
+#results #left #web .dd, #results #right .cardReg .dd {
+    margin-left: 3px;
+    margin-right: 3px;
+    margin-bottom: 6px;
+}
+
+div {
+    display: block;
+}
+
+li {
+    display: list-item;
+    list-style: none;
+    text-align: -webkit-match-parent;
+}
+
+menu, ol, ul {
+    padding: 0;
+    list-style: none;
+    list-style-position: outside;
+}
+
+ol {
+    display: block;
+    list-style: none;
+    list-style-type: decimal;
+}
+
+dl, menu, ol, ul, dd, p {
+    margin: 0;
+}
+
+ul, menu, dir {
+    display: block;
+    list-style-type: disc;
+}
+
+.dd .mr-25 {
+    margin-right: 25px;
+}
+
+.mb-12, .mb-12 {
+    margin-bottom: 12px;
+}
+
+.mt-12, .mt-12 {
+    margin-top: 12px;
+}
+
+.lh-22 {
+    line-height: 22px;
+}
+
+.mh-22 {
+    min-height: 22px;
+}
+
+.dd .mr-12 {
+    margin-right: 12px;
+}
+
+.dd .fz-14, .fz-14 {
+    font-size: 14px;
+}
+
+.dd .fz-16, .fz-16 {
+    font-size: 16px;
+}
+
+.dd .fl-l, .fl-l {
+    float: left;
+}
+
+.cardDesign .tabs-pos_type, .cardDesign .pos_button {
+    display: inline-block;
+    vertical-align: middle;
+    min-width: 36px;
+    height: 22px;
+    line-height: 22px;
+    border-radius: 2px;
+    background-color: #006cb7;
+    text-align: center;
+    color: #fff;
+    padding: 0 2px 0 2px;
+}

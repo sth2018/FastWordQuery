@@ -104,13 +104,12 @@ venv.bak/
 .mypy_cache/
 
 
-prefs.db
-User 1/
-用户1/
-addons/
+prefs*.db
+User*/
+用户*/
 .vscode/
 .pylintrc
 *.pyc
-release.zip
+release*.zip
 README.txt
 .fastwq.ankihub.json
