@@ -109,7 +109,7 @@ class DialogUpdates(QDialog, Ui_DialogUpdates):
 
 
 def installZipFile(data, fname):
-    base = mw.pm.addonFolder()#os.path.join(defaultBase(),'addons')
+    base = os.path.join(mw.pm.addonFolder(), 'fastwq')
     if fname.endswith(".py"):
         path = os.path.join(base, fname)
         with open(path, "wb") as file:
@@ -149,8 +149,8 @@ def updateSingle(repositories,path,data):
                 p, fname = os.path.split(code)
                 response = urllib2.urlopen(code)
                 meta = response.info()
-                file_size = int(meta.getheaders("Content-Length")[0])
-                d = buffer('')
+                file_size = int(meta.get("Content-Length"))
+                d = b''
                 dl = 0
                 i = 0
                 lastPercent = None
