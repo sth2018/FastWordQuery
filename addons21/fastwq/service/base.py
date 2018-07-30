@@ -241,7 +241,8 @@ class Service(object):
 
     @property
     def quote_word(self):
-        return urllib2.quote(self.word)
+        word = re.sub(r'</?\w+[^>]*>', '', self.word)
+        return urllib2.quote(word)
     
     @unique.setter
     def unique(self, value):

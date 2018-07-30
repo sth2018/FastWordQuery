@@ -238,9 +238,10 @@ class Service(object):
     
     @property
     def quote_word(self):
+        word = re.sub(r'</?\w+[^>]*>', '', self.word)
         return urllib2.quote(
-            self.word.encode('utf-8') if isinstance(self.word, unicode)
-            else self.word
+            word.encode('utf-8') if isinstance(word, unicode)
+            else word
         )
 
     @property
