@@ -53,7 +53,7 @@ class Ui_DialogUpdates(object):
         QMetaObject.connectSlotsByName(DialogUpdates)
 
     def retranslateUi(self, DialogUpdates):
-        DialogUpdates.setWindowTitle(_translate("DialogUpdates", "FastWQ - Update Checker", None))
+        DialogUpdates.setWindowTitle(_translate("DialogUpdates", "FastWQ - Updater", None))
         self.labelUpdates.setText(_translate("DialogUpdates", "<html><head/><body><p>A new version of {0} is available for download! </p><p>Do you want to update {1}to version {2}?</p><p>Changes from your version are listed below:</p></body></html>", None))
         #self.always.setText(_translate("DialogUpdates", "Always update", None))
         self.update.setText(_translate("DialogUpdates", "Update", None))

@@ -15,12 +15,12 @@ import io
 import aqt
 from aqt import mw
 from aqt.qt import *
+from aqt.utils import showInfo
 from anki.hooks import addHook
 from anki.utils import isMac, isWin
 from ..context import APP_ICON
 from .AnkiHub.updates import Ui_DialogUpdates
 from .AnkiHub.markdown2 import markdown
-
 
 # taken from Anki's aqt/profiles.py
 def defaultBase():
@@ -69,6 +69,9 @@ class DialogUpdates(QDialog, Ui_DialogUpdates):
         self.textBrowser.scrollToAnchor('text_bottom') 
 
     def finish(self):
+        self.hide()
+        self.destroy()
+        showInfo('Updated. Please restart Anki.')
         pass
 
 
@@ -138,7 +141,7 @@ def updateSingle(repositories, path, data):
                 with open(dataPath,'w') as f:
                     json.dump(repositories,f,indent=2)
                     f.close()
-                appendHtml('Done.<br/>Please restart Anki.<br/>')
+                appendHtml('Done.<br/>')
                 onReady() # close the AnkiHub update window
 
     return callback
@@ -146,7 +149,7 @@ def updateSingle(repositories, path, data):
 
 def update(add=[], install=False, VERSION='v0.0.0'):
     # progress win
-    progresswin = QProgressDialog('Update Checking...', 'FastWQ - Updater', 0, 0, mw)
+    progresswin = QProgressDialog('Update Checking...', '', 0, 0, mw)
     progresswin.setWindowModality(Qt.ApplicationModal)
     progresswin.setCancelButton(None)
     progresswin.setWindowFlags(
@@ -154,6 +157,7 @@ def update(add=[], install=False, VERSION='v0.0.0'):
         ~Qt.WindowContextHelpButtonHint
     )
     progresswin.setWindowIcon(APP_ICON)
+    progresswin.setWindowTitle('FastWQ - Updater')
     progresswin.resize(280, 60)
     progresswin.show()
     #
