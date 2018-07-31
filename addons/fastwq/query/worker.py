@@ -149,7 +149,7 @@ class QueryWorkerManager(object):
                 else:
                     self.update_progress()
                 mw.app.processEvents()
-                worker.wait(100)
+                worker.wait(30)
         self.progress.finish()
 
     @QtCore.pyqtSlot(object)

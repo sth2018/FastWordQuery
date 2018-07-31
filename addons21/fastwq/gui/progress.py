@@ -23,17 +23,19 @@ from collections import defaultdict
 
 from aqt.qt import *
 from ..lang import _
+from ..context import APP_ICON
 
 
 __all__ = ['ProgressWindow']
 
 
 _INFO_TEMPLATE = u''.join([
-    _('QUERIED') + u'<br>' + 45 * u'-' + u'<br>',
-    _('SUCCESS') + u' {} ' + _('WORDS') + u'<br>',
-    _('SKIPED') + u' {} ' + _('WORDS') + u'<br>',
-    _('UPDATE') + u' {} ' +  _('FIELDS') + u'<br>',
-    _('FAILURE') + u' {} ' + _('WORDS') + u''
+    u'<strong>' + _('QUERIED') + u'</strong>',
+    u'<p>' + 45 * u'-' + u'</p>',
+    u'<p>' + _('SUCCESS') + u' <b>{}</b> ' + _('WORDS') + u'</p>',
+    u'<p>' + _('SKIPED') + u' <b>{}</b> ' + _('WORDS') + u'</p>',
+    u'<p>' + _('UPDATE') + u' <b>{}</b> ' +  _('FIELDS') + u'</p>',
+    u'<p>' + _('FAILURE') + u' <b>{}</b> ' + _('WORDS') + u'</p>',
 ])
 
 
@@ -72,7 +74,6 @@ class ProgressWindow(object):
             fields_number,
             fails_number
         )
-
         self._update(label=number_info, value=words_number+skips_number+fails_number)
         self._win.adjustSize()
 
@@ -90,7 +91,13 @@ class ProgressWindow(object):
         self._win.setWindowModality(Qt.ApplicationModal)
         self._win.setCancelButton(None)
         self._win.canceled.connect(self.finish)
-        self._win.setWindowTitle("Querying...")
+        self._win.setWindowTitle("FastWQ - Querying...")
+        self._win.setModal(True)
+        self._win.setWindowFlags(
+            self._win.windowFlags() &
+            ~Qt.WindowContextHelpButtonHint
+        )
+        self._win.setWindowIcon(APP_ICON)
         self._win.setAutoReset(True)
         self._win.setAutoClose(True)
         self._win.setMinimum(0)
