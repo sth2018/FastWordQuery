@@ -37,8 +37,10 @@ It forks from WordQuery, added **multi-thread feature**, and some other features
 
   2. Click **Settings** button in the Options window  
       ![](screenshots/setting_config_02.png)  
-      - **Force Update** : Update all fields even if it's None
-      - **Thread** : The number of threads running at the same time
+      - **Force Updates of all fields** : Update all fields even if it's None
+      - **Ignore Accents** : Ignore accents symbol of word in querying
+      - **Auto check new version** : Check new version at startup
+      - **Number of Threads** : The number of threads running at the same time
   
   
 ## Usage
