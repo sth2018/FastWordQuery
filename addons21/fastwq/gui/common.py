@@ -33,16 +33,18 @@ from ..service import service_manager
 __all__ = ['show_options', 'check_updates', 'show_fm_dialog', 'show_about_dialog']
 
 
-def check_updates():
+def check_updates(background=False):
     '''check add-on last version'''
     try:
-        state = ankihub.update([Endpoint.check_version], False, Endpoint.version)
-        if state == 0:
-            showInfo(_('LATEST_VERSION'))
-        elif state == -1:
-            showInfo(_('CHECK_FAILURE'))
+        state = ankihub.update([Endpoint.check_version], Endpoint.version, background)
+        if not background:
+            if state == 0:
+                showInfo(_('LATEST_VERSION'))
+            elif state == -1:
+                showInfo(_('CHECK_FAILURE'))
     except:
-        showInfo(_('CHECK_FAILURE'))
+        if not background:
+            showInfo(_('CHECK_FAILURE'))
 
 
 def show_fm_dialog(browser = None):

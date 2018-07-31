@@ -18,7 +18,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from anki.lang import currentLang
-
+try:
+  basestring
+except NameError:
+  basestring = str
 
 __all__ = ['_', '_cl', '_sl']
 
@@ -55,6 +58,7 @@ _arr = [
     ['CHECK_FAILURE', u'版本检查失败.', u'Version check failed.'],
     ['NEW_VERSION', u'检查到新版本:', u'New version available:'],
     ['UPDATE', u'更新', u'Update'],
+    ['AUTO_UPDATE', u'自动检测新版本', u'Auto check new version'],
     ['FORCE_UPDATE', u'强制更新字段', u'Forced Updates of all fields'],
     ['IGNORE_ACCENTS', u'忽略声调', u'Ignore Accents'],
     ['SKIP_VALUED', u'跳过有值项', u'Skip non-empty'],

@@ -22,6 +22,10 @@ from ..context import APP_ICON
 from .AnkiHub.updates import Ui_DialogUpdates
 from .AnkiHub.markdown2 import markdown
 
+
+__all__ = ['update']
+
+
 # taken from Anki's aqt/profiles.py
 def defaultBase():
     path = mw.pm.addonFolder()
@@ -34,7 +38,8 @@ dataPath = os.path.join(defaultBase(),'.fastwq_2.0.x_ankihub.json')
 
 class DialogUpdates(QDialog, Ui_DialogUpdates):
 
-    def __init__(self, parent, data, oldData, callback, install=False):
+    def __init__(self, parent, data, oldData, callback):
+        parent = parent if parent else mw
         QDialog.__init__(self,parent)
         self.setModal(True)
         self.setWindowFlags(
@@ -46,7 +51,7 @@ class DialogUpdates(QDialog, Ui_DialogUpdates):
         totalSize = sum(map(lambda x:x['size'],data['assets']))
         def answer():
             self.update.setEnabled(False)
-            callback(self.appendHtml, self.finish, install)
+            callback(self.appendHtml, self.finish)
 
         self.html = u''
         self.appendHtml(markdown(data['body']))
@@ -105,7 +110,7 @@ def asset(a):
 
 
 def updateSingle(repositories, path, data):
-    def callback(appendHtml, onReady, install):
+    def callback(appendHtml, onReady):
         for asset in data['assets']:
             code = asset['url']
             p, fname = os.path.split(code)
@@ -147,19 +152,22 @@ def updateSingle(repositories, path, data):
     return callback
 
 
-def update(add=[], install=False, VERSION='v0.0.0'):
+def update(add=[], VERSION='v0.0.0', background=False):
     # progress win
-    progresswin = QProgressDialog('Update Checking...', '', 0, 0, mw)
-    progresswin.setWindowModality(Qt.ApplicationModal)
-    progresswin.setCancelButton(None)
-    progresswin.setWindowFlags(
-        progresswin.windowFlags() &
-        ~Qt.WindowContextHelpButtonHint
-    )
-    progresswin.setWindowIcon(APP_ICON)
-    progresswin.setWindowTitle('FastWQ - Updater')
-    progresswin.resize(280, 60)
-    progresswin.show()
+    if not background:
+        progresswin = QProgressDialog('Update Checking...', '', 0, 0, mw)
+        progresswin.setWindowModality(Qt.ApplicationModal)
+        progresswin.setCancelButton(None)
+        progresswin.setWindowFlags(
+            progresswin.windowFlags() &
+            ~Qt.WindowContextHelpButtonHint
+        )
+        progresswin.setWindowIcon(APP_ICON)
+        progresswin.setWindowTitle('FastWQ - Updater')
+        progresswin.resize(280, 60)
+        progresswin.show()
+    else:
+        progresswin = None
     #
     conn = httplib.HTTPSConnection("api.github.com")
     try:
@@ -214,7 +222,7 @@ def update(add=[], install=False, VERSION='v0.0.0'):
                     if isMinor:
                         i = 1
                 while i<newVersion[2]:
-                    if progresswin.wasCanceled():
+                    if progresswin and progresswin.wasCanceled():
                         break
                     try:
                         minorTagName = 'v{0}.{1}.{2}'.format(newVersion[0],oldVersion[1],i)
@@ -230,7 +238,7 @@ def update(add=[], install=False, VERSION='v0.0.0'):
                 if oldVersion[0]<newVersion[0] or oldVersion[1]<newVersion[1]:
                     # new major release necessary!
                     # if the newest version is minor, fetch the additional assets from the major
-                    if isMinor and not progresswin.wasCanceled(): 
+                    if isMinor and (background or not progresswin.wasCanceled()):
                         try:
                             majorTagName = 'v{0}.{1}'.format(newVersion[0],newVersion[1])
                             urlthread = UrlThread(
@@ -245,22 +253,26 @@ def update(add=[], install=False, VERSION='v0.0.0'):
                         except:
                             pass
                 
-                if not progresswin.wasCanceled():
-                    progresswin.hide()
-                    progresswin.destroy()
+                if background or not progresswin.wasCanceled():
+                    if progresswin:
+                        progresswin.hide()
+                        progresswin.destroy()
                     dialog = DialogUpdates(None, data, repository, updateSingle(repositories, path, data))
                     dialog.exec_()
                     dialog.destroy()
                 else:
-                    progresswin.hide()
-                    progresswin.destroy()
+                    if progresswin:
+                        progresswin.hide()
+                        progresswin.destroy()
                 return 1
             else:
-                progresswin.hide()
-                progresswin.destroy()
+                if progresswin:
+                    progresswin.hide()
+                    progresswin.destroy()
                 return 0
-    progresswin.hide()
-    progresswin.destroy()
+    if progresswin:
+        progresswin.hide()
+        progresswin.destroy()
     return -1
 
 

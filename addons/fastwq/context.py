@@ -114,5 +114,10 @@ class Config(object):
         '''ignore accents of field in querying'''
         return self.data.get('ignore_accents', False)
 
+    @property
+    def auto_update(self):
+        '''auto check new version'''
+        return self.data.get('auto_update', True)
+
 
 config = Config(mw)

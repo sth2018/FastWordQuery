@@ -35,6 +35,8 @@ class SettingDialog(Dialog):
         super(SettingDialog, self).__init__(parent, title)
         self.setFixedWidth(400)
         self.check_force_update = None
+        self.check_ignore_accents = None
+        self.check_auto_update = None
         self.input_thread_number = None
         self.build()
 
@@ -49,6 +51,11 @@ class SettingDialog(Dialog):
         check_ignore_accents = QCheckBox(_("IGNORE_ACCENTS"))
         check_ignore_accents.setChecked(config.ignore_accents)
         layout.addWidget(check_ignore_accents)
+        layout.addSpacing(10)
+
+        check_auto_update = QCheckBox(_("AUTO_UPDATE"))
+        check_auto_update.setChecked(config.auto_update)
+        layout.addWidget(check_auto_update)
         layout.addSpacing(10)
 
         hbox = QHBoxLayout()
@@ -71,6 +78,7 @@ class SettingDialog(Dialog):
         
         self.check_force_update = check_force_update
         self.check_ignore_accents = check_ignore_accents
+        self.check_auto_update = check_auto_update
         self.input_thread_number = input_thread_number
 
         layout.setAlignment(Qt.AlignTop|Qt.AlignLeft)
@@ -84,7 +92,8 @@ class SettingDialog(Dialog):
         data = {
             'force_update': self.check_force_update.isChecked(),
             'ignore_accents': self.check_ignore_accents.isChecked(),
-            'thread_number': self.input_thread_number.value()
+            'auto_update': self.check_auto_update.isChecked(),
+            'thread_number': self.input_thread_number.value(),
         }
         config.update(data)
         

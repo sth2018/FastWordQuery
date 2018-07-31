@@ -22,7 +22,7 @@ from aqt import mw
 from anki.hooks import addHook, wrap
 from aqt.addcards import AddCards
 from aqt.utils import showInfo, shortcut
-from .gui import show_options, show_about_dialog
+from .gui import show_options, show_about_dialog, check_updates
 from .query import query_from_browser, query_from_editor_all_fields
 from .context import config, APP_ICON
 from .lang import _
@@ -31,7 +31,7 @@ from .lang import _
 __all__ = [
     'add_query_button', 'browser_menu', 
     'customize_addcards', 'config_menu', 
-    'window_shortcut'
+    'window_shortcut', 'check_updates'
 ]
 
 
@@ -122,4 +122,3 @@ def window_shortcut(key_sequence):
     """
     global my_shortcut
     my_shortcut = key_sequence
-        
