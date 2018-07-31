@@ -18,6 +18,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import json
+import os
 from aqt import mw
 from .constants import VERSION
 from .utils import get_icon
@@ -35,13 +36,14 @@ class Config(object):
     Addon Config
     """
 
-    _CONFIG_FILENAME = '.fastwqcfg.json'     #Config File Path
+    _CONFIG_FILENAME = 'fastwqcfg.json'     #Config File Path
     LDOCE6_PATH = ''
 
     def __init__(self, window):
-        self.path = self._CONFIG_FILENAME
+        self.path = u'_' + self._CONFIG_FILENAME
         self.window = window
         self.version = '0'
+        self.data = None
         self.read()
 
     @property
@@ -64,10 +66,15 @@ class Config(object):
         """
         Load from config file
         """
+        if self.data:
+            return self.data
         try:
-            with open(self.path, 'r',encoding="utf-8") as f:
+            path = self.path if os.path.exists(self.path) else u'.' + self._CONFIG_FILENAME
+            with open(path, 'r', encoding="utf-8") as f:
                 self.data = json.load(f)
                 f.close()
+            if not os.path.exists(self.path):
+                self.update(self.data)
         except:
             self.data = dict()
 
