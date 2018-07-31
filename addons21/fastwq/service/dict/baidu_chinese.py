@@ -71,8 +71,7 @@ class Baidu_Chinese(WebService):
     def fld_pron(self):
         audio_url = self._get_field('audio_url')
         if baidu_download_mp3 and audio_url:
-            filename = u'_baidu_chinese_{}_.mp3'.format(self.word)
-            filename = get_hex_name(self.unique.lower(), filename, 'mp3')
+            filename = get_hex_name(self.unique.lower(), audio_url, 'mp3')
             try:
                 if os.path.exists(filename) or self.net_download(
                     filename,

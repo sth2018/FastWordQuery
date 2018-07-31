@@ -71,14 +71,14 @@ class OxfordLearning(WebService):
 
     def get_sound_bre(self):
         url = self._get_single_dict('s_bre')
-        filename = u'oxford_{}_uk.mp3'.format(self.word)
+        filename = get_hex_name(self.unique.lower(), url, 'mp3')
         if url and self.download(url, filename):
             return self.get_anki_label(filename, 'audio')
         return ''
 
     def get_sound_ame(self):
         url = self._get_single_dict('s_ame')
-        filename = u'oxford_{}_us.mp3'.format(self.word)
+        filename = get_hex_name(self.unique.lower(), url, 'mp3')
         if url and self.download(url, filename):
             return self.get_anki_label(filename, 'audio')
         return ''

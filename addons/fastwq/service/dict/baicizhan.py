@@ -36,8 +36,7 @@ class Baicizhan(WebService):
     @export('PRON')
     def fld_phonetic(self):
         url = u'http://baicizhan.qiniucdn.com/word_audios/{}.mp3'.format(self.quote_word)
-        audio_name = 'bcz_%s.mp3' % self.word
-        audio_name = get_hex_name(self.unique.lower(), audio_name, 'mp3')
+        audio_name = get_hex_name(self.unique.lower(), url, 'mp3')
         if self.bcz_download_mp3:
             if os.path.exists(audio_name) or self.download(url, audio_name, 5):
                 with open(audio_name, 'rb') as f:

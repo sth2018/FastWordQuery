@@ -60,8 +60,7 @@ class Frdic(WebService):
         url = 'https://api.frdic.com/api/v2/speech/speakweb?langid=fr&txt=QYN{word}'.format(
             word=urllib2.quote(base64.b64encode(self.word.encode('utf-8')))
         )
-        filename = u'frdic_{word}.mp3'.format(word=self.word)
-        filename = get_hex_name(self.unique.lower(), filename, 'mp3')
+        filename = get_hex_name(self.unique.lower(), url, 'mp3')
         if os.path.exists(filename) or self.net_download(filename, url):
                 return self.get_anki_label(filename, 'audio')
         return ''
