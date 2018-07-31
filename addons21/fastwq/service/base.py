@@ -215,9 +215,9 @@ class Service(object):
         self._exporters = self._get_exporters()
         self._fields, self._actions = zip(*self._exporters) \
             if self._exporters else (None, None)
+        self._word = ''
         # query interval: default 500ms
         self.query_interval = 0.5
-        self.word = u''
 
     def cache_this(self, result):
         self.cache[self.word].update(result)
@@ -238,16 +238,23 @@ class Service(object):
     @property
     def unique(self):
         return self._unique
-
-    @property
-    def quote_word(self):
-        word = re.sub(r'</?\w+[^>]*>', '', self.word)
-        return urllib2.quote(word)
-    
     @unique.setter
     def unique(self, value):
         self._unique = value
 
+    @property
+    def word(self):
+        return self._word
+    
+    @word.setter
+    def word(self, value):
+        value = re.sub(r'</?\w+[^>]*>', '', value)
+        self._word = value
+
+    @property
+    def quote_word(self):
+        return urllib2.quote(self.word)
+    
     @property
     def support(self):
         return True
