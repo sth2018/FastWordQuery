@@ -31,7 +31,7 @@ from .lang import _
 __all__ = [
     'add_query_button', 'browser_menu', 
     'customize_addcards', 'config_menu', 
-    'window_shortcut', 'check_updates'
+    'check_updates'
 ]
 
 
@@ -111,15 +111,4 @@ def config_menu():
     """
     action = QAction(APP_ICON, "FastWQ...", mw)
     action.triggered.connect(wrap_method(show_options))
-    mw.form.menuTools.addAction(action)
-    global have_setup
-    have_setup = True
-
-
-def window_shortcut(key_sequence):
-    """
-    setup shortcut
-    """
-    global my_shortcut
-    my_shortcut = key_sequence
-        
+    mw.form.menuTools.addAction(action)       

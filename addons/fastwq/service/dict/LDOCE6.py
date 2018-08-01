@@ -1,9 +1,7 @@
 #-*- coding:utf-8 -*-
 import re
-import FastWQ
 from ..base import *
-
-PATH = FastWQ.LDOCE6_PATH
+from ...context import config
 
 VOICE_PATTERN = r'<a href="sound://([\w/]+\w*\.mp3)"><img src="img/spkr_%s.png"></a>'
 MAPPINGS = [
@@ -17,7 +15,7 @@ LANG_TO_REGEXPS = {lang: regexps for lang, regexps in MAPPINGS}
 class Ldoce6(MdxService):
 
     def __init__(self):
-        super(Ldoce6, self).__init__(PATH)
+        super(Ldoce6, self).__init__(config.LDOCE6_PATH)
 
     @property
     def title(self):

@@ -17,8 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt4 import QtCore, QtGui
 from aqt import mw
+from aqt.qt import *
 from anki.hooks import addHook, wrap
 from aqt.addcards import AddCards
 from aqt.utils import showInfo, shortcut
@@ -31,7 +31,7 @@ from .lang import _
 __all__ = [
     'add_query_button', 'browser_menu', 
     'customize_addcards', 'config_menu', 
-    'window_shortcut', 'check_updates'
+    'check_updates'
 ]
 
 
@@ -53,11 +53,11 @@ def add_query_button(self):
     add a button in add card window
     '''
     bb = self.form.buttonBox
-    ar = QtGui.QDialogButtonBox.ActionRole
+    ar = QDialogButtonBox.ActionRole
     self.queryButton = bb.addButton(_(u"Query"), ar)
     self.queryButton.clicked.connect(wrap_method(
         query_from_editor_all_fields, self.editor))
-    self.queryButton.setShortcut(QtGui.QKeySequence(my_shortcut))
+    self.queryButton.setShortcut(QKeySequence(my_shortcut))
     self.queryButton.setToolTip(
         shortcut(_(u"Query (shortcut: %s)" % my_shortcut)))
 
@@ -71,15 +71,15 @@ def browser_menu():
         on browser setupMenus was called
         """
         # main menu
-        menu = QtGui.QMenu("FastWQ", browser.form.menubar)
+        menu = QMenu("FastWQ", browser.form.menubar)
         browser.form.menubar.addMenu(menu)
         # Query Selected
-        action = QtGui.QAction("Query Selected", browser)
+        action = QAction("Query Selected", browser)
         action.triggered.connect(wrap_method(query_from_browser, browser))
-        action.setShortcut(QtGui.QKeySequence(my_shortcut))
+        action.setShortcut(QKeySequence(my_shortcut))
         menu.addAction(action)
         # Options
-        action = QtGui.QAction("Options", browser)
+        action = QAction("Options", browser)
         def _show_options():
             model_id = -1
             for note_id in browser.selectedNotes():
@@ -90,7 +90,7 @@ def browser_menu():
         action.triggered.connect(_show_options)
         menu.addAction(action)
         # About
-        action = QtGui.QAction("About", browser)
+        action = QAction("About", browser)
         action.triggered.connect(wrap_method(show_about_dialog, browser))
         menu.addAction(action)
 
@@ -109,16 +109,6 @@ def config_menu():
     """
     add menu to anki window menebar
     """
-    action = QtGui.QAction(APP_ICON, "FastWQ...", mw)
+    action = QAction(APP_ICON, "FastWQ...", mw)
     action.triggered.connect(wrap_method(show_options))
     mw.form.menuTools.addAction(action)
-    global have_setup
-    have_setup = True
-
-
-def window_shortcut(key_sequence):
-    """
-    setup shortcut
-    """
-    global my_shortcut
-    my_shortcut = key_sequence

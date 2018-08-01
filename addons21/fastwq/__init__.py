@@ -31,12 +31,13 @@ LDOCE6_PATH = u'D:\\mdx_server\\mdx\\LDOCE6.mdx'
 def start_here():
     config.read()
     config.LDOCE6_PATH = LDOCE6_PATH
+    fastwq.my_shortcut = shortcut
     if not fastwq.have_setup:
+        fastwq.have_setup = True
         fastwq.config_menu()
         fastwq.browser_menu()
         fastwq.customize_addcards()
         if fastwq.config.auto_update:
             fastwq.check_updates(True)
-    fastwq.window_shortcut(shortcut)
 
 addHook("profileLoaded", start_here)
