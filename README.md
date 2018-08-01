@@ -8,7 +8,7 @@
 
 ## Features
 
-This addon looks up words in local dictionary or web dictionary and pasting the explanations to Anki.
+This addon looks up words in local dictionary or web dictionary and pasting the explanations to Anki.  
 It forks from [WordQuery](https://github.com/finalion/WordQuery), added **multi-thread** feature, improve stability, and some other features.
 
   - Querying Words and Making Cards, IMMEDIATELY!
