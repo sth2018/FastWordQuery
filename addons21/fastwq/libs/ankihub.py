@@ -115,12 +115,16 @@ def updateSingle(repositories, path, data):
             code = asset['url']
             p, fname = os.path.split(code)
             appendHtml(temp='<br />Downloading {1}: {0}%<br/>'.format(0,fname))
-            urlthread = UrlThread(code)
-            urlthread.start()
-            urlthread.join()
-            response = urlthread.response#urllib2.urlopen(code)
-            meta = response.info()
-            file_size = int(meta.get("Content-Length"))
+            try:
+                urlthread = UrlThread(code)
+                urlthread.start()
+                urlthread.join()
+                response = urlthread.response#urllib2.urlopen(code)
+                meta = response.info()
+                file_size = int(meta.get("Content-Length"))
+            except:
+                appendHtml('Downloading file error!<br/>')
+                return
             d = b''
             dl = 0
             i = 0
