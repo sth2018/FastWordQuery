@@ -98,7 +98,10 @@ def installZipFile(data, fname):
             # folder; ignore
             continue
         # write
-        z.extract(n, base)
+        try:
+            z.extract(n, base)
+        except:
+            print(n)
     return True
 
 

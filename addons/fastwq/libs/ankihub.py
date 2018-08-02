@@ -98,7 +98,10 @@ def installZipFile(data, fname):
             # folder; ignore
             continue
         # write
-        z.extract(n, base)
+        try:
+            z.extract(n, base)
+        except:
+            print(n)
     return True
 
 
@@ -121,7 +124,7 @@ def updateSingle(repositories, path, data):
                 urlthread.join()
                 response = urlthread.response#urllib2.urlopen(code)
                 meta = response.info()
-                file_size = int(meta.get("Content-Length"))
+                file_size = int(meta.getheaders("Content-Length")[0])
             except:
                 appendHtml('Downloading file error!<br/>')
                 return
