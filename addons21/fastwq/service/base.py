@@ -314,8 +314,7 @@ class WebService(Service):
 
     def get_response(self, url, data=None, headers=None, timeout=10):
         default_headers = {
-            'User-Agent': 'Mozilla/5.0',
-            'Accept-Encoding': 'gzip'
+            'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6'
         }
         if headers:
             default_headers.update(headers)
