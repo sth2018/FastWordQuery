@@ -96,6 +96,13 @@ class OptionsDialog(Dialog):
         self.tab_bar = TabBarPlus()
         self.tab_widget.setTabBar(self.tab_bar)
         self.tab_widget.setTabsClosable(True)
+        self.tab_widget.setStyleSheet(
+            """
+            QTabWidget::pane { /* The tab widget frame */
+                border: 1px solid #c3c3c3;
+            }
+            """
+        )
         # signals
         self.tab_bar.plusClicked.connect(self.addTab)
         self.tab_widget.tabCloseRequested.connect(self.removeTab)
@@ -513,7 +520,7 @@ class TabBarPlus(QTabBar):
         # Plus Button
         self.plusButton = QPushButton(u'+')
         self.plusButton.setParent(self)
-        self.plusButton.setFixedSize(26, 26)
+        self.plusButton.setFixedSize(25, 25)
         self.plusButton.clicked.connect(self.plusClicked.emit)
         self.movePlusButton()
 
@@ -533,7 +540,7 @@ class TabBarPlus(QTabBar):
 
     def movePlusButton(self):
         size = sum([self.tabRect(i).width() for i in range(self.count())])
-        h = self.geometry().top()
+        h = self.geometry().top() + 1
         w = self.width()
         if size > w:
             self.plusButton.move(w-54, h)
