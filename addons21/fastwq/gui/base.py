@@ -55,10 +55,10 @@ class WidgetSize(object):
     '''
     constant values
     '''
-    dialog_width = 700 
-    dialog_height_margin = 120 
+    dialog_width = 720
+    dialog_height_margin = 146
     map_min_height = 0
-    map_max_height = 32
+    map_max_height = 30
     map_fld_width = 100
     map_dictname_width = 150
     map_dictfield_width = 160
