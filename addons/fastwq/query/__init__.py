@@ -26,7 +26,7 @@ from aqt import mw
 from aqt.utils import showInfo, showText, tooltip
 
 from .worker import QueryWorkerManager
-from .common import promot_choose_css
+from .common import promot_choose_css, inspect_note
 
 from ..constants import Endpoint, Template
 from ..context import config
@@ -66,7 +66,7 @@ def query_from_editor_all_fields(editor):
     if not editor or not editor.note:
         return
 
-    maps = config.get_maps(editor.note.model()['id'])
+    word_ord, word, maps = inspect_note(editor.note)
     nomaps = True
     for each in maps:
         dict_unique = each.get('dict_unique', '').strip()

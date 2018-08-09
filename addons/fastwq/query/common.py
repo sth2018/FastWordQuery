@@ -34,7 +34,7 @@ from ..utils import wrap_css
 __all__ = [
     'InvalidWordException', 'update_note_fields',
     'update_note_field', 'promot_choose_css', 'add_to_tmpl',
-    'query_all_flds'
+    'query_all_flds', 'inspect_note'
 ]
 
 
@@ -50,7 +50,9 @@ def inspect_note(note):
     return maps: dicts map of current note
     """
 
-    maps = config.get_maps(note.model()['id'])
+    conf = config.get_maps(note.model()['id'])
+    maps_list = {'list': [conf], 'def': 0} if isinstance(conf, list) else conf
+    maps = maps_list['list'][maps_list['def']]
     for i, m in enumerate(maps):
         if m.get('word_checked', False):
             word_ord = i

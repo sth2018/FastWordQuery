@@ -67,6 +67,7 @@ _arr = [
     ['THREAD_NUMBER', u'线程数', u'Number of Threads'],
     ['INITLIZING_DICT', u'初始化词典...', u'Initlizing Dictionary...'],
     ['PLS_SET_DICTIONARY_FIELDS', u'请设置字典和字段', u'Please set the dictionary and fields.'],
+    ['CONFIG_INDEX', u'配置 %s', u'Config %s'],
 
     ['BRE_PRON', u'英式发音', u'British Pronunciation'],
     ['AME_PRON', u'美式发音', u'American Pronunciation'],

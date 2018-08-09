@@ -59,10 +59,9 @@ class OptionsDialog(Dialog):
         #self.loading_layout.addLayout(models_layout)
         self.setLayout(self.main_layout)
         #initlize properties
-        self.___last_checkeds___ = None
-        self.___options___ = list()
         self.model_id = model_id if model_id != -1 else config.last_model_id
         self.current_model = None
+        self.tabs = []
         # size and signal
         self.resize(WIDGET_SIZE.dialog_width, 4 * WIDGET_SIZE.map_max_height + WIDGET_SIZE.dialog_height_margin)
         self._signal.emit('before_build')
@@ -92,17 +91,16 @@ class OptionsDialog(Dialog):
         models_layout.addWidget(mdx_button)
         models_layout.addWidget(self.models_button)
         self.main_layout.addLayout(models_layout)
-        # add dicts mapping
-        dicts_widget = QWidget()
-        self.dicts_layout = QGridLayout()
-        self.dicts_layout.setSizeConstraint(QLayout.SetMinAndMaxSize)
-        dicts_widget.setLayout(self.dicts_layout)
-
-        scroll_area = QScrollArea()
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setWidget(dicts_widget)
-
-        self.main_layout.addWidget(scroll_area)
+        # tabs
+        self.tab_widget = QTabWidget()
+        self.tab_bar = TabBarPlus()
+        self.tab_widget.setTabBar(self.tab_bar)
+        self.tab_widget.setTabsClosable(True)
+        # signals
+        self.tab_bar.plusClicked.connect(self.addTab)
+        self.tab_widget.tabCloseRequested.connect(self.removeTab)
+        # layout
+        self.main_layout.addWidget(self.tab_widget)
         # add description of radio buttons AND ok button
         bottom_layout = QHBoxLayout()
         paras_btn = QPushButton(_('SETTINGS'))
@@ -113,18 +111,16 @@ class OptionsDialog(Dialog):
         chk_update_btn = QPushButton(_('UPDATE'))
         chk_update_btn.clicked.connect(self.check_updates)
         home_label = QLabel(
-            '<a href="{url}">User Guide</a>'.format(url=Endpoint.user_guide))
+            '<a href="{url}">User Guide</a>'.format(url=Endpoint.user_guide)
+        )
         home_label.setOpenExternalLinks(True)
-        # shop_label = QLabel(
-        #     '<a href="{url}">Service Shop</a>'.format(url=Endpoint.service_shop))
-        # shop_label.setOpenExternalLinks(True)
+        # buttons
         btnbox = QDialogButtonBox(QDialogButtonBox.Ok, Qt.Horizontal, self)
         btnbox.accepted.connect(self.accept)
         bottom_layout.addWidget(paras_btn)
         bottom_layout.addWidget(chk_update_btn)
         bottom_layout.addWidget(about_btn)
         bottom_layout.addWidget(home_label)
-        # bottom_layout.addWidget(shop_label)
         bottom_layout.addWidget(btnbox)
         #self.setLayout(self.main_layout)
         self.main_layout.addLayout(bottom_layout)
@@ -136,7 +132,7 @@ class OptionsDialog(Dialog):
             self.models_button.setText(
                 u'%s [%s]' % (_('CHOOSE_NOTE_TYPES'),  self.current_model['name']))
             # build fields -- dicts layout
-            self.build_mappings_layout(self.current_model)
+            self.build_tabs_layout(self.current_model)
 
     def show_paras(self):
         '''open setting dialog'''
@@ -172,55 +168,57 @@ class OptionsDialog(Dialog):
         self.save()
         self.current_model = self.show_models()
         if self.current_model:
-            self.build_mappings_layout(self.current_model)
+            self.build_tabs_layout(self.current_model)
 
-    def build_mappings_layout(self, model):
+    def build_tabs_layout(self, model):
         '''
         build dictionary、fields etc
         '''
-        def clear_layout(layout):
-            if layout is not None:
-                while layout.count():
-                    item = layout.takeAt(0)
-                    widget = item.widget()
-                    if widget is not None:
-                        widget.deleteLater()
-                    else:
-                        clear_layout(item.layout())
-
-        clear_layout(self.dicts_layout)
-        del self.___options___[:]
-        self.___last_checkeds___ = None
-
-        labels = ['', '', 'DICTS', 'DICT_FIELDS', '']
-        for i, s in enumerate(labels):
-            label = QLabel(_(s))
-            label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-            self.dicts_layout.addWidget(label, 0, i)
-
-        maps = config.get_maps(model['id'])
-        self.radio_group = QButtonGroup()
-        for i, fld in enumerate(model['flds']):
-            ord = fld['ord']
-            name = fld['name']
-            if maps:
-                for j, each in enumerate(maps):
-                    if each.get('fld_ord', -1) == ord or each.get('fld_name', '') == name:
-                        each['fld_name'] = name
-                        each['fld_ord'] = ord
-                        self.add_dict_layout(j, **each)
-                        break
-                else:
-                    self.add_dict_layout(i, fld_name=name, fld_ord=ord, word_checked=i==0)
-            else:
-                self.add_dict_layout(i, fld_name=name, fld_ord=ord, word_checked=i==0)
-
-        #self.setLayout(self.main_layout)
-        self.resize(
-            WIDGET_SIZE.dialog_width,
-            max(3, (i + 1)) * WIDGET_SIZE.map_max_height + WIDGET_SIZE.dialog_height_margin
-        )
+        try: self.tab_widget.currentChanged.disconnect()
+        except Exception: pass
+        while len(self.tabs) > 0:
+            self.removeTab(0, True)
+        #
+        conf = config.get_maps(model['id'])
+        length = 0
+        maps_list = {'list': [conf], 'def': 0} if isinstance(conf, list) else conf
+        for i, maps in enumerate(maps_list['list']):
+            length = len(maps)
+            tab = TabContent(model, maps)
+            self.tabs.append(tab)
+            self.tab_widget.addTab(tab, _('CONFIG_INDEX') % (i+1))
+        self.tab_widget.setCurrentIndex(maps_list['def'])
+        self.tab_widget.currentChanged.connect(self.changedTab)
+        self.changedTab(self.tab_widget.currentIndex())
+        # size
+        #self.resize(
+        #    WIDGET_SIZE.dialog_width,
+        #    length * WIDGET_SIZE.map_max_height + WIDGET_SIZE.dialog_height_margin
+        #)
+        self.adjustSize()
         self.save()
+    
+    def addTab(self):
+        tab = TabContent(self.current_model, None)
+        i = len(self.tabs)
+        self.tabs.append(tab)
+        self.tab_widget.addTab(tab, _('CONFIG_INDEX') % (i+1))
+        self.tab_widget.setCurrentIndex(i)
+
+    def removeTab(self, i, forcus=False):
+        # less than one config
+        if not forcus and len(self.tabs) <= 1:
+            return
+        tab = self.tabs[i]
+        del self.tabs[i]
+        self.tab_widget.removeTab(i)
+        tab.destroy()
+        for k in range(0, len(self.tabs)):
+            self.tab_widget.setTabText(k, _('CONFIG_INDEX') % (k+1))
+
+    def changedTab(self, i):
+        tab = self.tabs[i]
+        tab.build_mappings_layout()
 
     def show_models(self):
         '''
@@ -238,69 +236,72 @@ class OptionsDialog(Dialog):
                 u'%s [%s]' % (_('CHOOSE_NOTE_TYPES'), ret.name))
             return model
 
-    def fill_dict_combo_options(self, dict_combo, current_unique):
-        '''setup dict combo box'''
-        dict_combo.clear()
-        #dict_combo.addItem(_('NOT_DICT_FIELD'))
+    def save(self):
+        '''save config to file'''
+        if not self.current_model:
+            return
+        data = dict()
+        maps_list = {
+            'list': [], 
+            'def': self.tab_widget.currentIndex()
+        }
+        for tab in self.tabs:
+            maps_list['list'].append(tab.data)
+        current_model_id = str(self.current_model['id'])
+        data[current_model_id] = maps_list
+        data['last_model'] = self.current_model['id']    
+        config.update(data)
 
-        # local dict service
-        #dict_combo.insertSeparator(dict_combo.count())
-        has_local_service = False
-        for cls in service_manager.local_services:
-            # combo_data.insert("data", each.label)
-            service = service_pool.get(cls.__unique__)
-            if service and service.support:
-                dict_combo.addItem(
-                    service.title, userData=service.unique)
-                service_pool.put(service)
-                has_local_service = True
 
-        # hr
-        if has_local_service:
-            dict_combo.insertSeparator(dict_combo.count())
-        
-        # web dict service
-        for cls in service_manager.web_services:
-            service = service_pool.get(cls.__unique__)
-            if service and service.support:
-                dict_combo.addItem(
-                    service.title, userData=service.unique)
-                service_pool.put(service)
+class TabContent(QWidget):
+    '''Options tab content'''
 
-        def set_dict_combo_index():
-            #dict_combo.setCurrentIndex(-1)
-            dict_combo.setCurrentIndex(0)
-            if current_unique:
-                for i in range(dict_combo.count()):
-                    if dict_combo.itemData(i) == current_unique:
-                        dict_combo.setCurrentIndex(i)
+    def __init__(self, model, conf):
+        super(TabContent, self).__init__()
+        self._conf = conf
+        self._model = model
+        self.___last_checkeds___ = None
+        self.___options___ = list()
+        self.___was_built___ = False
+        # add dicts mapping
+        self.dicts_layout = QGridLayout()
+        self.dicts_layout.setSizeConstraint(QLayout.SetMinAndMaxSize)
+        self.setLayout(self.dicts_layout)
+
+    def build_mappings_layout(self):
+        '''
+        build dictionary、fields etc
+        '''
+        if self.___was_built___:
+            return
+
+        del self.___options___[:]
+        self.___last_checkeds___ = None
+        self.___was_built___ = True
+
+        model = self._model 
+        maps = self._conf
+        labels = ['', '', 'DICTS', 'DICT_FIELDS', '']
+        for i, s in enumerate(labels):
+            label = QLabel(_(s))
+            label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+            self.dicts_layout.addWidget(label, 0, i)
+
+        self.radio_group = QButtonGroup()
+        for i, fld in enumerate(model['flds']):
+            ord = fld['ord']
+            name = fld['name']
+            if maps:
+                for j, each in enumerate(maps):
+                    if each.get('fld_ord', -1) == ord or each.get('fld_name', '') == name:
+                        each['fld_name'] = name
+                        each['fld_ord'] = ord
+                        self.add_dict_layout(j, **each)
                         break
-            
-        set_dict_combo_index()
-
-    def fill_field_combo_options(self, field_combo, dict_combo_text, dict_combo_itemdata, dict_fld_name, dict_fld_ord):
-        '''setup field combobox'''
-        field_combo.clear()
-        field_combo.setEditable(False)
-        #if dict_combo_text in _sl('NOT_DICT_FIELD'):
-        #    field_combo.setEnabled(False)
-        #el
-        if dict_combo_text in _sl('MDX_SERVER'):
-            text = dict_fld_name if dict_fld_name else 'http://'
-            field_combo.setEditable(True)
-            field_combo.setEditText(text)
-            field_combo.setFocus(Qt.MouseFocusReason)  # MouseFocusReason
-        else:
-            unique = dict_combo_itemdata
-            service = service_pool.get(unique)
-            # problem
-            field_combo.setCurrentIndex(0)
-            if service and service.support and service.fields:
-                for i, each in enumerate(service.fields):
-                    field_combo.addItem(each, userData=i)
-                    if each == dict_fld_name or i == dict_fld_ord:
-                        field_combo.setCurrentIndex(i)
-            service_pool.put(service)
+                else:
+                    self.add_dict_layout(i, fld_name=name, fld_ord=ord, word_checked=i==0)
+            else:
+                self.add_dict_layout(i, fld_name=name, fld_ord=ord, word_checked=i==0)
 
     def add_dict_layout(self, i, **kwargs):
         """
@@ -418,11 +419,74 @@ class OptionsDialog(Dialog):
             'skip_check_btn': skip_check_btn
         })
 
-    def save(self):
-        '''save config to file'''
-        if not self.current_model:
-            return
-        data = dict()
+    def fill_dict_combo_options(self, dict_combo, current_unique):
+        '''setup dict combo box'''
+        dict_combo.clear()
+        #dict_combo.addItem(_('NOT_DICT_FIELD'))
+
+        # local dict service
+        #dict_combo.insertSeparator(dict_combo.count())
+        has_local_service = False
+        for cls in service_manager.local_services:
+            # combo_data.insert("data", each.label)
+            service = service_pool.get(cls.__unique__)
+            if service and service.support:
+                dict_combo.addItem(
+                    service.title, userData=service.unique)
+                service_pool.put(service)
+                has_local_service = True
+
+        # hr
+        if has_local_service:
+            dict_combo.insertSeparator(dict_combo.count())
+        
+        # web dict service
+        for cls in service_manager.web_services:
+            service = service_pool.get(cls.__unique__)
+            if service and service.support:
+                dict_combo.addItem(
+                    service.title, userData=service.unique)
+                service_pool.put(service)
+
+        def set_dict_combo_index():
+            #dict_combo.setCurrentIndex(-1)
+            dict_combo.setCurrentIndex(0)
+            if current_unique:
+                for i in range(dict_combo.count()):
+                    if dict_combo.itemData(i) == current_unique:
+                        dict_combo.setCurrentIndex(i)
+                        break
+            
+        set_dict_combo_index()
+
+    def fill_field_combo_options(self, field_combo, dict_combo_text, dict_combo_itemdata, dict_fld_name, dict_fld_ord):
+        '''setup field combobox'''
+        field_combo.clear()
+        field_combo.setEditable(False)
+        #if dict_combo_text in _sl('NOT_DICT_FIELD'):
+        #    field_combo.setEnabled(False)
+        #el
+        if dict_combo_text in _sl('MDX_SERVER'):
+            text = dict_fld_name if dict_fld_name else 'http://'
+            field_combo.setEditable(True)
+            field_combo.setEditText(text)
+            field_combo.setFocus(Qt.MouseFocusReason)  # MouseFocusReason
+        else:
+            unique = dict_combo_itemdata
+            service = service_pool.get(unique)
+            # problem
+            field_combo.setCurrentIndex(0)
+            if service and service.support and service.fields:
+                for i, each in enumerate(service.fields):
+                    field_combo.addItem(each, userData=i)
+                    if each == dict_fld_name or i == dict_fld_ord:
+                        field_combo.setCurrentIndex(i)
+            service_pool.put(service)
+
+    @property
+    def data(self):
+        if not self.___was_built___:
+            return self._conf
         maps = []
         for row in self.___options___:
             maps.append({
@@ -436,7 +500,42 @@ class OptionsDialog(Dialog):
                 'ignore': row['ignore_check_btn'].isChecked(),
                 'skip_valued': row['skip_check_btn'].isChecked()
             })
-        current_model_id = str(self.current_model['id'])
-        data[current_model_id] = maps
-        data['last_model'] = self.current_model['id']
-        config.update(data)
+        return maps
+
+
+class TabBarPlus(QTabBar):
+    '''Tab bar that has a plus button floating to the right of the tabs.'''
+
+    plusClicked = pyqtSignal()
+
+    def __init__(self):
+        super(TabBarPlus, self).__init__()
+        # Plus Button
+        self.plusButton = QPushButton(u'+')
+        self.plusButton.setParent(self)
+        self.plusButton.setFixedSize(26, 26)
+        self.plusButton.clicked.connect(self.plusClicked.emit)
+        self.movePlusButton()
+
+    def sizeHint(self):
+        sh = super(TabBarPlus, self).sizeHint() 
+        width = sh.width()
+        height = sh.height()
+        return QSize(width+25, height)
+
+    def resizeEvent(self, event):
+        super(TabBarPlus, self).resizeEvent(event)
+        self.movePlusButton()
+
+    def tabLayoutChange(self):
+        super(TabBarPlus, self).tabLayoutChange()
+        self.movePlusButton()
+
+    def movePlusButton(self):
+        size = sum([self.tabRect(i).width() for i in range(self.count())])
+        h = self.geometry().top()
+        w = self.width()
+        if size > w:
+            self.plusButton.move(w-54, h)
+        else:
+            self.plusButton.move(size, h)
