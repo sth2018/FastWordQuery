@@ -10,7 +10,7 @@ class Baidu_Chinese(WebService):
     def __init__(self):
         super(Baidu_Chinese, self).__init__()
 
-    def _get_content(self):
+    def _get_from_api(self):
         url = u"http://dict.baidu.com/s?wd={}#basicmean".format(self.quote_word)
         html = self.get_response(url, timeout=10)
         soup = parse_html(html)
@@ -56,9 +56,6 @@ class Baidu_Chinese(WebService):
 
         return self.cache_this(result)
 
-    def _get_field(self, key, default=u''):
-        return self.cache_result(key) if self.cached(key) else self._get_content().get(key, default)
-
     @with_styles(need_wrap_css=True, cssfile='_baidu.css')
     def _css(self, val):
         return val
@@ -72,15 +69,8 @@ class Baidu_Chinese(WebService):
         audio_url = self._get_field('audio_url')
         if baidu_download_mp3 and audio_url:
             filename = get_hex_name(self.unique.lower(), audio_url, 'mp3')
-            try:
-                if os.path.exists(filename) or self.net_download(
-                    filename,
-                    audio_url,
-                    require=dict(mime='audio/mp3', size=512)
-                ):
-                    return self.get_anki_label(filename, 'audio')
-            except:
-                pass
+            if os.path.exists(filename) or self.download(audio_url, filename):
+                return self.get_anki_label(filename, 'audio')
         return ''
 
     @export([u'基本释义', u'Basic Definitions'])
