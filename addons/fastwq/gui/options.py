@@ -295,12 +295,35 @@ class TabContent(QWidget):
 
         model = self._model 
         maps = self._conf
-        labels = ['', '', 'DICTS', 'DICT_FIELDS', '']
-        for i, s in enumerate(labels):
-            label = QLabel(_(s))
-            label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-            self.dicts_layout.addWidget(label, 0, i)
 
+        # labels
+        f = QFont()
+        f.setBold(True)
+        labels = [u'＃', '', 'DICTS', 'DICT_FIELDS', '']
+        for i, s in enumerate(labels):
+            if s:
+                label = QLabel(_(s))
+                label.setFont(f)
+                label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+                self.dicts_layout.addWidget(label, 0, i)
+
+        # ignore all
+        self.ignore_all_check_btn = QCheckBox(_('SELECT_ALL'))
+        self.ignore_all_check_btn.setFont(f)
+        self.ignore_all_check_btn.setEnabled(True)
+        self.ignore_all_check_btn.setChecked(True)
+        self.dicts_layout.addWidget(self.ignore_all_check_btn, 0, 1)
+        self.ignore_all_check_btn.clicked.connect(self.ignore_all_check_changed)
+
+        # Skip valued all
+        self.skip_all_check_btn = QCheckBox(_('SELECT_ALL'))
+        self.skip_all_check_btn.setFont(f)
+        self.skip_all_check_btn.setEnabled(True)
+        self.skip_all_check_btn.setChecked(True)
+        self.dicts_layout.addWidget(self.skip_all_check_btn, 0, 4)
+        self.skip_all_check_btn.clicked.connect(self.skip_all_check_changed)
+
+        # dict & fields
         self.radio_group = QButtonGroup()
         for i, fld in enumerate(model['flds']):
             ord = fld['ord']
@@ -316,6 +339,10 @@ class TabContent(QWidget):
                     self.add_dict_layout(i, fld_name=name, fld_ord=ord, word_checked=i==0)
             else:
                 self.add_dict_layout(i, fld_name=name, fld_ord=ord, word_checked=i==0)
+        
+        # update
+        self.ignore_all_update()
+        self.skip_all_update()
 
     def add_dict_layout(self, i, **kwargs):
         """
@@ -342,18 +369,17 @@ class TabContent(QWidget):
 
         # check
         word_check_btn = QRadioButton(fld_name)
-        word_check_btn.setMinimumSize(WIDGET_SIZE.map_fld_width, 0)
-        word_check_btn.setMaximumSize(
-            WIDGET_SIZE.map_fld_width,
-            WIDGET_SIZE.map_max_height
-        )
         word_check_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         word_check_btn.setCheckable(True)
         word_check_btn.setChecked(word_checked)
         self.radio_group.addButton(word_check_btn)
         # dict combox
         dict_combo = QComboBox()
-        dict_combo.setMinimumSize(WIDGET_SIZE.map_dictname_width, 0)
+        dict_combo.setMinimumSize(WIDGET_SIZE.map_dict_width, 0)
+        dict_combo.setMaximumSize(
+            WIDGET_SIZE.map_dict_width, 
+            WIDGET_SIZE.map_max_height
+        )
         dict_combo.setFocusPolicy(
             Qt.TabFocus | Qt.ClickFocus | Qt.StrongFocus | Qt.WheelFocus
         )
@@ -362,7 +388,11 @@ class TabContent(QWidget):
         dict_unique = dict_combo.itemData(dict_combo.currentIndex())
         # field combox
         field_combo = QComboBox()
-        field_combo.setMinimumSize(WIDGET_SIZE.map_dictfield_width, 0)
+        field_combo.setMinimumSize(WIDGET_SIZE.map_field_width, 0)
+        field_combo.setMaximumSize(
+            WIDGET_SIZE.map_field_width, 
+            WIDGET_SIZE.map_max_height
+        )
         field_combo.setEnabled(not word_checked and not ignore)
         self.fill_field_combo_options(field_combo, dict_name, dict_unique, dict_fld_name, dict_fld_ord)
 
@@ -402,11 +432,15 @@ class TabContent(QWidget):
             radio_btn_checked()
         # ignor
         def ignore_check_changed():
-            ignore = not ignore_check_btn.isChecked()
-            dict_combo.setEnabled(ignore)
-            field_combo.setEnabled(ignore)
-            skip_check_btn.setEnabled(ignore)
-        ignore_check_btn.clicked.connect(ignore_check_changed)
+            word_checked = word_check_btn.isChecked()
+            ignore = ignore_check_btn.isChecked()
+            dict_combo.setEnabled(not word_checked and not ignore)
+            field_combo.setEnabled(not word_checked and not ignore)
+            skip_check_btn.setEnabled(not word_checked and not ignore)
+        ignore_check_btn.stateChanged.connect(ignore_check_changed)
+        ignore_check_btn.clicked.connect(self.ignore_all_update)
+        # skip
+        skip_check_btn.clicked.connect(self.skip_all_update)
         # dict
         def dict_combo_changed(index):
             '''dict combo box index changed'''
@@ -503,3 +537,30 @@ class TabContent(QWidget):
                 'skip_valued': row['skip_check_btn'].isChecked()
             })
         return maps
+
+    def ignore_all_check_changed(self):
+        b = self.ignore_all_check_btn.isChecked()
+        for row in self._options:
+            row['ignore_check_btn'].setChecked(b)
+
+    def skip_all_check_changed(self):
+        b = self.skip_all_check_btn.isChecked()
+        for row in self._options:
+            row['skip_check_btn'].setChecked(b)
+
+    def ignore_all_update(self):
+        b = True
+        for row in self._options:
+            if not row['ignore_check_btn'].isChecked():
+                b = False
+                break
+        self.ignore_all_check_btn.setChecked(b)
+    
+    def skip_all_update(self):
+        b = True
+        for row in self._options:
+            if not row['skip_check_btn'].isChecked():
+                b = False
+                break
+        self.skip_all_check_btn.setChecked(b)
+    
