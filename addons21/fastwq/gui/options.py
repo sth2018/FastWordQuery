@@ -29,7 +29,7 @@ from .setting import SettingDialog
 from ..context import config
 from ..lang import _, _sl
 from ..service import service_manager, service_pool
-from ..utils import get_model_byId
+from ..utils import get_model_byId, get_icon
 from ..constants import Endpoint
 
 
@@ -47,6 +47,9 @@ class OptionsDialog(Dialog):
         'after_build'
     ]
     _signal = pyqtSignal(str)
+
+    _NULL_ICON = get_icon('null.png')
+    _OK_ICON = get_icon('ok.png')
 
     def __init__(self, parent, title=u'Options', model_id = -1):
         super(OptionsDialog, self).__init__(parent, title)
@@ -238,8 +241,12 @@ class OptionsDialog(Dialog):
             self.tab_widget.setTabText(k, _('CONFIG_INDEX') % (k+1))
 
     def changedTab(self, i):
-        tab = self.tabs[i]
-        tab.build()
+        # restore
+        for k in range(0, len(self.tabs)):
+            self.tab_widget.setTabIcon(k, self._NULL_ICON)
+        # add flag
+        self.tab_widget.setTabIcon(i, self._OK_ICON)
+        self.tabs[i].build()
 
     def show_models(self):
         '''
