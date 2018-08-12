@@ -103,7 +103,10 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+# osx
+.DS_Store
 
+# Anki
 prefs*.db
 User*/
 用户*/
