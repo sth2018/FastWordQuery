@@ -1,7 +1,6 @@
 #-*- coding:utf-8 -*-
 import re
 from ..base import *
-from ...context import config
 
 VOICE_PATTERN = r'<a href="sound://([\w/]+\w*\.mp3)"><img src="img/spkr_%s.png"></a>'
 MAPPINGS = [
@@ -15,7 +14,16 @@ LANG_TO_REGEXPS = {lang: regexps for lang, regexps in MAPPINGS}
 class Ldoce6(MdxService):
 
     def __init__(self):
-        super(Ldoce6, self).__init__(config.LDOCE6_PATH)
+        from ...service import service_manager, service_pool
+        dict_path = ''
+        for clazz in service_manager.mdx_services:
+            service = service_pool.get(clazz.__unique__)
+            title = service.builder._title if service and service.support else u''
+            service_pool.put(service)
+            if title.startswith(u'LDOCE6'):
+                dict_path = service.dict_path
+                break
+        super(Ldoce6, self).__init__(dict_path)
 
     @property
     def title(self):

@@ -37,7 +37,6 @@ class Config(object):
     """
 
     _CONFIG_FILENAME = u'fastwqcfg.json'     #Config File Path
-    LDOCE6_PATH = u''
 
     def __init__(self, window):
         self.path = u'_' + self._CONFIG_FILENAME

@@ -75,14 +75,22 @@ class OptionsDialog(Dialog):
             'local': [],                                                #本地词典
             'web': []                                                   #网络词典
         }
-        for cls in service_manager.local_services:
-            service = service_pool.get(cls.__unique__)
+        for clazz in service_manager.local_services:
+            service = service_pool.get(clazz.__unique__)
             if service and service.support:
-                self.dict_services['local'].append(service)
-        for cls in service_manager.web_services:
-            service = service_pool.get(cls.__unique__)
+                self.dict_services['local'].append({
+                    'title': service.title, 
+                    'unique': service.unique
+                })
+            service_pool.put(service)
+        for clazz in service_manager.web_services:
+            service = service_pool.get(clazz.__unique__)
             if service and service.support:
-                self.dict_services['web'].append(service)
+                self.dict_services['web'].append({
+                    'title': service.title, 
+                    'unique': service.unique
+                })
+            service_pool.put(service)
         # emit finished
         self._signal.emit('after_build')
 
@@ -474,7 +482,7 @@ class TabContent(QWidget):
 
         # local dict service
         for service in services['local']:
-            dict_combo.addItem(service.title, userData=service.unique)
+            dict_combo.addItem(service['title'], userData=service['unique'])
 
         # hr
         if len(services['local']) > 0:
@@ -482,7 +490,7 @@ class TabContent(QWidget):
         
         # web dict service
         for service in services['web']:
-            dict_combo.addItem(service.title, userData=service.unique)
+            dict_combo.addItem(service['title'], userData=service['unique'])
 
         def set_dict_combo_index():
             #dict_combo.setCurrentIndex(-1)
