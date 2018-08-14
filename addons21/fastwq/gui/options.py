@@ -80,13 +80,14 @@ class OptionsDialog(Dialog):
             'web': []                                                   #网络词典
         }
         for clazz in service_manager.local_services:
-            service = service_pool.get(clazz.__unique__)
-            if service and service.support:
-                self.dict_services['local'].append({
-                    'title': service.title, 
-                    'unique': service.unique
-                })
-            service_pool.put(service)
+            if dicts.get(clazz.__unique__, dict()).get('enabled', True):
+                service = service_pool.get(clazz.__unique__)
+                if service and service.support:
+                    self.dict_services['local'].append({
+                        'title': service.title, 
+                        'unique': service.unique
+                    })
+                service_pool.put(service)
         for clazz in service_manager.web_services:
             if dicts.get(clazz.__unique__, dict()).get('enabled', True):
                 service = service_pool.get(clazz.__unique__)

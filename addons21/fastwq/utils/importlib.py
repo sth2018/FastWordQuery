@@ -2,6 +2,10 @@
 # While not critical (and in no way guaranteed!), it would be nice to keep this
 # code compatible with Python 2.3.
 import sys
+try:
+    from importlib import reload
+except:
+    pass
 
 def _resolve_name(name, package, level):
     """Return the absolute name of the module to be imported."""
@@ -33,6 +37,9 @@ def import_module(name, package=None):
             level += 1
         name = _resolve_name(name[level:], package, level)
     
-    __import__(name)
+    if name in sys.modules:
+        reload(sys.modules[name])
+    else:
+        __import__(name)
     return sys.modules[name]
     

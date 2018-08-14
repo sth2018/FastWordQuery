@@ -82,7 +82,10 @@ class ServiceManager(object):
             for name, clazz in inspect.getmembers(module, predicate=inspect.isclass):
                 if clazz in base_class:
                     continue
+                if not(issubclass(clazz, WebService) or issubclass(clazz, LocalService)):
+                    continue
                 service = service_wrap(clazz, *args)
+                service.__title__ = getattr(clazz, '__register_label__', name)
                 service.__unique__ = name
                 service.__path__ = os.path.join(mypath, f)
                 if issubclass(clazz, WebService):

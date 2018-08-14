@@ -77,16 +77,14 @@ class DictManageDialog(Dialog):
         # dict service list
         confs = config.dicts
         dicts = list()
-        for clazz in service_manager.web_services:
-            service = service_pool.get(clazz.__unique__)
-            if service and service.support:
-                dicts.append({
-                    'title': service.title, 
-                    'unique': service.unique, 
-                    'path': clazz.__path__,
-                    'enabled': confs.get(service.unique, dict()).get('enabled', True)
-                })
-            service_pool.put(service)
+        services = service_manager.local_custom_services + service_manager.web_services
+        for clazz in services:
+            dicts.append({
+                'title': clazz.__title__, 
+                'unique': clazz.__unique__, 
+                'path': clazz.__path__,
+                'enabled': confs.get(clazz.__unique__, dict()).get('enabled', True)
+            })
         # add dict
         for i, d in enumerate(dicts):
             self.add_dict_layout(i, **d)
