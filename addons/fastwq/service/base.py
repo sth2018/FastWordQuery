@@ -576,7 +576,7 @@ class MdxService(LocalService):
 
     def _get_definition_mdx(self):
         """according to the word return mdx dictionary page"""
-        content = self.builder.mdx_lookup(self.word)
+        content = self.builder.mdx_lookup(self.word, ignorecase=True)
         str_content = ""
         if len(content) > 0:
             for c in content:
@@ -587,7 +587,7 @@ class MdxService(LocalService):
     def _get_definition_mdd(self, word):
         """according to the keyword(param word) return the media file contents"""
         word = word.replace('/', '\\')
-        content = self.builder.mdd_lookup(word)
+        content = self.builder.mdd_lookup(word, ignorecase=True)
         if len(content) > 0:
             return [content[0]]
         else:
