@@ -84,6 +84,7 @@ class ServiceManager(object):
                     continue
                 service = service_wrap(clazz, *args)
                 service.__unique__ = name
+                service.__path__ = os.path.join(mypath, f)
                 if issubclass(clazz, WebService):
                     web_services.append(service)
                     # get the customized local services

@@ -92,6 +92,10 @@ class Config(object):
         return self.data.get('dirs', list())
 
     @property
+    def dicts(self):
+        return self.data.get('dicts', dict())
+
+    @property
     def use_filename(self):
         return self.data.get('use_filename', True)
 

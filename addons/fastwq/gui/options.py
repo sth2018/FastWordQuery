@@ -74,6 +74,7 @@ class OptionsDialog(Dialog):
         if s != 'before_build':
             return
         # dict service list
+        dicts = config.dicts
         self.dict_services = {
             'local': [],                                                #本地词典
             'web': []                                                   #网络词典
@@ -87,13 +88,14 @@ class OptionsDialog(Dialog):
                 })
             service_pool.put(service)
         for clazz in service_manager.web_services:
-            service = service_pool.get(clazz.__unique__)
-            if service and service.support:
-                self.dict_services['web'].append({
-                    'title': service.title, 
-                    'unique': service.unique
-                })
-            service_pool.put(service)
+            if dicts.get(clazz.__unique__, dict()).get('enabled', True):
+                service = service_pool.get(clazz.__unique__)
+                if service and service.support:
+                    self.dict_services['web'].append({
+                        'title': service.title, 
+                        'unique': service.unique
+                    })
+                service_pool.put(service)
         # emit finished
         self._signal.emit('after_build')
 
@@ -117,6 +119,7 @@ class OptionsDialog(Dialog):
         self.tab_widget = QTabWidget()
         self.tab_widget.setTabsClosable(True)
         self.tab_widget.setMovable(False)
+        self.tab_widget.tabBar().setExpanding(False)
         self.tab_widget.setStyleSheet(
             """
             QTabWidget::pane { /* The tab widget frame */
@@ -124,10 +127,21 @@ class OptionsDialog(Dialog):
             }
             """
         )
+        tab_corner = QWidget()
+        tab_corner_layout = QHBoxLayout()
+        tab_corner_layout.setSpacing(1)
+        tab_corner_layout.setSizeConstraint(QLayout.SetMinAndMaxSize)
+        tab_corner_layout.setContentsMargins(0, 0, 0, 0)
+        tab_corner.setLayout(tab_corner_layout)
         tab_add_button = QToolButton(self)
-        tab_add_button.setText(' + ')
-        self.tab_widget.setCornerWidget(tab_add_button)
+        tab_add_button.setIcon(get_icon('add.png'))
+        tab_set_button = QToolButton(self)
+        tab_set_button.setIcon(get_icon('setting.png'))
+        tab_corner_layout.addWidget(tab_set_button)
+        tab_corner_layout.addWidget(tab_add_button)
+        self.tab_widget.setCornerWidget(tab_corner)
         # signals
+        tab_set_button.clicked.connect(self.show_dm_dialog)
         tab_add_button.clicked.connect(self.addTab)
         self.tab_widget.tabCloseRequested.connect(self.removeTab)
         # layout
@@ -178,11 +192,13 @@ class OptionsDialog(Dialog):
 
     def show_fm_dialog(self):
         '''open folder manager dialog'''
-        from .common import show_fm_dialog
-        self.save()
-        self.close()
-        self.destroy()
-        show_fm_dialog(self._parent)
+        self.accept()
+        self.setResult(1001)
+    
+    def show_dm_dialog(self):
+        '''open dictionary manager dialog'''
+        self.accept()
+        self.setResult(1002)
 
     def show_about(self):
         '''open about dialog'''
@@ -398,9 +414,9 @@ class TabContent(QWidget):
         dict_combo.setFocusPolicy(
             Qt.TabFocus | Qt.ClickFocus | Qt.StrongFocus | Qt.WheelFocus
         )
-        dict_combo.setEnabled(not word_checked and not ignore)
-        self.fill_dict_combo_options(dict_combo, dict_unique, self._services)
+        ignore = not self.fill_dict_combo_options(dict_combo, dict_unique, self._services) or ignore
         dict_unique = dict_combo.itemData(dict_combo.currentIndex())
+        dict_combo.setEnabled(not word_checked and not ignore)
         # field combox
         field_combo = QComboBox()
         field_combo.setMinimumSize(WIDGET_SIZE.map_field_width, 0)
@@ -500,15 +516,14 @@ class TabContent(QWidget):
             dict_combo.addItem(service['title'], userData=service['unique'])
 
         def set_dict_combo_index():
-            #dict_combo.setCurrentIndex(-1)
             dict_combo.setCurrentIndex(0)
             if current_unique:
                 for i in range(dict_combo.count()):
                     if dict_combo.itemData(i) == current_unique:
                         dict_combo.setCurrentIndex(i)
-                        break
-            
-        set_dict_combo_index()
+                        return True
+            return False
+        return set_dict_combo_index()
 
     def fill_field_combo_options(self, field_combo, dict_combo_text, dict_combo_itemdata, dict_fld_name, dict_fld_ord):
         '''setup field combobox'''

@@ -23,11 +23,12 @@ from aqt.qt import *
 from aqt.utils import showInfo
 from .options import OptionsDialog
 from .foldermanager import FoldersManageDialog
+from .dictmanager import DictManageDialog
 from ..libs import ankihub
 from ..context import config
 from ..lang import _
 from ..constants import Endpoint, Template
-from ..service import service_manager
+from ..service import service_manager, service_pool
 
 
 __all__ = ['show_options', 'check_updates', 'show_fm_dialog', 'show_about_dialog']
@@ -55,8 +56,23 @@ def show_fm_dialog(browser = None):
     fm_dialog.raise_()
     if fm_dialog.exec_() == QDialog.Accepted:
         # update local services
+        service_pool.clean()
         service_manager.update_services()
     fm_dialog.destroy()
+    # reshow options window
+    show_options(browser)
+
+
+def show_dm_dialog(browser = None):
+    parent = mw if browser is None else browser
+    dm_dialog = DictManageDialog(parent, u'Dictionary Manager')
+    dm_dialog.activateWindow()
+    dm_dialog.raise_()
+    if dm_dialog.exec_() == QDialog.Accepted:
+        # update local services
+        service_pool.clean()
+        service_manager.update_services()
+    dm_dialog.destroy()
     # reshow options window
     show_options(browser)
 
@@ -68,10 +84,15 @@ def show_options(browser = None, model_id = -1, callback = None, *args, **kwargs
     opt_dialog = OptionsDialog(parent, u'Options', model_id)
     opt_dialog.activateWindow()
     opt_dialog.raise_()
-    if opt_dialog.exec_() == QDialog.Accepted:
+    result = opt_dialog.exec_()
+    opt_dialog.destroy()
+    if result == QDialog.Accepted:
         if isinstance(callback, types.FunctionType):
             callback(*args, **kwargs)
-    opt_dialog.destroy()
+    elif result == 1001:
+        show_fm_dialog(parent)
+    elif result == 1002:
+        show_dm_dialog(parent)
 
 
 def show_about_dialog(parent):

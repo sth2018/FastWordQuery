@@ -69,6 +69,8 @@ _arr = [
     ['PLS_SET_DICTIONARY_FIELDS', u'请设置字典和字段', u'Please set the dictionary and fields.'],
     ['CONFIG_INDEX', u'配置 %s', u'Config %s'],
     ['SELECT_ALL', u'全选', u'All'],
+    ['DICTS_NAME', u'字典名称', u'Dictionary Name'],
+    ['EDIT', u'编辑', u'Edit'],
 
     ['BRE_PRON', u'英式发音', u'British Pronunciation'],
     ['AME_PRON', u'美式发音', u'American Pronunciation'],
