@@ -6,6 +6,7 @@ from ..base import *
 
 
 longman_download_mp3 = True
+longman_download_img = True
 
 
 @register([u'朗文', u'Longman'])
@@ -35,6 +36,12 @@ class Longman(WebService):
             if br_s_tag:
                 word_info['br_mp3'] = br_s_tag.get('data-src-mp3', u'')
                 br_s_tag.decompose()
+
+            # remove image
+            image_tag = dic_link.find('img')
+            if image_tag:
+                word_info['image'] = image_tag.get('src')
+                image_tag.decompose()
 
             # Remove related Topics Container
             related_topic_tag = dic_link.find('div', {'class': "topics_container"})
@@ -106,7 +113,7 @@ class Longman(WebService):
         word_info['ee'] = body_html
         return self.cache_this(word_info)
 
-    @export(u'音标')
+    @export('PHON')
     def fld_phonetic(self):
         return self._get_field('phonetic')
     
@@ -118,28 +125,40 @@ class Longman(WebService):
                 return self.get_anki_label(filename, 'audio')
         return ''
 
-    @export(u'美音')
+    def _fld_img(self, fld):
+        img_url = self._get_field(fld)
+        if longman_download_img and img_url:
+            filename = get_hex_name(self.unique.lower(), img_url, 'jpg')
+            if os.path.exists(filename) or self.net_download(filename, img_url):
+                return self.get_anki_label(filename, 'img')
+        return ''
+
+    @export(u'AME_PRON')
     def fld_mp3_us(self):
         return self._fld_mp3('am_mp3')
 
-    @export(u'英音')
+    @export(u'BRE_PRON')
     def fld_mp3_uk(self):
         return self._fld_mp3('br_mp3')
 
-    @export(u'断字单词')
+    @export('IMAGE')
+    def fld_image(self):
+        return self._fld_img('image')
+
+    @export([u'断字单词', u'Hyphenation'])
     def fld_hyphenation(self):
         return self._get_field('hyphenation')
 
-    @export(u'词性')
+    @export([u'词性', u'POS'])
     def fld_pos(self):
         return self._get_field('pos')
 
-    @export(u'英英解释')
+    @export('DEF')
     @with_styles(cssfile='_longman.css')
     def fld_ee(self):
         return self._get_field('ee')
 
-    @export(u'变形')
+    @export([u'变形', u'Inflections'])
     @with_styles(cssfile='_longman.css')
     def fld_inflections(self):
         return self._get_field('inflections')
