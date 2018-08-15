@@ -627,7 +627,7 @@ class MdxService(LocalService):
         '''
         if not self.cache[self.word]:
             html = ''
-            result = self.builder.mdx_lookup(self.word)  # self.word: unicode
+            result = self.builder.mdx_lookup(self.word, ignorecase=True)  # self.word: unicode
             if result:
                 if result[0].upper().find(u"@@@LINK=") > -1:
                     # redirect to a new word behind the equal symol.
@@ -695,7 +695,7 @@ class MdxService(LocalService):
                 shutil.copy(src_fn, savepath)
                 return savepath
             else:
-                bytes_list = self.builder.mdd_lookup(filepath_in_mdx)
+                bytes_list = self.builder.mdd_lookup(filepath_in_mdx, ignorecase=True)
                 if bytes_list:
                     with open(savepath, 'wb') as f:
                         f.write(bytes_list[0])
