@@ -117,5 +117,5 @@ def config_menu():
     add menu to anki window menebar
     """
     action = QAction(APP_ICON, "FastWQ...", mw)
-    action.triggered.connect(show_options)
+    action.triggered.connect(lambda: show_options())
     mw.form.menuTools.addAction(action)
