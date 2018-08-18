@@ -108,7 +108,7 @@ def customize_addcards():
     AddCards.setupButtons = wrap(
         AddCards.setupButtons, 
         add_query_button, 
-        "before"
+        "after"
     )
 
 
