@@ -1,6 +1,7 @@
 #-*- coding:utf-8 -*-
 
 import os
+import re
 from bs4 import Tag
 from ..base import *
 
@@ -40,7 +41,7 @@ class Longman(WebService):
             # remove image
             image_tag = dic_link.find('img')
             if image_tag:
-                word_info['image'] = image_tag.get('src')
+                word_info['image'] = image_tag.get('src', u'')
                 image_tag.decompose()
 
             # Remove related Topics Container
@@ -128,7 +129,11 @@ class Longman(WebService):
     def _fld_img(self, fld):
         img_url = self._get_field(fld)
         if longman_download_img and img_url:
-            filename = get_hex_name(self.unique.lower(), img_url, 'jpg')
+            # img_url -> https://.../ldoce_XXX.jpg?version=A.B.CC
+            img_url_no_version = re.sub(r'\?version=.*?$', '', img_url)
+            # file extension isn't always jpg
+            file_extension = os.path.splitext(img_url_no_version)[1][1:].strip().lower()
+            filename = get_hex_name(self.unique.lower(), img_url, file_extension)
             if os.path.exists(filename) or self.net_download(filename, img_url):
                 return self.get_anki_label(filename, 'img')
         return ''
