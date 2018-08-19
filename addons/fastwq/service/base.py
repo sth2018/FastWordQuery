@@ -549,6 +549,7 @@ class MdxService(LocalService):
         self.cache = defaultdict(str)
         self.html_cache = defaultdict(str)
         self.query_interval = 0.01
+        self.word_links = []
         self.styles = []
         if MdxService.check(self.dict_path):
             self.builder = self._get_builer(dict_path, service_wrap(MdxBuilder, dict_path))
@@ -620,16 +621,23 @@ class MdxService(LocalService):
         default get html from mdx interface
         '''
         if not self.cache[self.word]:
-            html = ''
-            result = self.builder.mdx_lookup(self.word, ignorecase=True)  # self.word: unicode
-            if result:
-                if result[0].upper().find(u"@@@LINK=") > -1:
-                    # redirect to a new word behind the equal symol.
-                    self.word = result[0][len(u"@@@LINK="):].strip()
-                    return self.get_default_html()
-                else:
-                    html = self.adapt_to_anki(result[0])
-                    self.cache[self.word] = html
+            self.word_links = [self.word.upper()]
+            self._get_default_html()
+        return self.cache[self.word]
+
+    def _get_default_html(self):
+        html = u''
+        result = self.builder.mdx_lookup(self.word, ignorecase=True)  # self.word: unicode
+        if result:
+            if result[0].upper().find(u"@@@LINK=") > -1:
+                # redirect to a new word behind the equal symol.
+                word = result[0][len(u"@@@LINK="):].strip()
+                if not word.upper() in self.word_links:
+                    self.word_links.append(word.upper())
+                    self.word = word
+                    return self._get_default_html()
+            html = self.adapt_to_anki(result[0])
+        self.cache[self.word] = html
         return self.cache[self.word]
 
     def adapt_to_anki(self, html):
