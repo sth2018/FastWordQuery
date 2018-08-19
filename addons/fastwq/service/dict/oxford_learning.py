@@ -37,6 +37,8 @@ class OxfordLearning(WebService):
                     {
                         'phonetic': '{} {}'.format(web_word.wd_phon_bre, web_word.wd_phon_nam),
                         'pos': web_word.wd_pos,
+                        'img_full': web_word.wd_image_full_url,
+                        'img_thumb': web_word.wd_image_thumb_url,
                         'ee': ''.join(web_word.definitions_html),
                         's_bre': web_word.wd_sound_url_bre,
                         's_ame': web_word.wd_sound_url_nam,
@@ -47,6 +49,8 @@ class OxfordLearning(WebService):
                     {
                         'phonetic': '',
                         'pos': '',
+                        'img_full': '',
+                        'img_thumb': '',
                         'ee': '',
                         's_bre': '',
                         's_ame': '',
@@ -69,6 +73,20 @@ class OxfordLearning(WebService):
         #     'ee') + "</div>" if "<li>" not in self._get_single_dict('ee') else self._get_single_dict('ee')
         return self._get_single_dict('ee')
 
+    def get_image_full(self):
+        url = self._get_single_dict('img_full')
+        filename = get_hex_name(self.unique.lower(), url, 'jpg')
+        if url and self.download(url, filename):
+            return self.get_anki_label(filename, 'img')
+        return ''
+
+    def get_image_thumb(self):
+        url = self._get_single_dict('img_thumb')
+        filename = get_hex_name(self.unique.lower(), url, 'jpg')
+        if url and self.download(url, filename):
+            return self.get_anki_label(filename, 'img')
+        return ''
+
     def get_sound_bre(self):
         url = self._get_single_dict('s_bre')
         filename = get_hex_name(self.unique.lower(), url, 'mp3')
@@ -82,6 +100,14 @@ class OxfordLearning(WebService):
         if url and self.download(url, filename):
             return self.get_anki_label(filename, 'audio')
         return ''
+
+    @export('IMAGE')
+    def fld_image_full(self):
+        return self.get_image_full()
+
+    @export(u'Thumbnails')
+    def fld_image_thumb(self):
+        return self.get_image_thumb()
 
     @export('BRE_PRON')
     def fld_sound_bre(self):
@@ -122,6 +148,14 @@ class OxfordLearningDictWord:
         :rtype: Tag
         """
         return self.bs.find("div", self._cls_dic('webtop-g'))
+
+    @property
+    def tag_img(self):
+        """
+
+        :rtype: Tag
+        """
+        return self.bs.find('a', self._cls_dic('topic'))
 
     @property
     def tag_pron(self):
@@ -204,6 +238,20 @@ class OxfordLearningDictWord:
             prefix,
             phon
         )
+
+    @property
+    def wd_image_full_url(self):
+        try:
+            return self.tag_img['href']
+        except:
+            return ''
+
+    @property
+    def wd_image_thumb_url(self):
+        try:
+            return self.tag_img.find('img', self._cls_dic('thumb'))['src']
+        except:
+            return ''
 
     @property
     def wd_sound_url_bre(self):
