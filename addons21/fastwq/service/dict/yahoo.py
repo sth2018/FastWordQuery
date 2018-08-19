@@ -54,11 +54,11 @@ class Yahoo_Dict(WebService):
     def _css(self, val):
         return val
 
-    @export(u'音标')
+    @export('PHON')
     def fld_pinyin(self):
         return self._get_field('phon')
 
-    @export(u'发音')
+    @export('PRON')
     def fld_pron(self):
         audio_url = self._get_field('audio_url')
         if yahoo_download_mp3 and audio_url:
@@ -68,14 +68,14 @@ class Yahoo_Dict(WebService):
 
         return ''
 
-    @export(u'中文释义')
+    @export('DEF')
     def fld_basic(self):
         val = self._get_field('def')
         if val is None or val == '':
             return ''
         return self._css(val)
 
-    @export(u'详细释义')
+    @export([u'详细释义', u'Detailed Interpretation'])
     def fld_detail(self):
         val = self._get_field('detail')
         if val is None or val == '':
