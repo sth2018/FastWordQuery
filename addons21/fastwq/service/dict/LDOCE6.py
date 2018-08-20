@@ -1,4 +1,5 @@
 #-*- coding:utf-8 -*-
+import os
 import re
 from ..base import *
 
@@ -62,6 +63,24 @@ class Ldoce6(MdxService):
     def fld_voiceame(self):
         return self._fld_voice(self.get_html(), 'us')
 
+    def _fld_image(self, img):
+        val = '/' + img
+        # file extension isn't always jpg
+        file_extension = os.path.splitext(img)[1][1:].strip().lower()
+        name = get_hex_name('mdx-'+self.unique.lower(), val, file_extension)
+        name = self.save_file(val, name)
+        if name:
+            return self.get_anki_label(name, 'img')
+        return ''
+
+    @export('IMAGE')
+    def fld_image(self):
+        html = self.get_html()
+        m = re.search(r'<span class="imgholder"><img src="(.*?)".*?></span>', html)
+        if m:
+            return self._fld_image(m.groups()[0])
+        return ''
+
     @export('EXAMPLE')
     def fld_sentence(self):
         m = re.findall(r'<span class="example"\s*.*>\s*.*<\/span>', self.get_html())
@@ -73,9 +92,34 @@ class Ldoce6(MdxService):
                                     for element in el_list]
             my_str = ''
             for i_str in maps:
-                i_str = re.sub(r'<a[^>]+?href=\"sound\:.*\.mp3\".*</a>', '', i_str)
-                i_str = i_str.replace('&nbsp;', '')
+                i_str = re.sub(r'<a[^>]+?href=\"sound\:.*\.mp3\".*</a>', '', i_str).strip()
                 my_str = my_str + '<li>' + i_str + '</li>'
+            return self._css(my_str)
+        return ''
+
+    def _fld_audio(self, audio):
+        name = get_hex_name('mdx-'+self.unique.lower(), audio, 'mp3')
+        name = self.save_file(audio, name)
+        if name:
+            return self.get_anki_label(name, 'audio')
+        return ''
+
+    @export(u'Examples with audios')
+    def fld_sentence_audio(self):
+        m = re.findall(r'<span class="example"\s*.*>\s*.*<\/span>', self.get_html())
+        if m:
+            soup = parse_html(m[0])
+            el_list = soup.findAll('span', {'class':'example'})
+            if el_list:
+                maps = [u''.join(str(content).decode('utf-8') for content in element.contents) 
+                                    for element in el_list]
+            my_str = ''
+            for i_str in maps:
+                sound = re.search(r'<a[^>]+?href=\"sound\:\/(.*?\.mp3)\".*</a>', i_str)
+                if sound:
+                    mp3 = self._fld_audio(sound.groups()[0])
+                    i_str = re.sub(r'<a[^>]+?href=\"sound\:.*\.mp3\".*</a>', '', i_str).strip()
+                    my_str = my_str + '<li>' + i_str + ' ' + mp3 + '</li>'
             return self._css(my_str)
         return ''
 
