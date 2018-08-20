@@ -585,7 +585,7 @@ class MdxService(LocalService):
 
     def _get_definition_mdx(self):
         """according to the word return mdx dictionary page"""
-        content = self.builder.mdx_lookup(self.word, ignorecase=True)
+        content = self.builder.mdx_lookup(self.word, ignorecase=config.ignore_mdx_wordcase)
         str_content = ""
         if len(content) > 0:
             for c in content:
@@ -596,7 +596,7 @@ class MdxService(LocalService):
     def _get_definition_mdd(self, word):
         """according to the keyword(param word) return the media file contents"""
         word = word.replace('/', '\\')
-        content = self.builder.mdd_lookup(word, ignorecase=True)
+        content = self.builder.mdd_lookup(word, ignorecase=config.ignore_mdx_wordcase)
         if len(content) > 0:
             return [content[0]]
         else:
@@ -635,7 +635,7 @@ class MdxService(LocalService):
 
     def _get_default_html(self):
         html = u''
-        result = self.builder.mdx_lookup(self.word, ignorecase=True)  # self.word: unicode
+        result = self.builder.mdx_lookup(self.word, ignorecase=config.ignore_mdx_wordcase)  # self.word: unicode
         if result:
             if result[0].upper().find(u"@@@LINK=") > -1:
                 # redirect to a new word behind the equal symol.
@@ -705,7 +705,7 @@ class MdxService(LocalService):
                 shutil.copy(src_fn, savepath)
                 return savepath
             else:
-                bytes_list = self.builder.mdd_lookup(filepath_in_mdx, ignorecase=True)
+                bytes_list = self.builder.mdd_lookup(filepath_in_mdx, ignorecase=config.ignore_mdx_wordcase)
                 if bytes_list:
                     with open(savepath, 'wb') as f:
                         f.write(bytes_list[0])

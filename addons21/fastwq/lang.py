@@ -59,6 +59,7 @@ _arr = [
     ['NEW_VERSION', u'检查到新版本:', u'New version available:'],
     ['UPDATE', u'更新', u'Update'],
     ['AUTO_UPDATE', u'自动检测新版本', u'Auto check new version'],
+    ['IGNORE_MDX_WORDCASE', u'忽略本地词典单词大小写', u'Ignore MDX dictionary word case'],
     ['FORCE_UPDATE', u'强制更新字段', u'Forced Updates of all fields'],
     ['IGNORE_ACCENTS', u'忽略声调', u'Ignore Accents'],
     ['SKIP_VALUED', u'跳过有值项', u'Skip non-empty'],

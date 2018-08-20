@@ -107,6 +107,10 @@ class Config(object):
         return self.data.get('force_update', False)
 
     @property
+    def ignore_mdx_wordcase(self):
+        return self.data.get('ignore_mdx_wordcase', False)
+
+    @property
     def thread_number(self):
         """
         Query Thread Number

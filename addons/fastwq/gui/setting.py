@@ -58,6 +58,11 @@ class SettingDialog(Dialog):
         layout.addWidget(check_auto_update)
         layout.addSpacing(10)
 
+        check_ighore_mdx_wordcase = QCheckBox(_("IGNORE_MDX_WORDCASE"))
+        check_ighore_mdx_wordcase.setChecked(config.ignore_mdx_wordcase)
+        layout.addWidget(check_ighore_mdx_wordcase)
+        layout.addSpacing(10)
+
         hbox = QHBoxLayout()
         input_thread_number = QSpinBox(parent=self)
         input_thread_number.setRange(1, 120)
@@ -79,6 +84,7 @@ class SettingDialog(Dialog):
         self.check_force_update = check_force_update
         self.check_ignore_accents = check_ignore_accents
         self.check_auto_update = check_auto_update
+        self.check_ighore_mdx_wordcase = check_ighore_mdx_wordcase
         self.input_thread_number = input_thread_number
 
         layout.setAlignment(Qt.AlignTop|Qt.AlignLeft)
@@ -93,6 +99,7 @@ class SettingDialog(Dialog):
             'force_update': self.check_force_update.isChecked(),
             'ignore_accents': self.check_ignore_accents.isChecked(),
             'auto_update': self.check_auto_update.isChecked(),
+            'ignore_mdx_wordcase': self.check_ighore_mdx_wordcase.isChecked(),
             'thread_number': self.input_thread_number.value(),
         }
         config.update(data)
