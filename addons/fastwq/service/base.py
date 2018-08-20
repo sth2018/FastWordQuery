@@ -572,8 +572,9 @@ class MdxService(LocalService):
     @export([u'默认', u'Default'])
     def fld_whole(self):
         html = self.get_default_html()
-        js = re.findall(r'<script.*?>.*?</script>', html, re.DOTALL)
-        return QueryResult(result=html, js=u'\n'.join(js))
+        js = re.findall(r'<script .*?>(.*?)</script>', html, re.DOTALL)
+        jsfile = re.findall(r'<script .*?src=[\'\"](.+?)[\'\"]', html, re.DOTALL)
+        return QueryResult(result=html, js=u'\n'.join(js), jsfile=jsfile)
 
     def _get_definition_mdx(self):
         """according to the word return mdx dictionary page"""

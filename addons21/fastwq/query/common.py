@@ -156,14 +156,25 @@ def add_to_tmpl(note, **kwargs):
             addings = js.strip()
             if addings not in afmt:
                 if not addings.startswith(u'<script') and not addings.endswith(u'/script>'):
-                    addings = u'\r\n<script>{}</script>'.format(addings)
+                    addings = u'\n<script type="text/javascript">\n{}\n</script>'.format(addings)
                 afmt += addings
         if jsfile:
-            new_jsfile = u'_' + \
-                jsfile if not jsfile.startswith(u'_') else jsfile
-            copy_static_file(jsfile, new_jsfile)
-            addings = u'\r\n<script src="{}"></script>'.format(new_jsfile)
-            afmt += addings
+            #new_jsfile = u'_' + \
+            #    jsfile if not jsfile.startswith(u'_') else jsfile
+            #copy_static_file(jsfile, new_jsfile)
+            #addings = u'\r\n<script src="{}"></script>'.format(new_jsfile)
+            #afmt += addings
+            jsfile = jsfile if isinstance(jsfile, list) else [jsfile]
+            addings = u''
+            for fn in jsfile:
+                try:
+                    with open(fn, 'r', encoding="utf-8") as f:
+                        addings += u'\n<script type="text/javascript">\n{}\n</script>'.format(f.read())
+                        f.close()
+                except:
+                    pass
+            if addings not in afmt:
+                afmt += addings
         note.model()['tmpls'][0]['afmt'] = afmt
 
 
