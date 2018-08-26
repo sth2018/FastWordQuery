@@ -126,7 +126,7 @@ def context_menu():
         """
         add context menu to webview
         """
-        submenu = menu.addMenu('FastWQ')
+        submenu = menu.addMenu(_('QUERY'))
         submenu.addAction(_('ALL_FIELDS'), lambda: query_from_editor_fields(web_view.editor), QKeySequence(my_shortcut))
         submenu.addAction(_('CURRENT_FIELDS'), 
             lambda: query_from_editor_fields(

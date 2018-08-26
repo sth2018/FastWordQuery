@@ -76,6 +76,7 @@ class ProgressWindow(object):
         )
         self._update(label=number_info, value=words_number+skips_number+fails_number)
         self._win.adjustSize()
+        self.app.processEvents()
 
     def update_title(self, title):
         if self.abort():

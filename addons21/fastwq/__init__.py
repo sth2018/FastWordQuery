@@ -18,10 +18,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from anki.hooks import addHook
-
+from anki.utils import isMac
 
 ############## other config here ##################
-shortcut = 'Ctrl+Q'
+shortcut = ('Ctrl+Alt' if isMac else 'Ctrl') + '+Q'
 ###################################################
 
 
