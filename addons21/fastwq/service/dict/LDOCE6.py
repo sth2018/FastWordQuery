@@ -111,7 +111,7 @@ class Ldoce6(MdxService):
             soup = parse_html(m[0])
             el_list = soup.findAll('span', {'class':'example'})
             if el_list:
-                maps = [u''.join(str(content).decode('utf-8') for content in element.contents) 
+                maps = [u''.join(str(content) for content in element.contents) 
                                     for element in el_list]
             my_str = ''
             for i_str in maps:
