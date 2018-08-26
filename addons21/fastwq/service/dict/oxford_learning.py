@@ -111,7 +111,7 @@ class OxfordLearning(WebService):
     def fld_image_full(self):
         return self.get_image_full()
 
-    @export(u'Thumbnails')
+    @export([u'缩略图', u'Thumbnails'])
     def fld_image_thumb(self):
         return self.get_image_thumb()
 

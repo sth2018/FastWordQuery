@@ -104,7 +104,7 @@ class Ldoce6(MdxService):
             return self.get_anki_label(name, 'audio')
         return ''
 
-    @export(u'Examples with audios')
+    @export([u'例句加音频', u'Examples with audios'])
     def fld_sentence_audio(self):
         m = re.findall(r'<span class="example"\s*.*>\s*.*<\/span>', self.get_html())
         if m:

@@ -100,7 +100,7 @@ class Cambridge(WebService):
     def fld_image(self):
         return self._fld_img('image')
 
-    @export(u'Thumbnails')
+    @export([u'缩略图', u'Thumbnails'])
     def fld_thumbnail(self):
         return self._fld_img('thumb')
 

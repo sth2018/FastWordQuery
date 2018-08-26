@@ -77,7 +77,7 @@ class Oxford(WebService):
         except:
             return ''
 
-    @export(u'Derivatives')
+    @export([u'派生词', u'Derivatives'])
     def fld_deriv(self):
         try:
             entries = self._get_field('lexicalEntries')[0]['derivatives']
