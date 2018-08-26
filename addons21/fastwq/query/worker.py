@@ -92,6 +92,7 @@ class QueryWorkerManager(object):
         self.fields = 0
         self.skips = 0
         self.missed_css = list()
+        self.flush = True
 
     def get_worker(self):
         worker = QueryThread(self)
@@ -155,5 +156,5 @@ class QueryWorkerManager(object):
         self.progress.finish()
     
     def handle_flush(self, note):
-        if note:
+        if self.flush and note:
             note.flush()

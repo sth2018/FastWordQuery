@@ -96,11 +96,11 @@ def customize_addcards():
             if isinstance(e, QMouseEvent):
                 if e.buttons() & Qt.LeftButton:
                     menu = QMenu(self)
-                    menu.addAction(_("Query"), lambda: query_from_editor_all_fields(self.editor), QKeySequence(my_shortcut))
+                    menu.addAction(_("Query"), lambda: query_from_editor_all_fields(self.editor, False), QKeySequence(my_shortcut))
                     menu.addAction(_("Options"), lambda: show_options(self, self.editor.note.model()['id']))
                     menu.exec_(fastwqBtn.mapToGlobal(QPoint(0, fastwqBtn.height())))
             else:
-                query_from_editor_all_fields(self.editor)
+                query_from_editor_all_fields(self.editor, False)
 
         fastwqBtn.mousePressEvent = onQuery
         fastwqBtn.clicked.connect(onQuery)
