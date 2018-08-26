@@ -28,7 +28,7 @@ from ..lang import _
 from ..gui import ProgressWindow
 from ..utils import Empty, MapDict, Queue
 
-from .common import InvalidWordException, query_all_flds, update_note_fields
+from .common import InvalidWordException, query_flds, update_note_fields
 
 
 __all__ = ['QueryWorkerManager']
@@ -60,7 +60,7 @@ class QueryThread(QThread):
                 continue
 
             try:
-                results, success_num, missed_css = query_all_flds(note)
+                results, success_num, missed_css = query_flds(note, self.manager.query_fields)
                 if not self.exit and self.manager:
                     if self.manager.update(note, results, success_num, missed_css):
                         self.note_flush.emit(note)
@@ -93,6 +93,7 @@ class QueryWorkerManager(object):
         self.skips = 0
         self.missed_css = list()
         self.flush = True
+        self.query_fields = None
 
     def get_worker(self):
         worker = QueryThread(self)

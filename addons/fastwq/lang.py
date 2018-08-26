@@ -72,6 +72,11 @@ _arr = [
     ['SELECT_ALL', u'全选', u'All'],
     ['DICTS_NAME', u'字典名称', u'Dictionary Name'],
     ['EDIT', u'编辑', u'Edit'],
+    ['QUERY', u'查询', u'Query'],
+    ['QUERY_SELECTED', u'查询选中项', u'Query Selected'],
+    ['ALL_FIELDS', u'所有字段', u'All Fields'],
+    ['CURRENT_FIELDS', u'当前字段', u'Current Fields'],
+    ['OPTIONS', u'选项', u'Options'],
 
     ['BRE_PRON', u'英式发音', u'British Pronunciation'],
     ['AME_PRON', u'美式发音', u'American Pronunciation'],

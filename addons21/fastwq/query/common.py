@@ -34,7 +34,7 @@ from ..utils import wrap_css
 __all__ = [
     'InvalidWordException', 'update_note_fields',
     'update_note_field', 'promot_choose_css', 'add_to_tmpl',
-    'query_all_flds', 'inspect_note'
+    'query_flds', 'inspect_note'
 ]
 
 
@@ -178,9 +178,9 @@ def add_to_tmpl(note, **kwargs):
         note.model()['tmpls'][0]['afmt'] = afmt
 
 
-def query_all_flds(note):
+def query_flds(note, fileds=None):
     """
-    Query all fields of single note
+    Query fields of single note
     """
 
     word_ord, word, maps = inspect_note(note)
@@ -212,14 +212,15 @@ def query_all_flds(note):
         dict_fld_ord = each.get('dict_fld_ord', -1)
         fld_ord = each.get('fld_ord', -1)
         if dict_unique and dict_fld_ord != -1 and fld_ord != -1:
-            s = services.get(dict_unique, None)
-            if s is None:
-                s = service_pool.get(dict_unique)
+            if fileds is None or fld_ord in fileds:
+                s = services.get(dict_unique, None)
+                if s is None:
+                    s = service_pool.get(dict_unique)
+                    if s and s.support:
+                        services[dict_unique] = s
                 if s and s.support:
-                    services[dict_unique] = s
-            if s and s.support:
-                tasks.append({'k': dict_unique, 'w': word,
-                              'f': dict_fld_ord, 'i': fld_ord})
+                    tasks.append({'k': dict_unique, 'w': word,
+                                'f': dict_fld_ord, 'i': fld_ord})
 
     success_num = 0
     result = defaultdict(QueryResult)

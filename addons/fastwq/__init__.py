@@ -23,15 +23,14 @@ from anki.hooks import addHook, wrap
 from aqt.addcards import AddCards
 from aqt.utils import showInfo, shortcut, downArrow
 from .gui import show_options, show_about_dialog, check_updates
-from .query import query_from_browser, query_from_editor_all_fields
+from .query import query_from_browser, query_from_editor_fields
 from .context import config, APP_ICON
 from .lang import _
 
 
 __all__ = [
-    'add_query_button', 'browser_menu', 
-    'customize_addcards', 'config_menu', 
-    'check_updates'
+    'browser_menu', 'customize_addcards', 
+    'config_menu', 'check_updates', 'context_menu'
 ]
 
 
@@ -51,12 +50,12 @@ def browser_menu():
         menu = QMenu("FastWQ", browser.form.menubar)
         browser.form.menubar.addMenu(menu)
         # Query Selected
-        action = QAction("Query Selected", browser)
+        action = QAction(_('QUERY_SELECTED'), browser)
         action.triggered.connect(lambda: query_from_browser(browser))
         action.setShortcut(QKeySequence(my_shortcut))
         menu.addAction(action)
         # Options
-        action = QAction("Options", browser)
+        action = QAction(_('OPTIONS'), browser)
         def _show_options():
             model_id = -1
             for note_id in browser.selectedNotes():
@@ -67,7 +66,7 @@ def browser_menu():
         action.triggered.connect(_show_options)
         menu.addAction(action)
         # About
-        action = QAction("About", browser)
+        action = QAction(_('ABOUT'), browser)
         action.triggered.connect(lambda: show_about_dialog(browser))
         menu.addAction(action)
 
@@ -85,7 +84,7 @@ def customize_addcards():
         bb = self.form.buttonBox
         ar = QDialogButtonBox.ActionRole
         # button
-        fastwqBtn = QPushButton(_("Query") + u" " + downArrow())
+        fastwqBtn = QPushButton(_("QUERY") + u" " + downArrow())
         fastwqBtn.setShortcut(QKeySequence(my_shortcut))
         fastwqBtn.setToolTip(
             _(u"Shortcut: %s") % shortcut(my_shortcut)
@@ -96,11 +95,11 @@ def customize_addcards():
             if isinstance(e, QMouseEvent):
                 if e.buttons() & Qt.LeftButton:
                     menu = QMenu(self)
-                    menu.addAction(_("Query"), lambda: query_from_editor_all_fields(self.editor, False), QKeySequence(my_shortcut))
-                    menu.addAction(_("Options"), lambda: show_options(self, self.editor.note.model()['id']))
+                    menu.addAction(_("QUERY"), lambda: query_from_editor_fields(self.editor), QKeySequence(my_shortcut))
+                    menu.addAction(_("OPTIONS"), lambda: show_options(self, self.editor.note.model()['id']))
                     menu.exec_(fastwqBtn.mapToGlobal(QPoint(0, fastwqBtn.height())))
             else:
-                query_from_editor_all_fields(self.editor, False)
+                query_from_editor_fields(self.editor)
 
         fastwqBtn.mousePressEvent = onQuery
         fastwqBtn.clicked.connect(onQuery)
@@ -119,3 +118,22 @@ def config_menu():
     action = QAction(APP_ICON, "FastWQ...", mw)
     action.triggered.connect(lambda: show_options())
     mw.form.menuTools.addAction(action)
+
+
+def context_menu():
+    '''mouse right click menu'''
+    def on_setup_menus(web_view, menu):
+        """
+        add context menu to webview
+        """
+        submenu = menu.addMenu('FastWQ')
+        submenu.addAction(_('ALL_FIELDS'), lambda: query_from_editor_fields(web_view.editor), QKeySequence(my_shortcut))
+        submenu.addAction(_('CURRENT_FIELDS'), 
+            lambda: query_from_editor_fields(
+                web_view.editor,
+                fields=[web_view.editor.currentField]
+            )
+        )
+        submenu.addAction(_("OPTIONS"), lambda: show_options(web_view, web_view.editor.note.model()['id']))
+
+    addHook('EditorWebView.contextMenuEvent', on_setup_menus)

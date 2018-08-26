@@ -37,7 +37,7 @@ from ..service.base import LocalService
 from ..utils import Empty, MapDict, Queue, wrap_css
 
 
-__all__ = ['query_from_browser', 'query_from_editor_all_fields']
+__all__ = ['query_from_browser', 'query_from_editor_fields']
 
 
 def query_from_browser(browser):
@@ -52,13 +52,13 @@ def query_from_browser(browser):
              for note_id in browser.selectedNotes()]
 
     if len(notes) == 1:
-        query_from_editor_all_fields(browser.editor)
+        query_from_editor_fields(browser.editor)
     else:
         query_all(notes)
         # browser.model.reset()
 
 
-def query_from_editor_all_fields(editor, flush=True):
+def query_from_editor_fields(editor, fields=None):
     """
     Query word fileds from Editor
     """
@@ -67,6 +67,7 @@ def query_from_editor_all_fields(editor, flush=True):
         return
 
     word_ord, word, maps = inspect_note(editor.note)
+    flush = not editor.addMode
     nomaps = True
     for each in maps:
         dict_unique = each.get('dict_unique', '').strip()
@@ -80,17 +81,18 @@ def query_from_editor_all_fields(editor, flush=True):
         show_options(
             editor.parentWindow,
             editor.note.model()['id'],
-            query_from_editor_all_fields,
-            editor
+            query_from_editor_fields,
+            editor,
+            fields
         )
     else:
         editor.setNote(editor.note)
-        query_all([editor.note], flush)
+        query_all([editor.note], flush, fields)
         editor.setNote(editor.note, focusTo=0)
         editor.saveNow(lambda:None)
 
 
-def query_all(notes, flush=True):
+def query_all(notes, flush=True, fields=None):
     """
     Query maps word fileds
     """
@@ -102,6 +104,7 @@ def query_all(notes, flush=True):
     #work_manager.reset()
     #progress.start(max=len(notes), min=0, immediate=True)
     work_manager.flush = flush
+    work_manager.query_fields = fields
     queue = work_manager.queue
 
     for note in notes:
