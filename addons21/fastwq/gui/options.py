@@ -230,18 +230,18 @@ class OptionsDialog(Dialog):
         except Exception: pass
         while len(self.tabs) > 0:
             self.removeTab(0, True)
-        #
+        # tabs
         conf = config.get_maps(self.current_model['id'])
         maps_list = {'list': [conf], 'def': 0} if isinstance(conf, list) else conf
         for maps in maps_list['list']:
             self.addTab(maps, False)
-        self.tab_widget.setCurrentIndex(maps_list['def'])
         self.tab_widget.currentChanged.connect(self.changedTab)
-        self.changedTab(self.tab_widget.currentIndex())
+        # value
+        self.changedTab(maps_list['def'])
+        self.tab_widget.setCurrentIndex(maps_list['def'])
         # size
-        tab_frame_width = self.tabs[self.tab_widget.currentIndex()].frameSize().width()
         self.resize(
-            tab_frame_width + self.frameSize().width() - tab_frame_width,
+            WIDGET_SIZE.dialog_width, 
             min(max(3, len(self.current_model['flds'])+1), 14) * WIDGET_SIZE.map_max_height + WIDGET_SIZE.dialog_height_margin
         )
         self.save()
@@ -272,7 +272,7 @@ class OptionsDialog(Dialog):
                 self.tab_widget.setTabIcon(k, self._NULL_ICON)
             # add flag
             self.tab_widget.setTabIcon(i, self._OK_ICON)
-        self.tabs[i].build()
+        self.tabs[i].build_layout()
 
     def show_models(self):
         '''
@@ -318,16 +318,16 @@ class TabContent(QScrollArea):
         self._last_checkeds = None
         self._options = list()
         self._was_built = False
-        # add dicts mapping
-        self.dicts_widget = QWidget()
-        self.dicts_layout = QGridLayout()
-        self.dicts_layout.setSizeConstraint(QLayout.SetMinAndMaxSize)
-        self.dicts_widget.setLayout(self.dicts_layout)
+        # dicts mapping
+        dicts = QWidget(self)
+        dicts.setLayout(QGridLayout())
         self.setFrameShape(QFrame.NoFrame)
         self.setWidgetResizable(True)
-        self.setWidget(self.dicts_widget)
+        self.setWidget(dicts)
+        self.dicts_layout = dicts.layout()
+        #self.dicts_layout.setSizeConstraint(QLayout.SetFixedSize)
 
-    def build(self):
+    def build_layout(self):
         '''
         build dictionary、fields etc
         '''
@@ -367,7 +367,7 @@ class TabContent(QScrollArea):
         self.skip_all_check_btn.setChecked(True)
         self.dicts_layout.addWidget(self.skip_all_check_btn, 0, 4)
         self.skip_all_check_btn.clicked.connect(self.skip_all_check_changed)
-
+        
         # dict & fields
         self.radio_group = QButtonGroup()
         for i, fld in enumerate(model['flds']):
@@ -440,7 +440,7 @@ class TabContent(QScrollArea):
         )
         field_combo.setEnabled(not word_checked and not ignore)
         self.fill_field_combo_options(field_combo, dict_name, dict_unique, dict_fld_name, dict_fld_ord)
-
+        
         # ignore
         ignore_check_btn = QCheckBox(_("NOT_DICT_FIELD"))
         ignore_check_btn.setEnabled(not word_checked)
@@ -497,13 +497,13 @@ class TabContent(QScrollArea):
                 field_combo.itemData(field_combo.currentIndex())
             )
         dict_combo.currentIndexChanged.connect(dict_combo_changed)
-
+        
         self.dicts_layout.addWidget(word_check_btn, i + 1, 0)
         self.dicts_layout.addWidget(ignore_check_btn, i + 1, 1)
         self.dicts_layout.addWidget(dict_combo, i + 1, 2)
         self.dicts_layout.addWidget(field_combo, i + 1, 3)
         self.dicts_layout.addWidget(skip_check_btn, i + 1, 4)
-
+        
         self._options.append({
             'model': {'fld_name': fld_name, 'fld_ord': fld_ord},
             'word_check_btn': word_check_btn, 
