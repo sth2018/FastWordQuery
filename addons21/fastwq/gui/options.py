@@ -24,6 +24,7 @@ import sip
 from aqt import mw
 from aqt.qt import *
 from aqt.studydeck import StudyDeck
+from anki.utils import isMac
 from .base import Dialog, WIDGET_SIZE
 from .setting import SettingDialog
 from ..context import config
@@ -137,6 +138,9 @@ class OptionsDialog(Dialog):
         tab_add_button = QToolButton(self)
         tab_add_button.setIcon(get_icon('add.png'))
         tab_set_button = QToolButton(self)
+        if isMac:
+            tab_set_button.setMaximumSize(20, 20)
+            tab_add_button.setMaximumSize(20, 20)
         tab_set_button.setIcon(get_icon('setting.png'))
         tab_corner_layout.addWidget(tab_set_button)
         tab_corner_layout.addWidget(tab_add_button)
@@ -258,11 +262,12 @@ class OptionsDialog(Dialog):
             self.tab_widget.setTabText(k, _('CONFIG_INDEX') % (k+1))
 
     def changedTab(self, i):
-        # restore
-        for k in range(0, len(self.tabs)):
-            self.tab_widget.setTabIcon(k, self._NULL_ICON)
-        # add flag
-        self.tab_widget.setTabIcon(i, self._OK_ICON)
+        if not isMac:
+            # restore
+            for k in range(0, len(self.tabs)):
+                self.tab_widget.setTabIcon(k, self._NULL_ICON)
+            # add flag
+            self.tab_widget.setTabIcon(i, self._OK_ICON)
         self.tabs[i].build()
 
     def show_models(self):
