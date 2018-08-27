@@ -239,7 +239,11 @@ class OptionsDialog(Dialog):
         self.tab_widget.currentChanged.connect(self.changedTab)
         self.changedTab(self.tab_widget.currentIndex())
         # size
-        self.adjustSize()
+        tab_frame_width = self.tabs[self.tab_widget.currentIndex()].frameSize().width()
+        self.resize(
+            tab_frame_width + self.frameSize().width() - tab_frame_width,
+            min(max(3, len(self.current_model['flds'])+1), 14) * WIDGET_SIZE.map_max_height + WIDGET_SIZE.dialog_height_margin
+        )
         self.save()
     
     def addTab(self, maps=None, forcus=True):
@@ -303,7 +307,7 @@ class OptionsDialog(Dialog):
         config.update(data)
 
 
-class TabContent(QWidget):
+class TabContent(QScrollArea):
     '''Options tab content'''
 
     def __init__(self, model, conf, services):
@@ -315,9 +319,13 @@ class TabContent(QWidget):
         self._options = list()
         self._was_built = False
         # add dicts mapping
+        self.dicts_widget = QWidget()
         self.dicts_layout = QGridLayout()
         self.dicts_layout.setSizeConstraint(QLayout.SetMinAndMaxSize)
-        self.setLayout(self.dicts_layout)
+        self.dicts_widget.setLayout(self.dicts_layout)
+        self.setFrameShape(QFrame.NoFrame)
+        self.setWidgetResizable(True)
+        self.setWidget(self.dicts_widget)
 
     def build(self):
         '''
