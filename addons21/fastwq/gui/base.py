@@ -55,7 +55,7 @@ class WidgetSize(object):
     '''
     constant values
     '''
-    dialog_width = 730
+    dialog_width = 850
     dialog_height_margin = 146
     map_min_height = 0
     map_max_height = 30

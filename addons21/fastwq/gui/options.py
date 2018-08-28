@@ -407,9 +407,10 @@ class TabContent(QScrollArea):
             kwargs.get('dcit_fld_ord', 0)                               #对应字典的字段编号
         )
 
-        ignore, skip = (
+        ignore, skip, cloze = (
             kwargs.get('ignore', True),                                 #忽略标志
             kwargs.get('skip_valued', True),                            #略过有值项标志
+            kwargs.get('cloze_word', False),                            #单词填空
         )
 
         # check
@@ -450,6 +451,11 @@ class TabContent(QScrollArea):
         skip_check_btn = QCheckBox(_("SKIP_VALUED"))
         skip_check_btn.setEnabled(not word_checked and not ignore)
         skip_check_btn.setChecked(skip)
+
+        # Skip valued
+        cloze_check_btn = QCheckBox(_("CLOZE_WORD"))
+        cloze_check_btn.setEnabled(not word_checked and not ignore)
+        cloze_check_btn.setChecked(cloze)
 
         # events
         # word
@@ -503,6 +509,7 @@ class TabContent(QScrollArea):
         self.dicts_layout.addWidget(dict_combo, i + 1, 2)
         self.dicts_layout.addWidget(field_combo, i + 1, 3)
         self.dicts_layout.addWidget(skip_check_btn, i + 1, 4)
+        self.dicts_layout.addWidget(cloze_check_btn, i + 1, 5)
         
         self._options.append({
             'model': {'fld_name': fld_name, 'fld_ord': fld_ord},
@@ -510,7 +517,8 @@ class TabContent(QScrollArea):
             'dict_combo': dict_combo, 
             'field_combo': field_combo, 
             'ignore_check_btn': ignore_check_btn, 
-            'skip_check_btn': skip_check_btn
+            'skip_check_btn': skip_check_btn,
+            'cloze_check_btn': cloze_check_btn
         })
 
     def fill_dict_combo_options(self, dict_combo, current_unique, services):
@@ -578,7 +586,8 @@ class TabContent(QScrollArea):
                 'dict_fld_name': row['field_combo'].currentText().strip(),
                 'dict_fld_ord': row['field_combo'].itemData(row['field_combo'].currentIndex()),
                 'ignore': row['ignore_check_btn'].isChecked(),
-                'skip_valued': row['skip_check_btn'].isChecked()
+                'skip_valued': row['skip_check_btn'].isChecked(),
+                'cloze_word': row['cloze_check_btn'].isChecked()
             })
         return maps
 

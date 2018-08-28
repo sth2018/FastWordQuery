@@ -17,12 +17,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from collections import defaultdict
+
 import os
+import re
 import io
 import shutil
 import unicodedata
-from PyQt4 import QtGui
+
+from collections import defaultdict
+from aqt.qt import *
 from aqt.utils import showInfo
 
 from ..constants import Template
@@ -130,7 +133,7 @@ def promot_choose_css(missed_css):
             try:
                 filepath = css['dict_path'][:css['dict_path'].rindex(
                     os.path.sep)+1]
-                filepath = QtGui.QFileDialog.getOpenFileName(
+                filepath = QFileDialog.getOpenFileName(
                     directory=filepath,
                     caption=u'Choose css file',
                     filter=u'CSS (*.css)'
@@ -207,6 +210,8 @@ def query_flds(note, fileds=None):
         skip = each.get('skip_valued', False)
         if skip and len(note.fields[i]) != 0:
             continue
+        #cloze
+        cloze = each.get('cloze_word', False)
         #normal
         dict_unique = each.get('dict_unique', '').strip()
         dict_fld_ord = each.get('dict_fld_ord', -1)
@@ -219,8 +224,13 @@ def query_flds(note, fileds=None):
                     if s and s.support:
                         services[dict_unique] = s
                 if s and s.support:
-                    tasks.append({'k': dict_unique, 'w': word,
-                                'f': dict_fld_ord, 'i': fld_ord})
+                    tasks.append({
+                        'k': dict_unique, 
+                        'w': word,
+                        'f': dict_fld_ord, 
+                        'i': fld_ord,
+                        'cloze': cloze,
+                    })
 
     success_num = 0
     result = defaultdict(QueryResult)
@@ -229,6 +239,8 @@ def query_flds(note, fileds=None):
         service = services.get(task['k'], None)
         qr = service.active(task['f'], task['w'])
         if qr:
+            if task['cloze']:
+                qr['result'] = cloze_deletion(qr['result'], word)
             result.update({task['i']: qr})
             success_num += 1
         #except:
@@ -247,3 +259,18 @@ def query_flds(note, fileds=None):
         service_pool.put(service)
 
     return result, -1 if len(tasks) == 0 else success_num, missed_css
+
+
+def cloze_deletion(text, term):
+    '''create cloze deletion text'''
+    result = text
+    words = re.finditer(r"\b" + re.escape(term) + r"\b", text, flags=re.IGNORECASE)
+    words = [m.start() for m in words][::-1]
+    index = 1
+    for word in words:
+        if not text[word - 1].isalnum() or text[word + len(term)].isalnum():
+            if not "{{" in text[word:word + len(term)] or "}}" in text[word:word + len(term)]:
+                result = result[:word + len(term)] + "}}" + result[word + len(term):]
+                result = result[:word] + "{{c" + str(index) + "::" + result[word:]
+                index += 1
+    return result
