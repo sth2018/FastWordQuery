@@ -473,6 +473,7 @@ class TabContent(QScrollArea):
             dict_combo.setEnabled(not word_checked and not ignore)
             field_combo.setEnabled(not word_checked and not ignore)
             skip_check_btn.setEnabled(not word_checked and not ignore)
+            cloze_check_btn.setEnabled(not word_checked and not ignore)
             if word_checked:
                 self._last_checkeds = [
                     ignore_check_btn, dict_combo, 
@@ -489,6 +490,7 @@ class TabContent(QScrollArea):
             dict_combo.setEnabled(not word_checked and not ignore)
             field_combo.setEnabled(not word_checked and not ignore)
             skip_check_btn.setEnabled(not word_checked and not ignore)
+            cloze_check_btn.setEnabled(not word_checked and not ignore)
         ignore_check_btn.stateChanged.connect(ignore_check_changed)
         ignore_check_btn.clicked.connect(self.ignore_all_update)
         # skip
