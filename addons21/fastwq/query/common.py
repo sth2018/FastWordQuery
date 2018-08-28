@@ -273,5 +273,5 @@ def cloze_deletion(text, term):
             if not "{{" in text[word:word + len(term)] or "}}" in text[word:word + len(term)]:
                 result = result[:word + len(term)] + "}}" + result[word + len(term):]
                 result = result[:word] + "{{c" + str(index) + "::" + result[word:]
-                index += 1
+                #index += 1
     return result
