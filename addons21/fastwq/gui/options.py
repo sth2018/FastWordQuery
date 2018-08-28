@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import sys
 import anki
 import aqt
 import aqt.models
@@ -138,7 +139,7 @@ class OptionsDialog(Dialog):
         tab_add_button = QToolButton(self)
         tab_add_button.setIcon(get_icon('add.png'))
         tab_set_button = QToolButton(self)
-        if isMac:
+        if isMac and sys.hexversion < 0x03000000:
             tab_set_button.setMaximumSize(20, 20)
             tab_add_button.setMaximumSize(20, 20)
         tab_set_button.setIcon(get_icon('setting.png'))
@@ -266,7 +267,7 @@ class OptionsDialog(Dialog):
             self.tab_widget.setTabText(k, _('CONFIG_INDEX') % (k+1))
 
     def changedTab(self, i):
-        if not isMac:
+        if not isMac or sys.hexversion >= 0x03000000:
             # restore
             for k in range(0, len(self.tabs)):
                 self.tab_widget.setTabIcon(k, self._NULL_ICON)

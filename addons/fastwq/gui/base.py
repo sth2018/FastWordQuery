@@ -17,6 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import sys
+from anki.utils import isMac
 from aqt.qt import *
 from ..context import APP_ICON
 
@@ -49,6 +51,9 @@ class Dialog(QDialog):
             title if "FastWQ" in title
             else "FastWQ - " + title
         )
+        # 2 & 3 & mac compatible
+        if isMac and sys.hexversion >= 0x03000000:
+            QApplication.setStyle('Fusion')
 
 
 class WidgetSize(object):
@@ -56,7 +61,7 @@ class WidgetSize(object):
     constant values
     '''
     dialog_width = 850
-    dialog_height_margin = 146
+    dialog_height_margin = 166 if isMac and sys.hexversion < 0x03000000 else 146
     map_min_height = 0
     map_max_height = 30
     map_fld_width = 100
