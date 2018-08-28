@@ -86,7 +86,7 @@ def query_from_editor_fields(editor, fields=None):
             fields
         )
     else:
-        editor.setNote(editor.note)
+        #editor.setNote(editor.note)
         query_all([editor.note], flush, fields)
         editor.setNote(editor.note, focus=True)
         editor.saveNow()
