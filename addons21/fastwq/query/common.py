@@ -33,6 +33,7 @@ from ..context import config
 from ..service import service_pool, QueryResult, copy_static_file
 from ..service.base import LocalService
 from ..utils import wrap_css
+from ..libs.snowballstemmer import stemmer
 
 
 __all__ = [
@@ -264,14 +265,27 @@ def query_flds(note, fileds=None):
 
 def cloze_deletion(text, term):
     '''create cloze deletion text'''
+    text = text.replace('’', '\'')
     result = text
-    words = re.finditer(r"\b" + re.escape(term) + r"\b", text, flags=re.IGNORECASE)
-    words = [m.start() for m in words][::-1]
-    index = 1
-    for word in words:
-        if not text[word - 1].isalnum() or text[word + len(term)].isalnum():
-            if not "{{" in text[word:word + len(term)] or "}}" in text[word:word + len(term)]:
-                result = result[:word + len(term)] + "}}" + result[word + len(term):]
-                result = result[:word] + "{{c" + str(index) + "::" + result[word:]
-                #index += 1
+    offset = 0
+    term = _stemmer.stemWord(term).lower()
+
+    terms = re.finditer(r"\b[\w'-]*\b", text)
+    tags = re.finditer(r"<[^>]+>", text)
+    for m in terms:
+        s = m.start()
+        e = m.end()
+        f = False
+        for tag in tags:
+            if s >= tag.start() and e <= tag.end():
+                f = True
+                break
+        if f:
+            continue
+        word = text[s:e]
+        if _stemmer.stemWord(word).lower() == term:
+            result = result[:s+offset] + "{{c1::" + word + "}}" + result[e+offset:]
+            offset += 8
     return result
+
+_stemmer = stemmer('english')

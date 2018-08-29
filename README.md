@@ -74,3 +74,4 @@ It forks from [WordQuery](https://github.com/finalion/WordQuery), added **multi-
   - [pystardict](https://github.com/lig/pystardict)
   - [WordQuery](https://github.com/finalion/WordQuery)
   - [AnkiHub](https://github.com/dayjaby/AnkiHub)
+  - [snowball_py](https://github.com/shibukawa/snowball_py)

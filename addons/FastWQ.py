@@ -17,8 +17,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import sys
 from anki.hooks import addHook
 from anki.utils import isMac
+
+sys.dont_write_bytecode = True
 
 ############## other config here ##################
 shortcut = ('Ctrl+Alt' if isMac else 'Ctrl') + '+Q'
