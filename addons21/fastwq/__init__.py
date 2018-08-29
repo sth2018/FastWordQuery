@@ -17,11 +17,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import ssl
 import sys
 from anki.hooks import addHook
 from anki.utils import isMac
 
 sys.dont_write_bytecode = True
+ssl._create_default_https_context = ssl._create_unverified_context
 
 ############## other config here ##################
 shortcut = ('Ctrl+Alt' if isMac else 'Ctrl') + '+Q'
