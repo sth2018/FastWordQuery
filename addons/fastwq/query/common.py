@@ -262,12 +262,12 @@ def query_flds(note, fileds=None):
     return result, -1 if len(tasks) == 0 else success_num, missed_css
 
 
-def cloze_deletion(text, term):
+def cloze_deletion(text, cloze):
     '''create cloze deletion text'''
     text = text.replace('’', '\'')
     result = text
     offset = 0
-    term = _stemmer.stemWord(term).lower()
+    term = _stemmer.stemWord(cloze).lower()
 
     terms = re.finditer(r"\b[\w'-]*\b", text)
     tags = re.finditer(r"<[^>]+>", text)
@@ -283,7 +283,12 @@ def cloze_deletion(text, term):
             continue
         word = text[s:e]
         if _stemmer.stemWord(word).lower() == term:
-            result = result[:s+offset] + "{{c1::" + word + "}}" + result[e+offset:]
+            l = len(cloze)
+            w = word
+            if w[:l].lower() == cloze.lower():
+                e = s + l
+                w = word[:l]
+            result = result[:s+offset] + "{{c1::" + w + "}}" + result[e+offset:]
             offset += 8
     return result
 
