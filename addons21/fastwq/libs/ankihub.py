@@ -81,7 +81,8 @@ class DialogUpdates(QDialog, Ui_DialogUpdates):
 
 
 def installZipFile(data, fname):
-    base = os.path.join(mw.pm.addonFolder(), 'fastwq')
+    #base = os.path.join(mw.pm.addonFolder(), 'fastwq')
+    base = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../'))
     if fname.endswith(".py"):
         path = os.path.join(base, fname)
         with open(path, "wb") as file:
