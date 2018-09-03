@@ -23,9 +23,10 @@ from anki.hooks import addHook, wrap
 from aqt.addcards import AddCards
 from aqt.utils import showInfo, shortcut, downArrow
 from .gui import show_options, show_about_dialog, check_updates
-from .query import query_from_browser, query_from_editor_fields
+from .query import query_from_browser, query_from_editor_fields, inspect_note
 from .context import config, APP_ICON
 from .lang import _
+from .service import service_pool
 
 
 __all__ = [
@@ -126,14 +127,30 @@ def context_menu():
         """
         add context menu to webview
         """
+        word, word_ord, maps = inspect_note(web_view.editor.note)
+        current_field = u''
+        if web_view.editor.currentField != word_ord:
+            each = maps[web_view.editor.currentField]
+            ignore = each.get('ignore', False)
+            if not ignore:
+                dict_unique = each.get('dict_unique', '').strip()
+                dict_fld_ord = each.get('dict_fld_ord', -1)
+                fld_ord = each.get('fld_ord', -1)
+                if dict_unique and dict_fld_ord != -1 and fld_ord != -1:
+                    s = service_pool.get(dict_unique)
+                    if s and s.support:
+                        current_field = ' (' + s.title + ' -> ' + s.fields[dict_fld_ord] + ')'
+                    service_pool.put(s)
+
         submenu = menu.addMenu(_('QUERY'))
         submenu.addAction(_('ALL_FIELDS'), lambda: query_from_editor_fields(web_view.editor), QKeySequence(my_shortcut))
-        submenu.addAction(_('CURRENT_FIELDS'), 
-            lambda: query_from_editor_fields(
-                web_view.editor,
-                fields=[web_view.editor.currentField]
+        if current_field:
+            submenu.addAction(_('CURRENT_FIELDS') + current_field, 
+                lambda: query_from_editor_fields(
+                    web_view.editor,
+                    fields=[web_view.editor.currentField]
+                )
             )
-        )
         submenu.addAction(_("OPTIONS"), lambda: show_options(web_view, web_view.editor.note.model()['id']))
 
     addHook('EditorWebView.contextMenuEvent', on_setup_menus)
