@@ -15,8 +15,8 @@ class BingXtk(WebService):
     def _get_from_api(self):
         result = {
             'pronunciation': {'AmE': '', 'BrE': '', 'AmEmp3': '', 'BrEmp3': ''},
-            'def': '',
-            'sams': '',
+            'def': [],
+            'sams': [],
         }
         headers = {
             'Accept-Language': 'en-US,zh-CN;q=0.8,zh;q=0.6,en;q=0.4',

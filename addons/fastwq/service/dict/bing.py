@@ -16,8 +16,8 @@ class Bing(WebService):
         soup = parse_html(data)
         result = {
             'pronunciation': {'AmE': '', 'BrE': '', 'AmEmp3': '', 'BrEmp3': ''},
-            'def': '',
-            'sams': '',
+            'def': [],
+            'sams': [],
         }
 
         #音
