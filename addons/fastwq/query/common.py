@@ -58,6 +58,7 @@ def inspect_note(note):
     conf = config.get_maps(note.model()['id'])
     maps_list = {'list': [conf], 'def': 0} if isinstance(conf, list) else conf
     maps = maps_list['list'][maps_list['def']]
+    maps = maps if isinstance(maps, list) else maps['fields']
     for i, m in enumerate(maps):
         if m.get('word_checked', False):
             word_ord = i

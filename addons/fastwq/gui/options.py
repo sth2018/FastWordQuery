@@ -120,9 +120,7 @@ class OptionsDialog(Dialog):
         self.main_layout.addLayout(models_layout)
         # tabs
         self.tab_widget = QTabWidget()
-        self.tab_widget.setTabsClosable(True)
-        self.tab_widget.setMovable(False)
-        self.tab_widget.tabBar().setExpanding(False)
+        self.tab_widget.setTabBar(CTabBar())
         self.tab_widget.setStyleSheet(
             """
             QTabWidget::pane { /* The tab widget frame */
@@ -248,10 +246,22 @@ class OptionsDialog(Dialog):
         self.save()
     
     def addTab(self, maps=None, forcus=True):
-        tab = TabContent(self.current_model, maps, self.dict_services)
         i = len(self.tabs)
+        if isinstance(maps, list):
+            maps = {
+                'fields': maps,
+                'name': _('CONFIG_INDEX') % (i+1)
+            }
+        tab = TabContent(
+            self.current_model, 
+            maps['fields'] if maps else None, 
+            self.dict_services
+        )
         self.tabs.append(tab)
-        self.tab_widget.addTab(tab, _('CONFIG_INDEX') % (i+1))
+        self.tab_widget.addTab(
+            tab, 
+            maps['name'] if maps else _('CONFIG_INDEX') % (i+1)
+        )
         if forcus:
             self.tab_widget.setCurrentIndex(i)
 
@@ -263,8 +273,8 @@ class OptionsDialog(Dialog):
         del self.tabs[i]
         self.tab_widget.removeTab(i)
         tab.destroy()
-        for k in range(0, len(self.tabs)):
-            self.tab_widget.setTabText(k, _('CONFIG_INDEX') % (k+1))
+        #for k in range(0, len(self.tabs)):
+        #    self.tab_widget.setTabText(k, _('CONFIG_INDEX') % (k+1))
 
     def changedTab(self, i):
         if not isMac or sys.hexversion >= 0x03000000:
@@ -300,8 +310,11 @@ class OptionsDialog(Dialog):
             'list': [], 
             'def': self.tab_widget.currentIndex()
         }
-        for tab in self.tabs:
-            maps_list['list'].append(tab.data)
+        for i, tab in enumerate(self.tabs):
+            maps_list['list'].append({
+                'fields': tab.data,
+                'name': self.tab_widget.tabBar().tabText(i)
+            })
         current_model_id = str(self.current_model['id'])
         data[current_model_id] = maps_list
         data['last_model'] = self.current_model['id']    
@@ -619,4 +632,60 @@ class TabContent(QScrollArea):
                 b = False
                 break
         self.skip_all_check_btn.setChecked(b)
+
+
+class CTabBar(QTabBar):
+
+    def __init__(self, parent = None):
+        super(CTabBar, self).__init__(parent)
+        # style
+        self.setTabsClosable(True)
+        self.setMovable(False)
+        self.setExpanding(False)
+        self.setDrawBase(False)
+        # edit
+        self._editor = QLineEdit(self)
+        self._editor.setWindowFlags(Qt.Popup)
+        self._editor.setMaxLength(20)
+        self._editor.editingFinished.connect(self.handleEditingFinished)
+        self._editor.installEventFilter(self)
+
+    def eventFilter(self, widget, event):
+        if ((event.type() == QEvent.MouseButtonPress and \
+                not self._editor.geometry().contains(event.globalPos()) \
+            ) or \
+            (event.type() == QEvent.KeyPress and \
+                event.key() == Qt.Key_Escape)
+            ):
+                self.hideEditor()
+                return True
+        return QTabBar.eventFilter(self, widget, event)
+
+    def mouseDoubleClickEvent(self, event):
+        index = self.tabAt(event.pos())
+        if index >= 0:
+            self.editTab(index)
+
+    def editTab(self, index):
+        rect = self.tabRect(index)
+        self._editor.setFixedSize(rect.size())
+        self._editor.move(self.parent().mapToGlobal(rect.topLeft()))
+        self._editor.setText(self.tabText(index))
+        if not self._editor.isVisible():
+            self._editor.show()
+        self._editor.selectAll()
+        self._editor.setEnabled(True)
+        self._editor.setFocus()
     
+    def hideEditor(self):
+        if self._editor.isVisible():
+            self._editor.setEnabled(False)
+            self._editor.clearFocus()
+            self._editor.hide()
+
+    def handleEditingFinished(self):
+        index = self.currentIndex()
+        if index >= 0:
+            self.hideEditor()
+            if self._editor.text():
+                self.setTabText(index, self._editor.text())
