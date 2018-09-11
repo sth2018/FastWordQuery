@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from operator import itemgetter
 from aqt import mw
 from aqt.qt import *
 from anki.hooks import addHook, wrap
@@ -24,9 +25,10 @@ from aqt.addcards import AddCards
 from aqt.utils import showInfo, shortcut, downArrow
 from .gui import show_options, show_about_dialog, check_updates
 from .query import query_from_browser, query_from_editor_fields
-from .context import config, APP_ICON
+from .context import config, APP_ICON, Config
 from .lang import _
 from .service import service_pool
+from .utils import get_icon
 
 
 __all__ = [
@@ -38,6 +40,10 @@ __all__ = [
 have_setup = False
 my_shortcut = ''
 
+_wraps = []
+_OK_ICON = get_icon('ok.png')
+_NULL_ICON = get_icon('null.png')
+
 
 def browser_menu():
     """
@@ -47,30 +53,74 @@ def browser_menu():
         """
         on browser setupMenus was called
         """
+        # 
         # main menu
         menu = QMenu("FastWQ", browser.form.menubar)
         browser.form.menubar.addMenu(menu)
-        # Query Selected
-        action = QAction(_('QUERY_SELECTED'), browser)
-        action.triggered.connect(lambda: query_from_browser(browser))
-        action.setShortcut(QKeySequence(my_shortcut))
-        menu.addAction(action)
-        # Options
-        action = QAction(_('OPTIONS'), browser)
-        def _show_options():
-            model_id = -1
-            for note_id in browser.selectedNotes():
-                note = browser.mw.col.getNote(note_id)
-                model_id = note.model()['id']
-                break
-            show_options(browser, model_id)
-        action.triggered.connect(_show_options)
-        menu.addAction(action)
-        # About
-        action = QAction(_('ABOUT'), browser)
-        action.triggered.connect(lambda: show_about_dialog(browser))
-        menu.addAction(action)
 
+        def set_options_def(mid, i):
+            conf = config.get_maps(mid)
+            conf = {'list': [conf], 'def': 0} if isinstance(conf, list) else conf
+            if conf['def'] != i:
+                conf['def'] = i
+                data = dict()
+                data[mid] = conf
+                config.update(data)
+        # end set_options_def
+
+        def init_fastwq_menu(*args, **kwargs):
+            menu.clear()
+            # Query Selected
+            action = QAction(_('QUERY_SELECTED'), browser)
+            action.triggered.connect(lambda: query_from_browser(browser))
+            action.setShortcut(QKeySequence(my_shortcut))
+            menu.addAction(action)
+            # Options
+            action = QAction(_('OPTIONS'), browser)
+            def _show_options():
+                model_id = -1
+                for note_id in browser.selectedNotes():
+                    note = browser.mw.col.getNote(note_id)
+                    model_id = note.model()['id']
+                    break
+                show_options(browser, model_id)
+            action.triggered.connect(_show_options)
+            menu.addAction(action)
+
+            # Default configs
+            menu.addSeparator()
+            b = False
+            for m in sorted(browser.mw.col.models.all(), key=itemgetter("name")):
+                conf = config.get_maps(m['id'])
+                conf = {'list': [conf], 'def': 0} if isinstance(conf, list) else conf
+                maps_list = conf['list']
+                if len(maps_list) > 1:
+                    submenu = menu.addMenu(m['name'])
+                    for i, maps in enumerate(maps_list):
+                        submenu.addAction(
+                            _OK_ICON if i==conf['def'] else _NULL_ICON,
+                            _('CONFIG_INDEX') % (i+1) if isinstance(maps, list) else maps['name'],
+                            lambda mid=m['id'], i=i: set_options_def(mid, i)
+                        )
+                    b = True
+            if b: 
+                menu.addSeparator()
+
+            # About
+            action = QAction(_('ABOUT'), browser)
+            action.triggered.connect(lambda: show_about_dialog(browser))
+            menu.addAction(action)
+
+        # end init_fastwq_menu
+        init_fastwq_menu()
+        # wrap config.update
+        if Config.update not in _wraps:
+            Config.update = wrap(
+                Config.update,
+                init_fastwq_menu,
+                "after"
+            )
+            _wraps.append(Config.update)
     addHook('browser.setupMenus', on_setup_menus)
 
 
