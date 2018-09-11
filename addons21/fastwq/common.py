@@ -23,7 +23,7 @@ from anki.hooks import addHook, wrap
 from aqt.addcards import AddCards
 from aqt.utils import showInfo, shortcut, downArrow
 from .gui import show_options, show_about_dialog, check_updates
-from .query import query_from_browser, query_from_editor_fields, inspect_note
+from .query import query_from_browser, query_from_editor_fields
 from .context import config, APP_ICON
 from .lang import _
 from .service import service_pool
@@ -127,30 +127,59 @@ def context_menu():
         """
         add context menu to webview
         """
-        word, word_ord, maps = inspect_note(web_view.editor.note)
-        current_field = u''
-        if web_view.editor.currentField != word_ord:
-            each = maps[web_view.editor.currentField]
-            ignore = each.get('ignore', False)
-            if not ignore:
-                dict_unique = each.get('dict_unique', '').strip()
-                dict_fld_ord = each.get('dict_fld_ord', -1)
-                fld_ord = each.get('fld_ord', -1)
-                if dict_unique and dict_fld_ord != -1 and fld_ord != -1:
-                    s = service_pool.get(dict_unique)
-                    if s and s.support:
-                        current_field = ' (' + s.title + ' -> ' + s.fields[dict_fld_ord] + ')'
-                    service_pool.put(s)
+        current_model_id = web_view.editor.note.model()['id']
+        conf = config.get_maps(current_model_id)
+        maps_list = conf if isinstance(conf, list) else conf['list']
+        curr_flds = []
+        names = []
+        for i, maps in enumerate(maps_list):
+            maps = maps if isinstance(maps, list) else maps['fields']
+            for mord, m in enumerate(maps):
+                if m.get('word_checked', False):
+                    word_ord = mord
+                    break
+            if web_view.editor.currentField != word_ord:
+                each = maps[web_view.editor.currentField]
+                ignore = each.get('ignore', False)
+                if not ignore:
+                    dict_unique = each.get('dict_unique', '').strip()
+                    dict_fld_ord = each.get('dict_fld_ord', -1)
+                    fld_ord = each.get('fld_ord', -1)
+                    if dict_unique and dict_fld_ord != -1 and fld_ord != -1:
+                        s = service_pool.get(dict_unique)
+                        if s and s.support:
+                            name = s.title + ' :-> ' + s.fields[dict_fld_ord]
+                            if name not in names:
+                                names.append(name)
+                                curr_flds.append({
+                                    'name': name,
+                                    'def': i
+                                })
+                        service_pool.put(s)
 
         submenu = menu.addMenu(_('QUERY'))
         submenu.addAction(_('ALL_FIELDS'), lambda: query_from_editor_fields(web_view.editor), QKeySequence(my_shortcut))
-        if current_field:
-            submenu.addAction(_('CURRENT_FIELDS') + current_field, 
-                lambda: query_from_editor_fields(
+        if len(curr_flds) > 0:
+            # quer hook method
+            def query_from_editor_hook(i):
+                conf = config.get_maps(current_model_id)
+                maps_list = {'list': [conf], 'def': i} if isinstance(conf, list) else conf
+                maps_list['def'] = i
+                data = dict()
+                data[current_model_id] = maps_list
+                config.update(data)
+                query_from_editor_fields(
                     web_view.editor,
                     fields=[web_view.editor.currentField]
                 )
-            )
+            # sub menu
+            #flds_menu = submenu.addMenu(_('CURRENT_FIELDS'))
+            submenu.addSeparator()
+            for c in curr_flds:
+                submenu.addAction(c['name'], 
+                    lambda i=c['def']: query_from_editor_hook(i)
+                )
+            submenu.addSeparator()
         submenu.addAction(_("OPTIONS"), lambda: show_options(web_view, web_view.editor.note.model()['id']))
 
     addHook('EditorWebView.contextMenuEvent', on_setup_menus)
