@@ -23,7 +23,7 @@ from .lang import _
 
 __all__ = ['VERSION', 'Endpoint', 'Template']
 
-VERSION = 'v1.3.0'
+VERSION = 'v1.3.1'
 
 class Endpoint:
     repository = u'https://github.com/sth2018/FastWordQuery'
