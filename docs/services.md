@@ -27,3 +27,4 @@
 | 15 | Yahoo Dictionary | [https://tw.dictionary...](https://tw.dictionary.search.yahoo.com/search?p=test) | 
 | 16 | Baidu Hanyu | [http://dict.baidu.com/...](http://dict.baidu.com/s?wd=%E4%B8%AD%E5%9B%BD#basicmean) | 
 | 17 | Cambridge | [https://dictionary.cambridge.org/...](https://dictionary.cambridge.org/dictionary/english/test) | 
+| 18 | Dr.eye | [https://yun.dreye.com/...](https://yun.dreye.com/dict_new/dict.php?w=test&hidden_codepage=01) |
