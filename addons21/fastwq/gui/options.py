@@ -192,7 +192,7 @@ class OptionsDialog(Dialog):
     def check_updates(self):
         '''check addon version'''
         from .common import check_updates
-        check_updates()
+        check_updates(parent=self)
 
     def show_fm_dialog(self):
         '''open folder manager dialog'''

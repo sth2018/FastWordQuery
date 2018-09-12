@@ -160,10 +160,11 @@ def updateSingle(repositories, path, data):
     return callback
 
 
-def update(add=[], VERSION='v0.0.0', background=False):
+def update(add=[], VERSION='v0.0.0', background=False, parent=None):
+    parent = parent if parent else mw
     # progress win
     if not background:
-        progresswin = QProgressDialog('Update Checking...', '', 0, 0, mw)
+        progresswin = QProgressDialog('Update Checking...', '', 0, 0, parent)
         progresswin.setWindowModality(Qt.ApplicationModal)
         progresswin.setCancelButton(None)
         progresswin.setWindowFlags(
@@ -265,7 +266,7 @@ def update(add=[], VERSION='v0.0.0', background=False):
                     if progresswin:
                         progresswin.hide()
                         progresswin.destroy()
-                    dialog = DialogUpdates(None, data, repository, updateSingle(repositories, path, data))
+                    dialog = DialogUpdates(parent, data, repository, updateSingle(repositories, path, data))
                     dialog.exec_()
                     dialog.destroy()
                 else:

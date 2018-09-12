@@ -106,6 +106,11 @@ def browser_menu():
             if b: 
                 menu.addSeparator()
 
+            # check update
+            action = QAction(_('CHECK_UPDATE'), browser)
+            action.triggered.connect(lambda: check_updates(background=False, parent=browser))
+            menu.addAction(action)
+
             # About
             action = QAction(_('ABOUT'), browser)
             action.triggered.connect(lambda: show_about_dialog(browser))

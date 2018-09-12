@@ -34,10 +34,11 @@ from ..service import service_manager, service_pool
 __all__ = ['show_options', 'check_updates', 'show_fm_dialog', 'show_about_dialog']
 
 
-def check_updates(background=False):
+def check_updates(background=False, parent=None):
     '''check add-on last version'''
     try:
-        state = ankihub.update([Endpoint.check_version], Endpoint.version, background)
+        parent = mw if parent is None else parent
+        state = ankihub.update([Endpoint.check_version], Endpoint.version, background, parent)
         if not background:
             if state == 0:
                 showInfo(_('LATEST_VERSION'))
