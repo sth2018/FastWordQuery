@@ -1,0 +1,254 @@
+.content {
+    font-size: 14px;
+    color: #333333;
+    font-family: Microsoft YaHei, simhei;
+}
+
+.IntExpcontent {
+    line-height: 25px;
+    font-size: 14px;
+    color: #333333;
+    font-family: Microsoft YaHei, simhei;
+}
+
+.IntExpcontent p, ul, li, ol, h4, h3, h1 {
+    margin: 0;
+    padding: 0;
+}
+
+.IntExpcontent a {
+    line-height: 25px;
+}
+
+.IntExpcontent ol {
+    *padding-left: 2em;
+    padding-left: 30px;
+}
+
+.IntExpcontent .col {
+    color: #43b4c6;
+}
+
+.IntExpcontent img {
+    *margin: 3px 0;
+    *vertical-align: middle;
+    display: inline-block;
+    cursor: pointer;
+    margin-left: .5em;
+}
+
+.content p, ul, li, ol, h4, h3, h1, {
+    margin: 0;
+    padding: 0;
+}
+
+.content .col {
+    color: #43b4c6;
+}
+
+.content a.col {
+    margin-right: 1em;
+    text-decoration: none;
+}
+
+.content a[href].col:hover {
+    text-decoration: underline;
+}
+
+.content .attr {
+    color: #43b4c6;
+    /*	font-weight:bold;
+    font-family:Geogia,"Times New Roman",serif;*/
+    margin-right: 5px;
+}
+
+.content span.label {
+    border: 1px solid #d6d6d6;
+    margin-right: 5px;
+    *padding: 1px;
+}
+
+.content ol.nonlist {
+    list-style-type: none;
+    list-style: none outside none;
+    /*margin-left:0;*/
+    padding-left: 0;
+}
+
+.content span.pho {
+    background-color: #43b4c6;
+    text-align: center;
+    padding: 0px 4px;
+    border-radius: 10px;
+    font-size: 12px;
+    color: #ffffff;
+    /*  border:1px solid #43b4c6;*/
+}
+
+.phonetic {
+    font-family: Lucida Sans Unicode;
+    color: #333333;
+}
+
+.exp em {
+    font-style: normal;
+}
+
+.jp {
+    font-family: "ms gothic", arial, sans-serif;
+}
+
+h1.keyword {
+    line-height: 25px;
+    color: #43b4c6;
+    margin: 0;
+    word-wrap: break-word;
+    font-size: 16px;
+}
+
+.content h4 {
+    height: 25px;
+    line-height: 25px;
+    font-size: 15px;
+    background-color: #efefef;
+}
+
+.content ol {
+    list-style-position: inside;
+}
+
+.content ul {
+    list-style-type: none;
+    margin-left: 0;
+}
+
+.content li {
+    display: list-item;
+}
+
+.IntExpcontent li {
+    display: list-item;
+}
+
+small {
+    font-size: 80%;
+}
+
+sup {
+    *font-size: 12px;
+}
+
+sup {
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+}
+
+sup {
+    top: -0.5em;
+}
+
+sub {
+    bottom: -0.25em;
+}
+
+.content p {
+    line-height: 25px;
+    word-wrap: break-word;
+    display: block;
+    *white-space: pre;
+    *word-wrap: break-word;
+    word-break: keep-all;
+}
+
+.content p.attr {
+    line-height: 25px;
+    word-wrap: break-word;
+    display: block;
+    white-space: normal;
+}
+
+/********************************/
+
+.content img {
+    *margin: 7px 0;
+    *vertical-align: middle;
+    display: inline-block;
+    cursor: pointer;
+    margin-left: .5em;
+}
+
+.content p.dictsrc {
+    Text-align: right;
+}
+
+p.dictsrc {
+    line-height: 25px;
+    Text-align: right;
+}
+
+/*oxfordEE*/
+
+.font-uc {
+    text-transform: uppercase;
+}
+
+.font-AN {
+    font-family: "Arial Narrow";
+}
+
+.font-uc-b {
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.font-small {
+    font-size: 13px;
+}
+
+.font-bNTR {
+    font-family: "Times New Roman";
+    font-weight: bold;
+}
+
+.font-LSU {
+    font-family: "lucida sans unicode";
+}
+
+.font-MRS {
+    font-family: "MS Reference Specialty";
+}
+
+/*é–”è¯è¯é–”*/
+
+.font-drtw {
+    font-family: "Dr.eye tw symbol";
+}
+
+.font-PL {
+    font-family: "PMingLiU";
+}
+
+.font-CS {
+    font-family: "Segoe UI";
+}
+
+/*ä½›å­¸*/
+
+.font-AUM {
+    font-family: "Arial Unicode MS";
+}
+
+.font-TMU {
+    font-family: "Tibetan Machine Uni";
+}
+
+/********************************/
+
+hr.separate {
+    border-color: #c4e8f8;
+    border-top-style: solid;
+    border-width: 1px 0px 0px 0px;
+    margin-bottom: 15px;
+}
