@@ -72,18 +72,19 @@ class BingXtk(WebService):
     def fld_samples(self):
         max_numbers = 10
         segs = self._get_field('sams')
-        sentences = ''
-        for i, seg in enumerate(segs):
-            sentences += u"""<li><div class="se_li1">
-                            <div class="sen_en">{0}</div>
-                            <div class="sen_cn">{1}</div>
-                        </div></li>""".format(seg['eng'], seg['chn'])
-            if i == 9:
-                break
-        if sentences:
-            return u"""<div class="se_div">
-                            <div class="sentenceCon">
-                                <div id="sentenceSeg"><ol>{0}</ol></div>
-                            </div>
-                    </div>""".format(sentences)
-        return ''
+        if segs:
+            sentences = u''
+            for i, seg in enumerate(segs):
+                sentences += u"""<li><div class="se_li1">
+                                <div class="sen_en">{0}</div>
+                                <div class="sen_cn">{1}</div>
+                            </div></li>""".format(seg['eng'], seg['chn'])
+                if i == 9:
+                    break
+            if sentences:
+                return u"""<div class="se_div">
+                                <div class="sentenceCon">
+                                    <div id="sentenceSeg"><ol>{0}</ol></div>
+                                </div>
+                        </div>""".format(sentences)
+        return u''
