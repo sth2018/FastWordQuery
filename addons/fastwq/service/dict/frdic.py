@@ -8,7 +8,7 @@ from ..base import *
 
 css = ''
 
-@register(u'法语助手')
+@register([u'法语助手', u'frdic'])
 class Frdic(WebService):
 
     def __init__(self):
@@ -55,7 +55,7 @@ class Frdic(WebService):
         except Exception as e:
             return {}
 
-    @export(u'真人发音')
+    @export([u'真人发音', u'Real person pronounciation'])
     def fld_sound(self):
         url = 'https://api.frdic.com/api/v2/speech/speakweb?langid=fr&txt=QYN{word}'.format(
             word=urllib2.quote(base64.b64encode(self.word.encode('utf-8')))
@@ -65,30 +65,30 @@ class Frdic(WebService):
                 return self.get_anki_label(filename, 'audio')
         return ''
 
-    @export(u'音标')
+    @export([u'音标', u'Phonetic symbol'])
     def fld_phonetic(self):
         return self._get_field('phonitic')
 
-    @export(u'法汉-汉法词典')
+    @export([u'法汉-汉法词典', u'French-chinese/chinese-french dictionary'])
     def fld_fccf(self):
         return self._get_field('fccf')
 
-    @export(u'法语例句库')
+    @export([u'法语例句库', u'French examples'])
     @with_styles(css=css)
     def fld_example(self):
         return self._get_field('example')
 
-    @export(u'近义、反义、派生词典')
+    @export([u'近义、反义、派生词典', u'Synonyms, antonyms, derivative'])
     @with_styles(css=css)
     def fld_syn(self):
         return self._get_field('syn')
 
-    @export(u'法法词典')
+    @export([u'法法词典', u'French-french dictionary'])
     @with_styles(css=css)
     def fld_ff(self):
         return self._get_field('ff')
 
-    @export(u'法英词典')
+    @export([u'法英词典', u'French-english dictionary'])
     @with_styles(css=css)
     def fld_fe(self):
         return self._get_field('fe')

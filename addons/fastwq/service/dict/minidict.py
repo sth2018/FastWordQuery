@@ -3,7 +3,7 @@
 from ..base import *
 
 
-@register(u'海词迷你词典')
+@register([u'海词迷你词典', u'cidian.dict'])
 class MiniDict(WebService):
 
     def __init__(self):
@@ -45,19 +45,19 @@ class MiniDict(WebService):
 
         return self.cache_this(result)
 
-    @export(u'音标')
+    @export([u'音标', u'Phonetic symbol'])
     def fld_phonetic(self):
         return self._get_field('phonetic')
 
-    @export(u'基本释义')
+    @export([u'基本释义', u'Expressions'])
     def fld_explains(self):
         return self._get_field('expressions')
 
-    @export(u'例句与用法')
+    @export([u'例句与用法', u'Example and pattern'])
     @with_styles(css='em {color:#cc0066;font-style:normal;}', need_wrap_css=True, wrap_class='minidict')
     def fld_sentences(self):
         return self._get_field('sentences')
 
-    @export(u'词形变化')
+    @export([u'词形变化', u'Inflections'])
     def fld_variations(self):
         return self._get_field('variations')

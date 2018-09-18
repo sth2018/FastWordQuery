@@ -33,7 +33,7 @@ class Youdaoko(WebService):
             pass
         return self.cache_this(result)
 
-    @export(u'基本释义')
+    @export([u'基本释义', u'Explanations'])
     def fld_explains(self):
         return self.cache_result('explains') if self.cached('explains') else \
             self._get_from_api().get('explains', '')
@@ -59,18 +59,18 @@ class Youdaoko(WebService):
         except:
             return ''
 
-    @export(u'网络释义')
+    @export([u'网络释义', u'Web translation'])
     def fld_web_trans(self):
         return self._get_singledict('web_trans')
 
-    @export(u'双语例句')
+    @export([u'双语例句', u'Biligual example'])
     def fld_blng_sents_part(self):
         return self._get_singledict('blng_sents_part')
 
-    @export(u'百科')
+    @export([u'百科', u'baike'])
     def fld_baike(self):
         return self._get_singledict('baike')
 
-    @export(u'汉语词典(中)')
+    @export([u'汉语词典(中)', u'Chinese dictionary'])
     def fld_hh(self):
         return self._get_singledict('hh')
