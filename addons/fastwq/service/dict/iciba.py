@@ -39,13 +39,13 @@ class ICIBA(WebService):
         #     return resp
 
     @ignore_exception
-    @export([u'美式音标', u'American phonetic'])
+    @export([u'美式音标', u'Phonetic symbols (US)'])
     def fld_phonetic_us(self):
         seg = self._get_field('baesInfo')
         return '/' + seg['symbols'][0]['ph_am'] + '/'
 
     @ignore_exception
-    @export([u'英式音标', u'British phonetic'])
+    @export([u'英式音标', u'Phonetic symbols (UK)'])
     def fld_phonetic_uk(self):
         seg = self._get_field('baesInfo')
         return '/' + seg['symbols'][0]['ph_en'] + '/'
