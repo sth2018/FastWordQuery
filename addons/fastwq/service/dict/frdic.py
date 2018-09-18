@@ -65,7 +65,7 @@ class Frdic(WebService):
                 return self.get_anki_label(filename, 'audio')
         return ''
 
-    @export([u'音标', u'Phonetic symbol'])
+    @export('PHON')
     def fld_phonetic(self):
         return self._get_field('phonitic')
 

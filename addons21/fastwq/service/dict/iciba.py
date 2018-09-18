@@ -39,19 +39,19 @@ class ICIBA(WebService):
         #     return resp
 
     @ignore_exception
-    @export([u'美式音标', u'Phonetic symbols (US)'])
+    @export('AME_PHON')
     def fld_phonetic_us(self):
         seg = self._get_field('baesInfo')
         return '/' + seg['symbols'][0]['ph_am'] + '/'
 
     @ignore_exception
-    @export([u'英式音标', u'Phonetic symbols (UK)'])
+    @export('BRE_PHON')
     def fld_phonetic_uk(self):
         seg = self._get_field('baesInfo')
         return '/' + seg['symbols'][0]['ph_en'] + '/'
 
     @ignore_exception
-    @export([u'美式发音', u'American pronounciation')
+    @export('AME_PRON')
     def fld_mp3_us(self):
         seg = self._get_field('baesInfo')
         audio_url, t = seg['symbols'][0]['ph_am_mp3'], 'am'
@@ -64,7 +64,7 @@ class ICIBA(WebService):
         return audio_url
 
     @ignore_exception
-    @export([u'英式发音', u'British pronounciation'])
+    @export('BRE_PRON')
     def fld_mp3_uk(self):
         seg = self._get_field('baesInfo')
         audio_url, t = seg['symbols'][0]['ph_en_mp3'], 'en'

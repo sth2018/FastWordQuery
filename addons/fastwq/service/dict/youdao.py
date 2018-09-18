@@ -64,7 +64,7 @@ class Youdao(WebService):
             pass
         return self.cache_this(result)
 
-    @export([u'音标', u'Phonetic symbols'])
+    @export('PHON')
     def fld_phonetic(self):
         return self._get_field('phonetic')
 
@@ -93,7 +93,7 @@ class Youdao(WebService):
         except:
             return ''
 
-    @export([u'英式发音', u'British pronounciation'])
+    @export('BRE_PRON')
     def fld_british_audio(self):
         audio_url = u'http://dict.youdao.com/dictvoice?audio={}&type=1'.format(self.quote_word)
         if youdao_download_mp3:
@@ -102,7 +102,7 @@ class Youdao(WebService):
                 return self.get_anki_label(filename, 'audio')
         return audio_url
 
-    @export([u'美式发音', u'American pronounciation'])
+    @export('AME_PRON')
     def fld_american_audio(self):
         audio_url = u'http://dict.youdao.com/dictvoice?audio={}&type=2'.format(self.quote_word)
         if youdao_download_mp3:
