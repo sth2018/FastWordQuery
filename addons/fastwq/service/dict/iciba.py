@@ -11,7 +11,7 @@ from ...utils import ignore_exception
 iciba_download_mp3 = True
 
 
-@register(u'爱词霸')
+@register([u'爱词霸', u'iciba'])
 class ICIBA(WebService):
 
     def __init__(self):
@@ -39,19 +39,19 @@ class ICIBA(WebService):
         #     return resp
 
     @ignore_exception
-    @export(u'美式音标')
+    @export([u'美式音标', u'American phonetic'])
     def fld_phonetic_us(self):
         seg = self._get_field('baesInfo')
         return '/' + seg['symbols'][0]['ph_am'] + '/'
 
     @ignore_exception
-    @export(u'英式音标')
+    @export([u'英式音标', u'British phonetic'])
     def fld_phonetic_uk(self):
         seg = self._get_field('baesInfo')
         return '/' + seg['symbols'][0]['ph_en'] + '/'
 
     @ignore_exception
-    @export(u'美式发音')
+    @export([u'美式发音', u'American pronounciation'])
     def fld_mp3_us(self):
         seg = self._get_field('baesInfo')
         audio_url, t = seg['symbols'][0]['ph_am_mp3'], 'am'
@@ -64,7 +64,7 @@ class ICIBA(WebService):
         return audio_url
 
     @ignore_exception
-    @export(u'英式发音')
+    @export([u'英式发音', u'British pronounciation'])
     def fld_mp3_uk(self):
         seg = self._get_field('baesInfo')
         audio_url, t = seg['symbols'][0]['ph_en_mp3'], 'en'
@@ -77,14 +77,14 @@ class ICIBA(WebService):
         return audio_url
 
     @ignore_exception
-    @export(u'释义')
+    @export([u'释义', u'Explanation'])
     def fld_definition(self):
         seg = self._get_field('baesInfo')
         parts = seg['symbols'][0]['parts']
         return u'<br>'.join([part['part'] + ' ' + '; '.join(part['means']) for part in parts])
 
     @ignore_exception
-    @export(u'双语例句')
+    @export([u'双语例句', u'Bilingual examples'])
     def fld_samples(self):
         sentences = ''
         segs = self._get_field('sentence')
@@ -97,7 +97,7 @@ class ICIBA(WebService):
         return u"""<ol>{}</ol>""".format(sentences)
 
     @ignore_exception
-    @export(u'权威例句')
+    @export([u'权威例句', u'Authoritative examples'])
     def fld_auth_sentence(self):
         sentences = ''
         segs = self._get_field('auth_sentence')
@@ -108,7 +108,7 @@ class ICIBA(WebService):
         return u"""<ol>{}</ol>""".format(sentences)
 
     @ignore_exception
-    @export(u'句式用法')
+    @export([u'句式用法', u'Sentence pattern usage'])
     def fld_usage(self):
         sentences = ''
         segs = self._get_field('jushi')
@@ -121,13 +121,13 @@ class ICIBA(WebService):
         return u"""<ol>{}</ol>""".format(sentences)
 
     @ignore_exception
-    @export(u'使用频率')
+    @export([u'使用频率', u'Usage frequency'])
     def fld_frequence(self):
         seg = self._get_field('baesInfo')
         return str(seg['frequence'])
 
     @ignore_exception
-    @export(u'英文例句')
+    @export([u'英文例句', u'English examples'])
     def fld_st(self):
         sentences = ''
         segs = self._get_field('sentence')
@@ -137,7 +137,7 @@ class ICIBA(WebService):
         return sentences
     
     @ignore_exception
-    @export(u'例句翻译')
+    @export([u'例句翻译', u'Examples translation'])
     def fld_sttr(self):
         sentences = ''
         segs = self._get_field('sentence')
