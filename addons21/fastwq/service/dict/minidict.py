@@ -45,7 +45,7 @@ class MiniDict(WebService):
 
         return self.cache_this(result)
 
-    @export([u'音标', u'Phonetic symbols'])
+    @export('PHON')
     def fld_phonetic(self):
         return self._get_field('phonetic')
 
