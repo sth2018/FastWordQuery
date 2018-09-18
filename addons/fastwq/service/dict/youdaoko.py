@@ -67,7 +67,7 @@ class Youdaoko(WebService):
     def fld_blng_sents_part(self):
         return self._get_singledict('blng_sents_part')
 
-    @export([u'百科', u'Encyclopedia'])
+    @export([u'百科', u'baike'])
     def fld_baike(self):
         return self._get_singledict('baike')
 

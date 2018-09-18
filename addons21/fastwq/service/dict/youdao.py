@@ -64,11 +64,11 @@ class Youdao(WebService):
             pass
         return self.cache_this(result)
 
-    @export(u'音标')
+    @export([u'音标', u'Phonetic symbols'])
     def fld_phonetic(self):
         return self._get_field('phonetic')
 
-    @export(u'基本释义')
+    @export([u'基本释义', u'Explanations'])
     def fld_explains(self):
         return self._get_field('explains')
 
@@ -93,7 +93,7 @@ class Youdao(WebService):
         except:
             return ''
 
-    @export(u'英式发音')
+    @export([u'英式发音', u'British pronounciation'])
     def fld_british_audio(self):
         audio_url = u'http://dict.youdao.com/dictvoice?audio={}&type=1'.format(self.quote_word)
         if youdao_download_mp3:
@@ -102,7 +102,7 @@ class Youdao(WebService):
                 return self.get_anki_label(filename, 'audio')
         return audio_url
 
-    @export(u'美式发音')
+    @export([u'美式发音', u'Americation pronounciation'])
     def fld_american_audio(self):
         audio_url = u'http://dict.youdao.com/dictvoice?audio={}&type=2'.format(self.quote_word)
         if youdao_download_mp3:
@@ -111,54 +111,54 @@ class Youdao(WebService):
                 return self.get_anki_label(filename, 'audio')
         return audio_url
 
-    @export(u'柯林斯英汉')
+    @export([u'柯林斯英汉', u'Collins'])
     def fld_collins(self):
         return self._get_singledict('collins')
 
-    @export(u'21世纪')
+    @export([u'21世纪', u'21st century'])
     def fld_ec21(self):
         return self._get_singledict('ec21')
 
-    @export(u'英英释义')
+    @export([u'英英释义', u'English-english dictionary'])
     def fld_ee(self):
         return self._get_singledict('ee')
 
-    @export(u'网络释义')
+    @export([u'网络释义', u'Web translation'])
     def fld_web_trans(self):
         return self._get_singledict('web_trans')
 
-    @export(u'同根词')
+    @export([u'同根词', u'Related words'])
     def fld_rel_word(self):
         return self._get_singledict('rel_word')
 
-    @export(u'同近义词')
+    @export([u'同近义词', u'Synonyms'])
     def fld_syno(self):
         return self._get_singledict('syno')
 
-    @export(u'双语例句')
+    @export([u'双语例句', u'Bilingual examples'])
     def fld_blng_sents_part(self):
         return self._get_singledict('blng_sents_part')
 
-    @export(u'原生例句')
+    @export([u'原生例句', u''])
     def fld_media_sents_part(self):
         return self._get_singledict('media_sents_part')
 
-    @export(u'权威例句')
+    @export([u'权威例句', u'Authoritative examples'])
     def fld_auth_sents_part(self):
         return self._get_singledict('auth_sents_part')
 
-    @export(u'新英汉大辞典(中)')
+    @export([u'新英汉大辞典(中)', u'New english-chinese dictionary'])
     def fld_ce_new(self):
         return self._get_singledict('ce_new')
 
-    @export(u'百科')
+    @export([u'百科', u'baike'])
     def fld_baike(self):
         return self._get_singledict('baike')
 
-    @export(u'汉语词典(中)')
+    @export([u'汉语词典(中)', u'Chinese dictionary'])
     def fld_hh(self):
         return self._get_singledict('hh')
 
-    @export(u'专业释义(中)')
+    @export([u'专业释义(中)', u'Professional translation'])
     def fld_special(self):
         return self._get_singledict('special')
