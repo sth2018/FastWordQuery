@@ -55,7 +55,7 @@ class Frdic(WebService):
         except Exception as e:
             return {}
 
-    @export([u'真人发音', u'Real person pronounciation'])
+    @export([u'真人发音', u'Real person pronunciation'])
     def fld_sound(self):
         url = 'https://api.frdic.com/api/v2/speech/speakweb?langid=fr&txt=QYN{word}'.format(
             word=urllib2.quote(base64.b64encode(self.word.encode('utf-8')))
