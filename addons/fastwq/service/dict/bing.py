@@ -81,7 +81,8 @@ class Bing(WebService):
         return seg.get('BrE', u'') if seg else u''
 
     def _fld_mp3(self, fld):
-        audio_url = self._get_field('pronunciation')[fld]
+        seg = self._get_field('pronunciation')
+        audio_url = seg[fld] if seg else u''
         if bing_download_mp3 and audio_url:
             filename = get_hex_name('bing', audio_url, 'mp3')
             if os.path.exists(filename) or self.net_download(filename, audio_url):
