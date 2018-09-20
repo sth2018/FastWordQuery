@@ -45,6 +45,16 @@ _OK_ICON = get_icon('ok.png')
 _NULL_ICON = get_icon('null.png')
 
 
+def set_options_def(mid, i):
+    conf = config.get_maps(mid)
+    conf = {'list': [conf], 'def': 0} if isinstance(conf, list) else conf
+    if conf['def'] != i:
+        conf['def'] = i
+        data = dict()
+        data[mid] = conf
+        config.update(data)
+# end set_options_def
+
 def browser_menu():
     """
     add add-on's menu to browser window
@@ -57,16 +67,6 @@ def browser_menu():
         # main menu
         menu = QMenu("FastWQ", browser.form.menubar)
         browser.form.menubar.addMenu(menu)
-
-        def set_options_def(mid, i):
-            conf = config.get_maps(mid)
-            conf = {'list': [conf], 'def': 0} if isinstance(conf, list) else conf
-            if conf['def'] != i:
-                conf['def'] = i
-                data = dict()
-                data[mid] = conf
-                config.update(data)
-        # end set_options_def
 
         def init_fastwq_menu(*args, **kwargs):
             menu.clear()
@@ -151,7 +151,22 @@ def customize_addcards():
             if isinstance(e, QMouseEvent):
                 if e.buttons() & Qt.LeftButton:
                     menu = QMenu(self)
-                    menu.addAction(_("QUERY"), lambda: query_from_editor_fields(self.editor), QKeySequence(my_shortcut))
+                    menu.addAction(_("ALL_FIELDS"), lambda: query_from_editor_fields(self.editor), QKeySequence(my_shortcut))
+                    # default options
+                    mid = self.editor.note.model()['id']
+                    conf = config.get_maps(mid)
+                    conf = {'list': [conf], 'def': 0} if isinstance(conf, list) else conf
+                    maps_list = conf['list']
+                    if len(maps_list) > 1:
+                        menu.addSeparator()
+                        for i, maps in enumerate(maps_list):
+                            menu.addAction(
+                                _OK_ICON if i==conf['def'] else _NULL_ICON,
+                                _('CONFIG_INDEX') % (i+1) if isinstance(maps, list) else maps['name'],
+                                lambda mid=mid, i=i: set_options_def(mid, i)
+                            )
+                        menu.addSeparator()
+                    # end default options
                     menu.addAction(_("OPTIONS"), lambda: show_options(self, self.editor.note.model()['id']))
                     menu.exec_(fastwqBtn.mapToGlobal(QPoint(0, fastwqBtn.height())))
             else:
@@ -218,15 +233,13 @@ def context_menu():
             # quer hook method
             def query_from_editor_hook(i):
                 conf = config.get_maps(current_model_id)
-                maps_list = {'list': [conf], 'def': i} if isinstance(conf, list) else conf
-                maps_list['def'] = i
-                data = dict()
-                data[current_model_id] = maps_list
-                config.update(data)
+                maps_old_def = 0 if isinstance(conf, list) else conf.get('def', 0)
+                set_options_def(current_model_id, i)
                 query_from_editor_fields(
                     web_view.editor,
                     fields=[web_view.editor.currentField]
                 )
+                set_options_def(current_model_id, maps_old_def)
             # sub menu
             #flds_menu = submenu.addMenu(_('CURRENT_FIELDS'))
             submenu.addSeparator()
