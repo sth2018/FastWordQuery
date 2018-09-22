@@ -728,7 +728,9 @@ class MdxService(LocalService):
                 keys = self.builder.get_mdd_keys(each)
                 if not keys:
                     errors.append(each)
-                lst.extend(keys)
+                    lst.append(each[1:])
+                else:
+                    lst.extend(keys)
             for each in lst:
                 self.save_default_file(each)
         except AttributeError:

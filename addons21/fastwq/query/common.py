@@ -171,16 +171,15 @@ def add_to_tmpl(note, **kwargs):
             #addings = u'\r\n<script src="{}"></script>'.format(new_jsfile)
             #afmt += addings
             jsfile = jsfile if isinstance(jsfile, list) else [jsfile]
-            addings = u''
             for fn in jsfile:
-                try:
-                    with open(fn, 'r', encoding="utf-8") as f:
-                        addings += u'\n<script type="text/javascript">\n{}\n</script>'.format(f.read())
-                        f.close()
-                except:
-                    pass
-            if addings not in afmt:
-                afmt += addings
+                addings = '''
+<script type="text/javascript">
+    var script = document.createElement("script");
+    script.src   = "{}";
+    document.getElementsByTagName('head')[0].appendChild(script);
+</script>'''.format(fn)
+                if addings not in afmt:
+                    afmt += addings
         note.model()['tmpls'][0]['afmt'] = afmt
 
 
