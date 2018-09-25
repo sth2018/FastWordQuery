@@ -65,7 +65,12 @@ class ServiceManager(object):
         """
         service_path = u'dict'
         web_services, local_custom_services = list(), list()
-        mypath = os.path.join(os.path.dirname(os.path.realpath(__file__)), service_path)
+        ufile = os.path.realpath(__file__)
+        try:
+            ufile = ufile.decode('gb2312').encode('utf8')
+        except UnicodeDecodeError:
+            pass
+        mypath = os.path.join(os.path.dirname(ufile), service_path)
         files = [
             f for f in os.listdir(mypath) \
             if f not in ('__init__.py') and \
