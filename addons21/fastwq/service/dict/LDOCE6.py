@@ -1,6 +1,7 @@
 #-*- coding:utf-8 -*-
 import os
 import re
+import random
 from ..base import *
 
 
@@ -83,19 +84,7 @@ class Ldoce6(MdxService):
 
     @export('EXAMPLE')
     def fld_sentence(self):
-        m = re.findall(r'<span class="example"\s*.*>\s*.*<\/span>', self.get_html())
-        if m:
-            soup = parse_html(m[0])
-            el_list = soup.findAll('span', {'class':'example'})
-            if el_list:
-                maps = [u''.join(str(content) for content in element.contents) 
-                                    for element in el_list]
-            my_str = ''
-            for i_str in maps:
-                i_str = re.sub(r'<a[^>]+?href=\"sound\:.*\.mp3\".*</a>', '', i_str).strip()
-                my_str = my_str + '<li>' + i_str + '</li>'
-            return self._css(my_str)
-        return ''
+        return self._range_sentence([i for i in range(0, 100)])
 
     def _fld_audio(self, audio):
         name = get_hex_name('mdx-'+self.unique.lower(), audio, 'mp3')
@@ -106,22 +95,7 @@ class Ldoce6(MdxService):
 
     @export([u'例句加音频', u'Examples with audios'])
     def fld_sentence_audio(self):
-        m = re.findall(r'<span class="example"\s*.*>\s*.*<\/span>', self.get_html())
-        if m:
-            soup = parse_html(m[0])
-            el_list = soup.findAll('span', {'class':'example'})
-            if el_list:
-                maps = [u''.join(str(content) for content in element.contents) 
-                                    for element in el_list]
-            my_str = ''
-            for i_str in maps:
-                sound = re.search(r'<a[^>]+?href=\"sound\:\/(.*?\.mp3)\".*</a>', i_str)
-                if sound:
-                    mp3 = self._fld_audio(sound.groups()[0])
-                    i_str = re.sub(r'<a[^>]+?href=\"sound\:.*\.mp3\".*</a>', '', i_str).strip()
-                    my_str = my_str + '<li>' + i_str + ' ' + mp3 + '</li>'
-            return self._css(my_str)
-        return ''
+        return self._range_sentence_audio([i for i in range(0, 100)])
 
     @export('DEF')
     def fld_definate(self):
@@ -135,6 +109,65 @@ class Ldoce6(MdxService):
             my_str = ''
             for i_str in maps:
                 my_str = my_str + '<li>' + i_str + '</li>'
+            return self._css(my_str)
+        return ''
+
+    @export([u'随机例句', u'Random example'])
+    def fld_random_sentence(self):
+        return self._range_sentence()
+
+    @export([u'首2个例句', u'First 2 examples'])
+    def fld_first2_sentence(self):
+        return self._range_sentence([0, 1])
+    
+    @export([u'随机例句加音频', u'Random example with audio'])
+    def fld_random_sentence_audio(self):
+        return self._range_sentence_audio()
+
+    @export([u'首2个例句加音频', u'First 2 examples with audios'])
+    def fld_first2_sentence_audio(self):
+        return self._range_sentence_audio([0, 1])
+
+    def _range_sentence(self, range_arr=None):
+        m = re.findall(r'<span class="example"\s*.*>\s*.*<\/span>', self.get_html())
+        if m:
+            soup = parse_html(m[0])
+            el_list = soup.findAll('span', {'class':'example'})
+            if el_list:
+                maps = [u''.join(str(content) for content in element.contents) 
+                                    for element in el_list]
+            my_str = ''
+            range_arr = range_arr if range_arr else [random.randrange(0, len(maps) - 1, 1)]
+            for i, i_str in enumerate(maps):
+                if i in range_arr:
+                    i_str = re.sub(r'<a[^>]+?href=\"sound\:.*\.mp3\".*</a>', '', i_str).strip()
+                    my_str = my_str + '<li>' + i_str + '</li>'
+            return self._css(my_str)
+        return ''
+
+    def _range_sentence_audio(self, range_arr=None):
+        m = re.findall(r'<span class="example"\s*.*>\s*.*<\/span>', self.get_html())
+        if m:
+            soup = parse_html(m[0])
+            el_list = soup.findAll('span', {'class':'example'})
+            if el_list:
+                maps = []
+                for element in el_list:
+                    i_str = ''
+                    for content in element.contents:
+                        i_str = i_str + str(content)
+                    sound = re.search(r'<a[^>]+?href=\"sound\:\/(.*?\.mp3)\".*</a>', i_str)
+                    if sound:
+                        maps.append([sound, i_str])
+            my_str = ''
+            range_arr = range_arr if range_arr else [random.randrange(0, len(maps) - 1, 1)]
+            for i, e in enumerate(maps):
+                if i in range_arr:
+                    i_str = e[1]
+                    sound = e[0]
+                    mp3 = self._fld_audio(sound.groups()[0])
+                    i_str = re.sub(r'<a[^>]+?href=\"sound\:.*\.mp3\".*</a>', '', i_str).strip()
+                    my_str = my_str + '<li>' + i_str + ' ' + mp3 + '</li>'
             return self._css(my_str)
         return ''
 
