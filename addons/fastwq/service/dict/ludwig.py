@@ -14,9 +14,18 @@ class Ludwig(WebService):
         data = self.get_response(u'https://ludwig.guru/s/{}'.format(self.quote_word))
         soup = parse_html(data)
         result = {
+            'def': u'',
             'examples': []
         }
 
+        # def
+        element = soup.find('div', class_='-id-__definition--1E88I')
+        if element:
+            e_list = element.find_all('p')
+            if e_list:
+                result['def'] = u''.join(str(c).decode('utf-8') for c in e_list)
+
+        # examples
         e_list = soup.find_all('p', class_='-id-__exact--SVDfq')
         if e_list:
             e_arr = []
@@ -24,6 +33,10 @@ class Ludwig(WebService):
                 e_arr.append(str(n.get_text()).decode('utf-8'))
             result['examples'] = e_arr
         return self.cache_this(result)
+    
+    @export('DEF')
+    def fld_definate(self):
+        return self._get_field('def')
 
     @export('EXAMPLE')
     def fld_example(self):
