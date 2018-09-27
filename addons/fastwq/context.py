@@ -20,6 +20,7 @@
 import json
 import os
 from aqt import mw
+from anki.hooks import runHook
 from .constants import VERSION
 from .utils import get_icon
 
@@ -59,6 +60,7 @@ class Config(object):
         with open(self.path, 'wb') as f:
             json.dump(self.data, f, indent=4, sort_keys=True)
             f.close()
+        runHook('config.update')
 
     def read(self):
         """

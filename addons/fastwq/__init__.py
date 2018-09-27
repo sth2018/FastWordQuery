@@ -20,7 +20,7 @@
 from operator import itemgetter
 from aqt import mw
 from aqt.qt import *
-from anki.hooks import addHook, wrap
+from anki.hooks import addHook, wrap, remHook
 from aqt.addcards import AddCards
 from aqt.utils import showInfo, shortcut, downArrow
 from .gui import show_options, show_about_dialog, check_updates
@@ -40,7 +40,6 @@ __all__ = [
 have_setup = False
 my_shortcut = ''
 
-_wraps = []
 _OK_ICON = get_icon('ok.png')
 _NULL_ICON = get_icon('null.png')
 
@@ -63,13 +62,15 @@ def browser_menu():
         """
         on browser setupMenus was called
         """
-        # 
         # main menu
-        menu = QMenu("FastWQ", browser.form.menubar)
-        browser.form.menubar.addMenu(menu)
-
-        def init_fastwq_menu(*args, **kwargs):
-            menu.clear()
+        menu = browser.form.menubar.addMenu("FastWQ")
+        # menu gen
+        def init_fastwq_menu():
+            try:
+                menu.clear()
+            except RuntimeError:
+                remHook('config.update', init_fastwq_menu)
+                return
             # Query Selected
             action = QAction(_('QUERY_SELECTED'), browser)
             action.triggered.connect(lambda: query_from_browser(browser))
@@ -118,14 +119,7 @@ def browser_menu():
 
         # end init_fastwq_menu
         init_fastwq_menu()
-        # wrap config.update
-        if Config.update not in _wraps:
-            Config.update = wrap(
-                Config.update,
-                init_fastwq_menu,
-                "after"
-            )
-            _wraps.append(Config.update)
+        addHook('config.update', init_fastwq_menu)
     addHook('browser.setupMenus', on_setup_menus)
 
 
