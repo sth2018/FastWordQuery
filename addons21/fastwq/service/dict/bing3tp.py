@@ -32,12 +32,18 @@ class BingXtk(WebService):
     @export('AME_PHON')
     def fld_phonetic_us(self):
         seg = self._get_field('pronunciation')
-        return seg.get('AmE', u'') if seg else u''
+        phon = seg.get('AmE', u'') if seg else u''
+        if phon and phon[0:1] not in '/[':
+            return u'/{}/'.format(phon)
+        return u''
 
     @export('BRE_PHON')
     def fld_phonetic_uk(self):
         seg = self._get_field('pronunciation')
-        return seg.get('BrE', u'') if seg else u''
+        phon = seg.get('BrE', u'') if seg else u''
+        if phon and phon[0:1] not in '/[':
+            return u'/{}/'.format(phon)
+        return u''
 
     def _fld_mp3(self, fld):
         seg = self._get_field('pronunciation')
