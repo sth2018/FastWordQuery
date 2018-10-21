@@ -191,6 +191,8 @@ def context_menu():
         """
         add context menu to webview
         """
+        if not isinstance(web_view.editor.currentField, int):
+            return
         current_model_id = web_view.editor.note.model()['id']
         conf = config.get_maps(current_model_id)
         maps_list = conf if isinstance(conf, list) else conf['list']
