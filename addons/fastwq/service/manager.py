@@ -74,7 +74,7 @@ class ServiceManager(object):
         files = [
             f for f in os.listdir(mypath) \
             if f not in ('__init__.py') and \
-            not f.endswith('.pyc') and \
+            f.endswith('.py') and \
             not os.path.isdir(mypath+os.sep+f)
         ]
         base_class = (
