@@ -19,50 +19,59 @@ class Cambridge(WebService):
             'pronunciation': {'AmE': '', 'BrE': '', 'AmEmp3': '', 'BrEmp3': ''},
             'image': '',
             'thumb': '',
-            'def': ''
+            'def': '',
+            'def_list': []
         }
 
-        #页
-        element = soup.find('div', class_='entry-body__el clrd js-share-holder')
+        #english
+        element = soup.find('div', class_='link')
         if element:
-            #音
-            header = element.find('div', class_='pos-header')
-            if header:
-                tags = header.find_all('span', class_='pron-info')
-                if tags:
-                    for tag in tags:
-                        r = tag.find('span', class_='region')
-                        reg = r.get_text() if r else u''
-                        pn = 'AmE' if reg=='us' else 'BrE'
-                        p = tag.find('span', class_='pron')
-                        result['pronunciation'][pn] = p.get_text() if p else u''
-                        snd = tag.find('span', class_='circle circle-btn sound audio_play_button')
-                        if snd:
-                            result['pronunciation'][pn+'mp3'] = cambridge_url_base + snd.get('data-src-mp3')
-            #义
-            body = element.find('div', class_='pos-body')
-            if body:
-                tags = body.find_all('div', class_='def-block pad-indent')
-                if tags:
-                    l = []
-                    for tag in tags:
-                        i = tag.find('span', class_='def-info')
-                        d = tag.find('b', class_='def')
-                        e = tag.find('div', class_='examp emphasized')
-                        l.append(
-                            u'<li><span class="epp-xref">{0}</span>\
-                            <b class="def">{1}</b>\
-                            <div class="examp">{2}</div></li>'.format(
-                                i.get_text() if i else u'',
-                                d.get_text() if d else u'',
-                                e.get_text() if e else u''
-                            )
-                        )
-                    result['def'] = u'<ul>' + u''.join(s for s in l) + u'</ul>'
-                img = body.find('img', class_='lightboxLink')
-                if img:
-                    result['image'] = cambridge_url_base + img.get('data-image')
-                    result['thumb'] = cambridge_url_base + img.get('src')
+            #页
+            elements = element.find_all('div', class_='entry-body__el clrd js-share-holder')
+            header_found = False
+            for element in elements:
+                if element:
+                    #音
+                    if not header_found:
+                        header = element.find('div', class_='pos-header')
+                        if header:
+                            tags = header.find_all('span', class_='pron-info')
+                            if tags:
+                                for tag in tags:
+                                    r = tag.find('span', class_='region')
+                                    reg = r.get_text() if r else u''
+                                    pn = 'AmE' if reg=='us' else 'BrE'
+                                    p = tag.find('span', class_='pron')
+                                    result['pronunciation'][pn] = p.get_text() if p else u''
+                                    snd = tag.find('span', class_='circle circle-btn sound audio_play_button')
+                                    if snd:
+                                        result['pronunciation'][pn+'mp3'] = cambridge_url_base + snd.get('data-src-mp3')
+                                    header_found = True
+                    #义
+                    body = element.find('div', class_='pos-body')
+                    if body:
+                        tags = body.find_all('div', class_='def-block pad-indent')
+                        if tags:
+                            l = result['def_list']
+                            for tag in tags:
+                                i = tag.find('span', class_='def-info')
+                                d = tag.find('b', class_='def')
+                                es = tag.find_all('div', class_='examp emphasized')
+                                l.append(
+                                    u'<li>{0}{1}{2}</li>'.format(
+                                        u'<span class="epp-xref">{0}</span>'.format(i.get_text()) if i else u'',
+                                        u'<b class="def">{0}</b>'.format(d.get_text()) if d else u'',
+                                        u''.join(
+                                            u'<div class="examp">{0}</div>'.format(e.get_text()) if e else u''
+                                            for e in es
+                                        )
+                                    )
+                                )
+                            result['def'] = u'<ul>' + u''.join(s for s in l) + u'</ul>'
+                        img = body.find('img', class_='lightboxLink')
+                        if img:
+                            result['image'] = cambridge_url_base + img.get('data-image')
+                            result['thumb'] = cambridge_url_base + img.get('src')
 
         return self.cache_this(result)
 
