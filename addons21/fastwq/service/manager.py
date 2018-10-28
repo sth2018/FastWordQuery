@@ -84,6 +84,8 @@ class ServiceManager(object):
                     continue
                 if not(issubclass(clazz, WebService) or issubclass(clazz, LocalService)):
                     continue
+                if getattr(clazz, '__register_label__', None) is None:
+                    continue
                 service = service_wrap(clazz, *args)
                 service.__title__ = getattr(clazz, '__register_label__', name)
                 service.__unique__ = name
@@ -93,6 +95,8 @@ class ServiceManager(object):
                     # get the customized local services
                 if issubclass(clazz, LocalService):
                     local_custom_services.append(service)
+        web_services = sorted(web_services, key=lambda service: service.__title__)
+        local_custom_services = sorted(local_custom_services, key=lambda service: service.__title__)
         return web_services, local_custom_services
 
     def _get_available_local_services(self):

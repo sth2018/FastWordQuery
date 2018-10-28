@@ -2,28 +2,31 @@
 import os
 from ..base import *
 
-cambridge_url_base = u'https://dictionary.cambridge.org'
+cambridge_url_base = u'https://dictionary.cambridge.org/dictionary/english/'
 cambridge_download_mp3 = True
 cambridge_download_img = True
 
-@register([u'剑桥英英', u'Cambridge'])
 class Cambridge(WebService):
 
     def __init__(self):
         super(Cambridge, self).__init__()
 
+    def _get_url(self):
+        return cambridge_url_base
+
     def _get_from_api(self):
-        data = self.get_response(u'{0}/dictionary/english/{1}'.format(cambridge_url_base, self.quote_word))
+        data = self.get_response(u'{0}{1}'.format(self._get_url(), self.quote_word))
         soup = parse_html(data)
         result = {
             'pronunciation': {'AmE': '', 'BrE': '', 'AmEmp3': '', 'BrEmp3': ''},
             'image': '',
             'thumb': '',
-            'def': ''
+            'def': '',
+            'def_list': []
         }
 
         #english
-        element = soup.find('div', class_='link')
+        element = soup.find('div', class_='di-body')
         if element:
             #页
             elements = element.find_all('div', class_='entry-body__el clrd js-share-holder')
