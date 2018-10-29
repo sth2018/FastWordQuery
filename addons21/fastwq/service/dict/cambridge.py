@@ -2,7 +2,7 @@
 import os
 from ..base import *
 
-cambridge_url_base = u'https://dictionary.cambridge.org/dictionary/english/'
+cambridge_url_base = u'https://dictionary.cambridge.org/'
 cambridge_download_mp3 = True
 cambridge_download_img = True
 
