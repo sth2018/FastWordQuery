@@ -628,16 +628,16 @@ class MdxService(LocalService):
 
     def _get_default_html(self):
         html = u''
-        result = self.builder.mdx_lookup(self.word, ignorecase=config.ignore_mdx_wordcase)  # self.word: unicode
+        result = self.get_html()
         if result:
-            if result[0].upper().find(u"@@@LINK=") > -1:
+            if result.upper().find(u"@@@LINK=") > -1:
                 # redirect to a new word behind the equal symol.
-                word = result[0][len(u"@@@LINK="):].strip()
+                word = result[len(u"@@@LINK="):].strip()
                 if not word.upper() in self.word_links:
                     self.word_links.append(word.upper())
                     self.word = word
                     return self._get_default_html()
-            html = self.adapt_to_anki(result[0])
+            html = self.adapt_to_anki(result)
         self.cache[self.word] = html
         return self.cache[self.word]
 

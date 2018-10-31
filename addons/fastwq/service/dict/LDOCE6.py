@@ -171,6 +171,19 @@ class Ldoce6(MdxService):
             return self._css(my_str)
         return ''
 
+    @export([u'额外例句', u'Extra Examples'])
+    def fld_extra_examples(self):
+        lst = re.findall(r'href="/(@examples_.*?)\">.*?<', self.get_html())
+        if lst:
+            str_content = u''
+            for m in lst:
+                content = self.builder.mdx_lookup(m)
+                if len(content) > 0:
+                    for c in content:
+                        str_content += c.replace("\r\n","").replace("entry:/","")
+            return self._css(str_content)
+        return ''    
+
     @with_styles(cssfile='_ldoce6.css')
     def _css(self, val):
         return val
