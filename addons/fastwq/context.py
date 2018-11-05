@@ -136,5 +136,10 @@ class Config(object):
         '''auto check new version'''
         return self.data.get('auto_update', True)
 
+    @property
+    def cloze_str(self):
+        '''cloze formater string'''
+        return self.data.get('cloze_str', '{{c1::%s}}')
+        
 
 config = Config(mw)

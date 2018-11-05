@@ -74,6 +74,16 @@ class SettingDialog(Dialog):
         hbox.setStretchFactor(input_thread_number, 2)
         layout.addLayout(hbox)
 
+        hbox = QHBoxLayout()
+        input_cloze_str = QLineEdit()
+        input_cloze_str.setText(config.cloze_str)
+        input_label = QLabel(_("CLOZE_WORD_FORMAT") + ":", parent=self)
+        hbox.addWidget(input_label)
+        hbox.setStretchFactor(input_label, 1)
+        hbox.addWidget(input_cloze_str)
+        hbox.setStretchFactor(input_cloze_str, 2)
+        layout.addLayout(hbox)
+
         buttonBox = QDialogButtonBox(parent=self)
         buttonBox.setStandardButtons(QDialogButtonBox.Ok)
         buttonBox.accepted.connect(self.accept) # 确定
@@ -86,6 +96,7 @@ class SettingDialog(Dialog):
         self.check_auto_update = check_auto_update
         self.check_ighore_mdx_wordcase = check_ighore_mdx_wordcase
         self.input_thread_number = input_thread_number
+        self.input_cloze_str = input_cloze_str
 
         layout.setAlignment(Qt.AlignTop|Qt.AlignLeft)
         self.setLayout(layout)
@@ -101,6 +112,7 @@ class SettingDialog(Dialog):
             'auto_update': self.check_auto_update.isChecked(),
             'ignore_mdx_wordcase': self.check_ighore_mdx_wordcase.isChecked(),
             'thread_number': self.input_thread_number.value(),
+            'cloze_str': self.input_cloze_str.text()
         }
         config.update(data)
         

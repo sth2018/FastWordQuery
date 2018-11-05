@@ -79,6 +79,7 @@ _arr = [
     ['CURRENT_FIELDS', u'当前字段', u'Current Fields'],
     ['OPTIONS', u'选项', u'Options'],
     ['CLOZE_WORD', u'单词填空', u'Cloze word'],
+    ['CLOZE_WORD_FORMAT', '单词填空格式', 'Cloze word formater'],
 
     ['BRE_PRON', u'英式发音', u'British Pronunciation'],
     ['AME_PRON', u'美式发音', u'American Pronunciation'],

@@ -288,7 +288,7 @@ def cloze_deletion(text, cloze):
             if w[:l].lower() == cloze.lower():
                 e = s + l
                 w = word[:l]
-            result = result[:s+offset] + "{{c1::" + w + "}}" + result[e+offset:]
+            result = result[:s+offset] + (config.cloze_str % w) + result[e+offset:]
             offset += 8
     return result
 
