@@ -290,7 +290,7 @@ def cloze_deletion(text, cloze):
                 e = s + l
                 w = word[:l]
             result = result[:s+offset] + (config.cloze_str % w) + result[e+offset:]
-            offset += 8
+            offset += len(config.cloze_str)-2
     return result
 
 _stemmer = stemmer('english')
