@@ -1,5 +1,7 @@
 #-*- coding:utf-8 -*-
 import os
+import re
+
 from ..base import *
 
 cambridge_url_base = u'https://dictionary.cambridge.org/'
@@ -37,7 +39,7 @@ class Cambridge(WebService):
                     if not header_found:
                         header = element.find('div', class_='pos-header')
                         if header:
-                            tags = header.find_all('span', class_='pron-info')
+                            tags = header.find_all('span', class_=re.compile("uk|us"))
                             if tags:
                                 for tag in tags:
                                     r = tag.find('span', class_='region')
