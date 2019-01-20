@@ -3,6 +3,7 @@
 
 from bs4 import Tag
 from ..base import *
+from ...utils.misc import format_multi_query_word
 
 #filterwarnings('ignore')
 
@@ -22,7 +23,7 @@ class OxfordLearning(WebService):
         :param word:
         :rtype:  WebWord
         """
-        qry_url = u'https://www.oxfordlearnersdictionaries.com/definition/english/{}'.format(word)
+        qry_url = u'https://www.oxfordlearnersdictionaries.com/definition/english/{}'.format(format_multi_query_word(word))
 
         retried = 10
         while retried:

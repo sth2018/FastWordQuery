@@ -60,6 +60,16 @@ def get_icon(filename):
     return QIcon(path)
 
 
+# Some query words like 'Saudi Arabia' is comprised by two or more words that split by '%20'(space),
+# it is an invalid query format. (Validated Dictionary: Longman, oxford learning)
+def format_multi_query_word(words: str):
+    _space = '%20'
+    if words is None or _space not in words:
+        return words
+
+    return words.lower().replace(_space, '-')
+
+
 class MapDict(dict):
     """
     Example:
