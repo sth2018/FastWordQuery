@@ -42,6 +42,8 @@ class OxfordLearning(WebService):
                 self.cache_this(
                     {
                         'phonetic': '{} {}'.format(web_word.wd_phon_bre, web_word.wd_phon_nam),
+                        'phon_bre': '{}'.format(web_word.wd_phon_bre),
+                        'phon_ame': '{}'.format(web_word.wd_phon_nam),
                         'pos': web_word.wd_pos,
                         'img_full': web_word.wd_image_full_url,
                         'img_thumb': web_word.wd_image_thumb_url,
@@ -54,6 +56,8 @@ class OxfordLearning(WebService):
                 self.cache_this(
                     {
                         'phonetic': '',
+                        'phon_bre': '',
+                        'phon_ame': '',
                         'pos': '',
                         'img_full': '',
                         'img_thumb': '',
@@ -67,6 +71,14 @@ class OxfordLearning(WebService):
     @export('PHON')
     def fld_phonetic(self):
         return self._get_single_dict('phonetic')
+
+    @export('AME_PHON')
+    def fld_phonetic_us(self):
+        return self._get_single_dict('phon_ame')
+
+    @export('BRE_PHON')
+    def fld_phonetic_uk(self):
+        return self._get_single_dict('phon_bre')
 
     @export([u'词性', u'POS'])
     def fld_pos(self):
