@@ -23,7 +23,7 @@ from aqt.qt import *
 from anki.hooks import addHook, wrap, remHook
 from aqt.addcards import AddCards
 from aqt.utils import showInfo, shortcut, downArrow
-from .gui import show_options, show_about_dialog, check_updates
+from .gui import show_options, show_about_dialog #, check_updates
 from .query import query_from_browser, query_from_editor_fields
 from .context import config, APP_ICON, Config
 from .lang import _
@@ -33,7 +33,7 @@ from .utils import get_icon
 
 __all__ = [
     'browser_menu', 'customize_addcards', 
-    'config_menu', 'check_updates', 'context_menu'
+    'config_menu', 'context_menu' #, 'check_updates'
 ]
 
 
@@ -107,10 +107,10 @@ def browser_menu():
             if b: 
                 menu.addSeparator()
 
-            # check update
-            action = QAction(_('CHECK_UPDATE'), browser)
-            action.triggered.connect(lambda: check_updates(background=False, parent=browser))
-            menu.addAction(action)
+            # # check update
+            # action = QAction(_('CHECK_UPDATE'), browser)
+            # action.triggered.connect(lambda: check_updates(background=False, parent=browser))
+            # menu.addAction(action)
 
             # About
             action = QAction(_('ABOUT'), browser)
