@@ -42,7 +42,7 @@ def start_here():
         fastwq.browser_menu()
         fastwq.context_menu()
         fastwq.customize_addcards()
-        if fastwq.config.auto_update:
-            fastwq.check_updates(True)
+        # if fastwq.config.auto_update:
+        #     fastwq.check_updates(True)
 
 addHook("profileLoaded", start_here)

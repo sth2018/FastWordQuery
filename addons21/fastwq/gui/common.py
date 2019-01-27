@@ -31,22 +31,22 @@ from ..constants import Endpoint, Template
 from ..service import service_manager, service_pool
 
 
-__all__ = ['show_options', 'check_updates', 'show_fm_dialog', 'show_about_dialog']
+__all__ = ['show_options', 'show_fm_dialog', 'show_about_dialog'] #'check_updates',
 
 
-def check_updates(background=False, parent=None):
-    '''check add-on last version'''
-    try:
-        parent = mw if parent is None else parent
-        state = ankihub.update([Endpoint.check_version], Endpoint.version, background, parent)
-        if not background:
-            if state == 0:
-                showInfo(_('LATEST_VERSION'))
-            elif state == -1:
-                showInfo(_('CHECK_FAILURE'))
-    except:
-        if not background:
-            showInfo(_('CHECK_FAILURE'))
+# def check_updates(background=False, parent=None):
+#     '''check add-on last version'''
+#     try:
+#         parent = mw if parent is None else parent
+#         state = ankihub.update([Endpoint.check_version], Endpoint.version, background, parent)
+#         if not background:
+#             if state == 0:
+#                 showInfo(_('LATEST_VERSION'))
+#             elif state == -1:
+#                 showInfo(_('CHECK_FAILURE'))
+#     except:
+#         if not background:
+#             showInfo(_('CHECK_FAILURE'))
 
 
 def show_fm_dialog(browser = None):

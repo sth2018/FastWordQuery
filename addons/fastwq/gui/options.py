@@ -157,8 +157,8 @@ class OptionsDialog(Dialog):
         about_btn = QPushButton(_('ABOUT'))
         about_btn.clicked.connect(self.show_about)
         # about_btn.clicked.connect(self.show_paras)
-        chk_update_btn = QPushButton(_('UPDATE'))
-        chk_update_btn.clicked.connect(self.check_updates)
+        # chk_update_btn = QPushButton(_('UPDATE'))
+        # chk_update_btn.clicked.connect(self.check_updates)
         home_label = QLabel(
             '<a href="{url}">User Guide</a>'.format(url=Endpoint.user_guide)
         )
@@ -167,7 +167,7 @@ class OptionsDialog(Dialog):
         btnbox = QDialogButtonBox(QDialogButtonBox.Ok, Qt.Horizontal, self)
         btnbox.accepted.connect(self.accept)
         bottom_layout.addWidget(paras_btn)
-        bottom_layout.addWidget(chk_update_btn)
+        # bottom_layout.addWidget(chk_update_btn)
         bottom_layout.addWidget(about_btn)
         bottom_layout.addWidget(home_label)
         bottom_layout.addWidget(btnbox)
@@ -189,10 +189,10 @@ class OptionsDialog(Dialog):
         dialog.exec_()
         dialog.destroy()
 
-    def check_updates(self):
-        '''check addon version'''
-        from .common import check_updates
-        check_updates(parent=self)
+    # def check_updates(self):
+    #     '''check addon version'''
+    #     from .common import check_updates
+    #     check_updates(parent=self)
 
     def show_fm_dialog(self):
         '''open folder manager dialog'''
