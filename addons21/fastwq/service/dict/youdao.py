@@ -39,6 +39,8 @@ class Youdao(WebService):
                     '&le={0}&q={1}').format(lang, self.quote_word)
         result ={
             'phonetic': '',
+            'us_phonetic': '',
+            'uk_phonetic': '',
             'explains':'',
         }
         try:
@@ -48,18 +50,24 @@ class Youdao(WebService):
             symbol, uk_symbol, us_symbol = doc.findtext(".//phonetic-symbol"), doc.findtext(
                 ".//uk-phonetic-symbol"), doc.findtext(".//us-phonetic-symbol")
             if uk_symbol and us_symbol:
-                #phonetics = 'UK [%s]   US [%s]' % (uk_symbol, us_symbol)
-                phonetics = '/%s/' % (us_symbol)
+                phonetics = 'UK [%s]   US [%s]' % (uk_symbol, us_symbol)
+                us_phonetics = '/%s/' % us_symbol
+                uk_phonetics = '/%s/' % uk_symbol
+                #phonetics = '/%s/' % (us_symbol)
             elif symbol:
                 phonetics = '/%s/' % symbol
+                us_phonetics = ''
+                uk_phonetics = ''
             else:
                 phonetics = ''
+                us_phonetics = ''
+                uk_phonetics = ''
             # fetch explanations
             explains = '<br>'.join([node.text
                                     for node in doc.findall(
                                         ".//custom-translation/translation/content"
                                     )])
-            result.update({'phonetic': phonetics, 'explains': explains})
+            result.update({'phonetic': phonetics, 'us_phonetic': us_phonetics, 'uk_phonetic': uk_phonetics, 'explains': explains})
         except:
             pass
         return self.cache_this(result)
@@ -67,6 +75,14 @@ class Youdao(WebService):
     @export('PHON')
     def fld_phonetic(self):
         return self._get_field('phonetic')
+
+    @export('AME_PHON')
+    def fld_phonetic_us(self):
+        return self._get_field('us_phonetic')
+
+    @export('BRE_PHON')
+    def fld_phonetic_uk(self):
+        return self._get_field('uk_phonetic')
 
     @export([u'基本释义', u'Explanations'])
     def fld_explains(self):
