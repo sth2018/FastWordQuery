@@ -18,10 +18,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from aqt.qt import *
-from .base import Dialog, WIDGET_SIZE
+
 from ..context import config
 from ..lang import _
-
+from .base import WIDGET_SIZE, Dialog
 
 __all__ = ['SettingDialog']
 
@@ -36,7 +36,6 @@ class SettingDialog(Dialog):
         self.setFixedWidth(400)
         self.check_force_update = None
         self.check_ignore_accents = None
-        # self.check_auto_update = None
         self.input_thread_number = None
         self.build()
 
@@ -52,11 +51,6 @@ class SettingDialog(Dialog):
         check_ignore_accents.setChecked(config.ignore_accents)
         layout.addWidget(check_ignore_accents)
         layout.addSpacing(10)
-
-        # check_auto_update = QCheckBox(_("AUTO_UPDATE"))
-        # check_auto_update.setChecked(config.auto_update)
-        # layout.addWidget(check_auto_update)
-        # layout.addSpacing(10)
 
         check_ighore_mdx_wordcase = QCheckBox(_("IGNORE_MDX_WORDCASE"))
         check_ighore_mdx_wordcase.setChecked(config.ignore_mdx_wordcase)
@@ -84,16 +78,23 @@ class SettingDialog(Dialog):
         hbox.setStretchFactor(input_cloze_str, 2)
         layout.addLayout(hbox)
 
-        buttonBox = QDialogButtonBox(parent=self)
-        buttonBox.setStandardButtons(QDialogButtonBox.Ok)
-        buttonBox.accepted.connect(self.accept) # 确定
+        hbox = QHBoxLayout()
+        okbtn = QDialogButtonBox(parent=self)
+        okbtn.setStandardButtons(QDialogButtonBox.Ok)
+        okbtn.clicked.connect(self.accept)
+        resetbtn = QDialogButtonBox(parent=self)
+        resetbtn.setStandardButtons(QDialogButtonBox.Reset)
+        resetbtn.clicked.connect(self.reset)
+        hbox.setAlignment(Qt.AlignRight)
+        hbox.addSpacing(300)
+        hbox.addWidget(resetbtn)
+        hbox.addWidget(okbtn)
         
         layout.addSpacing(48)
-        layout.addWidget(buttonBox)
+        layout.addLayout(hbox)
         
         self.check_force_update = check_force_update
         self.check_ignore_accents = check_ignore_accents
-        # self.check_auto_update = check_auto_update
         self.check_ighore_mdx_wordcase = check_ighore_mdx_wordcase
         self.input_thread_number = input_thread_number
         self.input_cloze_str = input_cloze_str
@@ -105,14 +106,27 @@ class SettingDialog(Dialog):
         self.save()
         super(SettingDialog, self).accept()
     
+    def reset(self):
+        data = {
+            'force_update': False,
+            'ignore_accents': False,
+            'ignore_mdx_wordcase': False,
+            'thread_number': 16,
+            'cloze_str': '{{c1::%s}}'
+        }
+        config.update(data)
+        self.check_force_update.setChecked(config.force_update)
+        self.check_ignore_accents.setChecked(config.ignore_accents)
+        self.check_ighore_mdx_wordcase.setChecked(config.ignore_mdx_wordcase)
+        self.input_thread_number.setValue(config.thread_number)
+        self.input_cloze_str.setText(config.cloze_str)
+    
     def save(self):
         data = {
             'force_update': self.check_force_update.isChecked(),
             'ignore_accents': self.check_ignore_accents.isChecked(),
-            # 'auto_update': self.check_auto_update.isChecked(),
             'ignore_mdx_wordcase': self.check_ighore_mdx_wordcase.isChecked(),
             'thread_number': self.input_thread_number.value(),
             'cloze_str': self.input_cloze_str.text()
         }
         config.update(data)
-        

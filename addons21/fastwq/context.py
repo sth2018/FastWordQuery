@@ -19,16 +19,17 @@
 
 import json
 import os
-from aqt import mw
+
 from anki.hooks import runHook
+from aqt import mw
+
 from .constants import VERSION
 from .utils import get_icon
-
 
 __all__ = ['APP_ICON', 'config']
 
 
-APP_ICON = get_icon('wqicon.png')       #Addon Icon
+APP_ICON = get_icon('wqicon.png')       # Addon Icon
 
 
 class Config(object):
@@ -37,7 +38,7 @@ class Config(object):
     Addon Config
     """
 
-    _CONFIG_FILENAME = 'fastwqcfg.json'     #Config File Path
+    _CONFIG_FILENAME = 'fastwqcfg.json'     # Config File Path
 
     def __init__(self, window):
         self.path = u'_' + self._CONFIG_FILENAME
@@ -122,7 +123,7 @@ class Config(object):
     @property
     def last_folder(self):
         """
-        last file dialog open path 
+        last file dialog open path
         """
         return self.data.get('last_folder', '')
 
@@ -132,14 +133,11 @@ class Config(object):
         return self.data.get('ignore_accents', False)
 
     @property
-    def auto_update(self):
-        '''auto check new version'''
-        return self.data.get('auto_update', True)
-
-    @property
     def cloze_str(self):
         '''cloze formater string'''
-        return self.data.get('cloze_str', '{{c1::%s}}')
-
+        tmpstr = self.data.get('cloze_str', '{{c1::%s}}')
+        if len(tmpstr.split('%s')) != 2:
+            tmpstr = '{{c1::%s}}'
+        return tmpstr
 
 config = Config(mw)
