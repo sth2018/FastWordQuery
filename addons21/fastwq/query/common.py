@@ -1,4 +1,4 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 #
 # Copyright (C) 2018 sthoo <sth201807@gmail.com>
 #
@@ -17,29 +17,26 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-
+import io
 import os
 import re
-import io
 import shutil
 import unicodedata
-
 from collections import defaultdict
+
 from aqt.qt import *
 from aqt.utils import showInfo
 
 from ..constants import Template
 from ..context import config
-from ..service import service_pool, QueryResult, copy_static_file
+from ..libs.snowballstemmer import stemmer
+from ..service import QueryResult, copy_static_file, service_pool
 from ..service.base import LocalService
 from ..utils import wrap_css
-from ..libs.snowballstemmer import stemmer
-
 
 __all__ = [
-    'InvalidWordException', 'update_note_fields',
-    'update_note_field', 'promot_choose_css', 'add_to_tmpl',
-    'query_flds', 'inspect_note'
+    'InvalidWordException', 'update_note_fields', 'update_note_field',
+    'promot_choose_css', 'add_to_tmpl', 'query_flds', 'inspect_note'
 ]
 
 
@@ -127,19 +124,14 @@ def promot_choose_css(missed_css):
         if not os.path.exists(filename) and not css['file'] in checked:
             checked.add(css['file'])
             showInfo(
-                Template.miss_css.format(
-                    dict=css['title'],
-                    css=css['file']
-                )
-            )
+                Template.miss_css.format(dict=css['title'], css=css['file']))
             try:
-                filepath = css['dict_path'][:css['dict_path'].rindex(
-                    os.path.sep)+1]
+                filepath = css['dict_path'][:css['dict_path'].rindex(os.path.
+                                                                     sep) + 1]
                 filepath = QFileDialog.getOpenFileName(
                     directory=filepath,
                     caption=u'Choose css file',
-                    filter=u'CSS (*.css)'
-                )
+                    filter=u'CSS (*.css)')
                 if filepath:
                     shutil.copy(filepath, filename)
                     wrap_css(filename)
@@ -161,15 +153,17 @@ def add_to_tmpl(note, **kwargs):
         if js and js.strip():
             addings = js.strip()
             if addings not in afmt:
-                if not addings.startswith(u'<script') and not addings.endswith(u'/script>'):
-                    addings = u'\n<script type="text/javascript">\n{}\n</script>'.format(addings)
+                if not addings.startswith(u'<script') and not addings.endswith(
+                        u'/script>'):
+                    addings = u'\n<script type="text/javascript">\n{}\n</script>'.format(
+                        addings)
                 afmt += addings
         if jsfile:
-            #new_jsfile = u'_' + \
-            #    jsfile if not jsfile.startswith(u'_') else jsfile
-            #copy_static_file(jsfile, new_jsfile)
-            #addings = u'\r\n<script src="{}"></script>'.format(new_jsfile)
-            #afmt += addings
+            # new_jsfile = u'_' + \
+            #     jsfile if not jsfile.startswith(u'_') else jsfile
+            # copy_static_file(jsfile, new_jsfile)
+            # addings = u'\r\n<script src="{}"></script>'.format(new_jsfile)
+            # afmt += addings
             jsfile = jsfile if isinstance(jsfile, list) else [jsfile]
             for fn in jsfile:
                 addings = '''
@@ -204,17 +198,17 @@ def query_flds(note, fileds=None):
             continue
         if i == len(note.fields):
             break
-        #ignore field
+        # ignore field
         ignore = each.get('ignore', False)
         if ignore:
             continue
-        #skip valued
+        # skip valued
         skip = each.get('skip_valued', False)
         if skip and len(note.fields[i]) != 0:
             continue
-        #cloze
+        # cloze
         cloze = each.get('cloze_word', False)
-        #normal
+        # normal
         dict_unique = each.get('dict_unique', '').strip()
         dict_fld_ord = each.get('dict_fld_ord', -1)
         fld_ord = each.get('fld_ord', -1)
@@ -227,9 +221,9 @@ def query_flds(note, fileds=None):
                         services[dict_unique] = s
                 if s and s.support:
                     tasks.append({
-                        'k': dict_unique, 
+                        'k': dict_unique,
                         'w': word,
-                        'f': dict_fld_ord, 
+                        'f': dict_fld_ord,
                         'i': fld_ord,
                         'cloze': cloze,
                     })
@@ -237,17 +231,17 @@ def query_flds(note, fileds=None):
     success_num = 0
     result = defaultdict(QueryResult)
     for task in tasks:
-        #try:
-        service = services.get(task['k'], None)
-        qr = service.active(task['f'], task['w'])
-        if qr:
-            if task['cloze']:
-                qr['result'] = cloze_deletion(qr['result'], word)
-            result.update({task['i']: qr})
-            success_num += 1
-        #except:
-        #    showInfo(_("NO_QUERY_WORD"))
-        #    pass
+        try:
+            service = services.get(task['k'], None)
+            qr = service.active(task['f'], task['w'])
+            if qr:
+                if task['cloze']:
+                    qr['result'] = cloze_deletion(qr['result'], word)
+                result.update({task['i']: qr})
+                success_num += 1
+        except Exception as e:
+            print(_("NO_QUERY_WORD"), e)
+            pass
 
     missed_css = list()
     for service in services.values():
@@ -284,13 +278,15 @@ def cloze_deletion(text, cloze):
             continue
         word = text[s:e]
         if _stemmer.stemWord(word).lower() == term:
-            l = len(cloze)
+            ln = len(cloze)
             w = word
-            if w[:l].lower() == cloze.lower():
-                e = s + l
-                w = word[:l]
-            result = result[:s+offset] + (config.cloze_str % w) + result[e+offset:]
-            offset += len(config.cloze_str)-2
+            if w[:ln].lower() == cloze.lower():
+                e = s + ln
+                w = word[:ln]
+            result = result[:s + offset] + (
+                config.cloze_str % w) + result[e + offset:]
+            offset += len(config.cloze_str) - 2
     return result
+
 
 _stemmer = stemmer('english')
