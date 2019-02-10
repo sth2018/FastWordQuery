@@ -1,4 +1,4 @@
-﻿#-*- coding:utf-8 -*-
+﻿# -*- coding:utf-8 -*-
 #
 # Copyright (C) 2018 sthoo <sth201807@gmail.com>
 #
@@ -18,15 +18,15 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from anki.lang import currentLang
+
 try:
-  basestring
+    basestring
 except NameError:
-  basestring = str
+    basestring = str
 
 __all__ = ['_', '_cl', '_sl']
 
-
-#Language Define, [Key, zh_CN, en]
+# Language Define, [Key, zh_CN, en]
 _arr = [
     ['CHECK_FILENAME_LABEL', u'使用文件名作为标签', u'Use the Filename as Label'],
     ['EXPORT_MEDIA', u'导出媒体文件', u'Export Media Files'],
@@ -42,13 +42,19 @@ _arr = [
     ['QUERIED', u'查询', u'Queried'],
     ['FIELDS', u'字段', u'Fields'],
     ['WORDS', u'单词', u'Words'],
-    ['NOT_DICT_FIELD', u'忽略', u'Ignore'],   #不是字典字段
+    ['NOT_DICT_FIELD', u'忽略', u'Ignore'],  # 不是字典字段
     ['NOTE_TYPE_FIELDS', u'<b>笔记字段</b>', u'<b>Note Fields</b>'],
     ['DICTS', u'<b>字典</b>', u'<b>Dictionary</b>'],
     ['DICT_FIELDS', u'<b>字典字段</b>', u'<b>Fields</b>'],
-    ['RADIOS_DESC', u'<b>单选框选中为待查询单词字段</b>', u'<b> Select the field to be queried with single selection.</b>'],
+    [
+        'RADIOS_DESC', u'<b>单选框选中为待查询单词字段</b>',
+        u'<b> Select the field to be queried with single selection.</b>'
+    ],
     ['NO_QUERY_WORD', u'查询字段无单词', u'The query field is empty'],
-    ['CSS_NOT_FOUND', u'没有找到CSS文件，请手动选择', u'No CSS file found, please select one manually.'],
+    [
+        'CSS_NOT_FOUND', u'没有找到CSS文件，请手动选择',
+        u'No CSS file found, please select one manually.'
+    ],
     ['ABOUT', u'关于', u'About'],
     ['REPOSITORY', u'项目地址', u'Project Repo'],
     ['FEEDBACK', u'反馈', u'Feedback'],
@@ -60,7 +66,10 @@ _arr = [
     ['UPDATE', u'更新', u'Update'],
     ['AUTO_UPDATE', u'自动检测新版本', u'Auto check new version'],
     ['CHECK_UPDATE', u'检测更新', u'Check Update'],
-    ['IGNORE_MDX_WORDCASE', u'忽略本地词典单词大小写', u'Ignore MDX dictionary word case'],
+    [
+        'IGNORE_MDX_WORDCASE', u'忽略本地词典单词大小写',
+        u'Ignore MDX dictionary word case'
+    ],
     ['FORCE_UPDATE', u'强制更新字段', u'Forced Updates of all fields'],
     ['IGNORE_ACCENTS', u'忽略声调', u'Ignore Accents'],
     ['SKIP_VALUED', u'跳过有值项', u'Skip non-empty'],
@@ -68,7 +77,10 @@ _arr = [
     ['SETTINGS', u'参数', u'Settings'],
     ['THREAD_NUMBER', u'线程数', u'Number of Threads'],
     ['INITLIZING_DICT', u'初始化词典...', u'Initlizing Dictionary...'],
-    ['PLS_SET_DICTIONARY_FIELDS', u'请设置字典和字段', u'Please set the dictionary and fields.'],
+    [
+        'PLS_SET_DICTIONARY_FIELDS', u'请设置字典和字段',
+        u'Please set the dictionary and fields.'
+    ],
     ['CONFIG_INDEX', u'配置 %s', u'Config %s'],
     ['SELECT_ALL', u'全选', u'All'],
     ['DICTS_NAME', u'字典名称', u'Dictionary Name'],
@@ -80,7 +92,6 @@ _arr = [
     ['OPTIONS', u'选项', u'Options'],
     ['CLOZE_WORD', u'单词填空', u'Cloze word'],
     ['CLOZE_WORD_FORMAT', '单词填空格式', 'Cloze word formater'],
-
     ['BRE_PRON', u'英式发音', u'British Pronunciation'],
     ['AME_PRON', u'美式发音', u'American Pronunciation'],
     ['PRON', u'发音', u'Audio Pronunciation'],
@@ -103,7 +114,7 @@ def _(key, lang=currentLang):
 
     def disp(s):
         return s.lower().capitalize()
-    
+
     if key not in _trans or lang not in _trans[key]:
         return disp(key)
     return _trans[key][lang]

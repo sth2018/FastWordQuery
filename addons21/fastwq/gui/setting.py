@@ -1,4 +1,4 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 #
 # Copyright (C) 2018 sthoo <sth201807@gmail.com>
 #
@@ -21,7 +21,7 @@ from aqt.qt import *
 
 from ..context import config
 from ..lang import _
-from .base import WIDGET_SIZE, Dialog
+from .base import Dialog
 
 __all__ = ['SettingDialog']
 
@@ -89,23 +89,23 @@ class SettingDialog(Dialog):
         hbox.addSpacing(300)
         hbox.addWidget(resetbtn)
         hbox.addWidget(okbtn)
-        
+
         layout.addSpacing(48)
         layout.addLayout(hbox)
-        
+
         self.check_force_update = check_force_update
         self.check_ignore_accents = check_ignore_accents
         self.check_ighore_mdx_wordcase = check_ighore_mdx_wordcase
         self.input_thread_number = input_thread_number
         self.input_cloze_str = input_cloze_str
 
-        layout.setAlignment(Qt.AlignTop|Qt.AlignLeft)
+        layout.setAlignment(Qt.AlignTop | Qt.AlignLeft)
         self.setLayout(layout)
 
     def accept(self):
         self.save()
         super(SettingDialog, self).accept()
-    
+
     def reset(self):
         data = {
             'force_update': False,
@@ -120,7 +120,7 @@ class SettingDialog(Dialog):
         self.check_ighore_mdx_wordcase.setChecked(config.ignore_mdx_wordcase)
         self.input_thread_number.setValue(config.thread_number)
         self.input_cloze_str.setText(config.cloze_str)
-    
+
     def save(self):
         data = {
             'force_update': self.check_force_update.isChecked(),
