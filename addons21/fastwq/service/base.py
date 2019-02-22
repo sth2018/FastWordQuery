@@ -370,7 +370,7 @@ class WebService(Service):
         be added onto the stream returned. This is helpful for some web
         services that sometimes return MP3s that `mplayer` clips early.
         """
-        DEFAULT_UA = 'Mozilla/5.0'
+        DEFAULT_UA = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.67 Safari/537.36'
         DEFAULT_TIMEOUT = 3
 
         PADDING = '\0' * 2**11
