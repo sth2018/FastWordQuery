@@ -18,6 +18,8 @@ class Baidu_Chinese(WebService):
             'pinyin': '',
             'basicmean': '',
             'detailmean': '',
+            'synonym': '',
+            'antonym': '',
             'fanyi': '',
             'audio_url': '',
         }
@@ -38,15 +40,28 @@ class Baidu_Chinese(WebService):
         if element:
             tag = element.find_all('div', {'class': 'tab-content'})
             if tag:
-                result['basicmean'] = u''.join(str(x).decode('utf-8') for x in tag)
+                result['basicmean'] = u''.join(str(x) for x in tag)
 
         #详细释义
         element = soup.find('div', id='detailmean-wrapper')
         if element:
             tag = element.find_all('div', {'class': 'tab-content'})
             if tag:
-                result['detailmean'] = u''.join(str(x).decode('utf-8') for x in tag)
-
+                result['detailmean'] = u''.join(str(x) for x in tag)
+        #近义词
+        element = soup.find('div', id='synonym')
+        if element:
+            tag = element.find('div', {'class': 'block'})
+            if tag:
+                element = tag.find_all('a')
+                result['synonym'] = u' '.join(x.get_text() for x in element)
+        #反义词
+        element = soup.find('div', id='antonym')
+        if element:
+            tag = element.find('div', {'class': 'block'})
+            if tag:
+                element = tag.find_all('a')
+                result['antonym'] = u' '.join(x.get_text() for x in element)
         #英文翻译
         element = soup.find('div', id='fanyi-wrapper')
         if element:
@@ -83,6 +98,20 @@ class Baidu_Chinese(WebService):
     @export([u'详细释义', u'Detail Definitions'])
     def fld_detail(self):
         val = self._get_field('detailmean')
+        if val is None or val == '':
+            return ''
+        return self._css(val)
+
+    @export([u'近义词', u'Synonym'])
+    def fld_synonym(self):
+        val = self._get_field('synonym')
+        if val is None or val == '':
+            return ''
+        return self._css(val)
+
+    @export([u'反义词', u'Antonym'])
+    def fld_antonym(self):
+        val = self._get_field('antonym')
         if val is None or val == '':
             return ''
         return self._css(val)
