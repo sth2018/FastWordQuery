@@ -145,7 +145,10 @@ class Youdao(WebService):
 
     @export([u'同根词', u'Related words'])
     def fld_rel_word(self):
-        return self._get_singledict('rel_word')
+        val = self._get_singledict('rel_word')
+        if val is None or val == '' or u'词根：${rel_word.getStem()}' in str(val):
+            return ' '
+        return val
 
     @export([u'同近义词', u'Synonyms'])
     def fld_syno(self):
