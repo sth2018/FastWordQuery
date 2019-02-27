@@ -11,13 +11,18 @@ class Baidu_Chinese(WebService):
         super(Baidu_Chinese, self).__init__()
 
     def _get_from_api(self):
-        url = u"http://dict.baidu.com/s?wd={}#basicmean".format(self.quote_word)
-        html = self.get_response(url, timeout=10)
-        soup = parse_html(html)
+        url = u"http://dict.baidu.com/s?wd={}&ptype=zici#basicmean".format(self.quote_word)
+        try:
+            html = self.get_response(url, timeout=10)
+            soup = parse_html(html)
+        except:
+            pass
         result = {
             'pinyin': '',
             'basicmean': '',
             'detailmean': '',
+            'source': '',
+            'example': '',
             'synonym': '',
             'antonym': '',
             'fanyi': '',
@@ -48,6 +53,21 @@ class Baidu_Chinese(WebService):
             tag = element.find_all('div', {'class': 'tab-content'})
             if tag:
                 result['detailmean'] = u''.join(str(x) for x in tag)
+
+        #出处
+        element = soup.find('div', id='source-wrapper')
+        if element:
+            tag = element.find('div', {'class': 'tab-content'})
+            if tag:
+                result['source'] = u''.join(str(x) for x in tag)
+
+        #例句
+        element = soup.find('div', id='liju-wrapper')
+        if element:
+            tag = element.find('div', {'class': 'tab-content'})
+            if tag:
+                result['example'] = u''.join(str(x) for x in tag)
+
         #近义词
         element = soup.find('div', id='synonym')
         if element:
@@ -102,6 +122,19 @@ class Baidu_Chinese(WebService):
             return ''
         return self._css(val)
 
+    @export([u'出处', u'Source Definitions'])
+    def fld_source(self):
+        val = self._get_field('source')
+        if val is None or val == '':
+            return ''
+        return self._css(val)
+
+    @export([u'例句', u'Example Definitions'])
+    def fld_example(self):
+        val = self._get_field('example')
+        if val is None or val == '':
+            return ''
+        return self._css(val)
     @export([u'近义词', u'Synonym'])
     def fld_synonym(self):
         val = self._get_field('synonym')
