@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*-
 
-
-from .readmdict import MDX, MDD
-from struct import pack, unpack
-from io import BytesIO
-import re
-import sys
-import os
-import sqlite3
 import json
-
+import os
+import re
+import sqlite3
+import sys
 # zlib compression is used for engine version >=2.0
 import zlib
+from io import BytesIO
+from struct import pack, unpack
+
+import chardet
+
+from .readmdict import MDD, MDX
+
 # LZO compression is used for engine version < 2.0
 try:
     import lzo
@@ -110,16 +112,22 @@ class IndexBuilder(object):
 
     def _replace_stylesheet(self, txt):
         # substitute stylesheet definition
+        encoding = 'utf-8'
+        if isinstance(txt, bytes):
+            encode_type = chardet.detect(txt)
+            encoding = encode_type['encoding']
+            txt = txt.decode(encoding)
         txt_list = re.split('`\d+`', txt)
         txt_tag = re.findall('`\d+`', txt)
         txt_styled = txt_list[0]
         for j, p in enumerate(txt_list[1:]):
             style = self._stylesheet[txt_tag[j][1:-1]]
             if p and p[-1] == '\n':
-                txt_styled = txt_styled + style[0] + p.rstrip() + style[1] + '\r\n'
+                txt_styled = txt_styled + style[0] + p.rstrip(
+                ) + style[1] + '\r\n'
             else:
                 txt_styled = txt_styled + style[0] + p + style[1]
-        return txt_styled
+        return txt_styled.encode(encoding)
 
     def _make_mdx_index(self, db_name):
         if os.path.exists(db_name):

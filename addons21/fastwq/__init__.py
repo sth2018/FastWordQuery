@@ -1,4 +1,4 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 #
 # Copyright (C) 2018 sthoo <sth201807@gmail.com>
 #
@@ -19,6 +19,7 @@
 
 import ssl
 import sys
+
 from anki.hooks import addHook
 from anki.utils import isMac
 
@@ -28,6 +29,7 @@ if isMac:
 
 ############## other config here ##################
 shortcut = ('Ctrl+Alt' if isMac else 'Ctrl') + '+Q'
+
 ###################################################
 
 
@@ -42,7 +44,6 @@ def start_here():
         fastwq.browser_menu()
         fastwq.context_menu()
         fastwq.customize_addcards()
-        # if fastwq.config.auto_update:
-        #     fastwq.check_updates(True)
+
 
 addHook("profileLoaded", start_here)

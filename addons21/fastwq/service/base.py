@@ -1,4 +1,4 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 #
 # Copyright (C) 2018 sthoo <sth201807@gmail.com>
 #
@@ -19,6 +19,7 @@
 
 import inspect
 import os
+import random
 # use ntpath module to ensure the windows-style (e.g. '\\LDOCE.css')
 # path can be processed on Unix platform.
 # However, anki version on mac platforms doesn't including this package?
@@ -27,32 +28,33 @@ import re
 import shutil
 import sqlite3
 import urllib
+import zlib
+from collections import defaultdict
+from functools import wraps
+from hashlib import md5, sha1
+
 import requests
+from bs4 import BeautifulSoup
+
+from aqt import mw
+from aqt.qt import QMutex, QThread
+
+from ..context import config
+from ..lang import _cl
+from ..libs import MdxBuilder, StardictBuilder
+from ..utils import MapDict, wrap_css
 
 try:
     import urllib2
-except:
+except Exception:
     import urllib.request as urllib2
 
-import zlib
-import random
-from collections import defaultdict
-from functools import wraps
-from hashlib import md5
-from hashlib import sha1
 
 try:
     from cookielib import CookieJar
-except:
+except Exception:
     from http.cookiejar import CookieJar
 
-from aqt import mw
-from aqt.qt import QThread, QMutex
-from bs4 import BeautifulSoup
-from ..context import config
-from ..libs import MdxBuilder, StardictBuilder
-from ..utils import MapDict, wrap_css
-from ..lang import _cl
 
 try:
     import threading as _threading
@@ -69,17 +71,13 @@ __all__ = [
 def get_hex_name(prefix, val, suffix):
     ''' get sha1 hax name '''
     hex_digest = sha1(val.encode('utf-8')).hexdigest().lower()
-    name = '.'.join([
-            '-'.join([
-                prefix, hex_digest[:8], hex_digest[8:16],
-                hex_digest[16:24], hex_digest[24:32], hex_digest[32:],
-            ]),
-            suffix,
-        ])
+    name = '.'.join(['-'.join([prefix, hex_digest[:8], hex_digest[8:16], hex_digest[16:24], hex_digest[24:32], hex_digest[32:], ]), suffix, ])
     return name
+
 
 def _is_method_or_func(object):
     return inspect.isfunction(object) or inspect.ismethod(object)
+
 
 def register(labels):
     """
@@ -120,6 +118,8 @@ def export(labels):
         export.EXPORT_INDEX += 1
         return _deco
     return _with
+
+
 export.EXPORT_INDEX = 0
 
 
@@ -181,8 +181,9 @@ def with_styles(**styles):
         return _deco
     return _with
 
-# bs4 threading lock, overload protection
-_BS_LOCKS = [_threading.Lock(), _threading.Lock()]
+
+_BS_LOCKS = [_threading.Lock(), _threading.Lock()]  # bs4 threading lock, overload protection
+
 
 def parse_html(html):
     '''
@@ -238,6 +239,7 @@ class Service(object):
     @property
     def unique(self):
         return self._unique
+
     @unique.setter
     def unique(self, value):
         self._unique = value
@@ -326,7 +328,7 @@ class WebService(Service):
             if response.info().get('Content-Encoding') == 'gzip':
                 data = zlib.decompress(data, 16 + zlib.MAX_WBITS)
             return data
-        except:
+        except Exception:
             return u''
 
     @classmethod
@@ -340,7 +342,7 @@ class WebService(Service):
                                   '(KHTML, like Gecko) Chrome/31.0.1623.0 Safari/537.36'
                 }).content)
             return True
-        except Exception as e:
+        except Exception:
             pass
 
     class TinyDownloadError(ValueError):
@@ -370,7 +372,7 @@ class WebService(Service):
         be added onto the stream returned. This is helpful for some web
         services that sometimes return MP3s that `mplayer` clips early.
         """
-        DEFAULT_UA = 'Mozilla/5.0'
+        DEFAULT_UA = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.67 Safari/537.36'
         DEFAULT_TIMEOUT = 3
 
         PADDING = '\0' * 2**11
@@ -434,7 +436,7 @@ class WebService(Service):
                 try:
                     value_error.payload = response.read()
                     response.close()
-                except:
+                except Exception:
                     pass
                 raise value_error
 
@@ -475,7 +477,7 @@ class WebService(Service):
                 f.write(payload)
                 f.close()
             return True
-        except:
+        except Exception:
             return False
 
 
@@ -516,7 +518,7 @@ class LocalService(Service):
     def _get_builer(key, func=None):
         LocalService._mutex_builder.lock()
         key = md5(str(key).encode('utf-8')).hexdigest()
-        if not func is None:
+        if not(func is None):
             if not LocalService._mdx_builders[key]:
                 worker = _DictBuildWorker(func)
                 worker.start()
@@ -582,21 +584,22 @@ class MdxService(LocalService):
         jsfile = re.findall(r'<script .*?src=[\'\"](.+?)[\'\"]', html, re.DOTALL)
         return QueryResult(result=html, js=u'\n'.join(js), jsfile=jsfile)
 
-
     def _get_definition_mdx(self):
         """according to the word return mdx dictionary page"""
-        content = self.builder.mdx_lookup(self.word, ignorecase=config.ignore_mdx_wordcase)
+        ignorecase = config.ignore_mdx_wordcase and (self.word != self.word.lower() or self.word != self.word.upper())
+        content = self.builder.mdx_lookup(self.word, ignorecase=ignorecase)
         str_content = ""
         if len(content) > 0:
             for c in content:
-                str_content += c.replace("\r\n","").replace("entry:/","")
+                str_content += c.replace("\r\n", "").replace("entry:/", "")
 
         return str_content
 
     def _get_definition_mdd(self, word):
         """according to the keyword(param word) return the media file contents"""
         word = word.replace('/', '\\')
-        content = self.builder.mdd_lookup(word, ignorecase=config.ignore_mdx_wordcase)
+        ignorecase = config.ignore_mdx_wordcase and (word != word.lower() or word != word.upper())
+        content = self.builder.mdd_lookup(word, ignorecase=ignorecase)
         if len(content) > 0:
             return [content[0]]
         else:
@@ -620,7 +623,7 @@ class MdxService(LocalService):
                         f.write(bytes_list[0])
                 return savepath
         except sqlite3.OperationalError as e:
-            #showInfo(str(e))
+            print(e)
             pass
         return ''
 
@@ -677,7 +680,7 @@ class MdxService(LocalService):
             # folder first, and it will also execute the wrap process to generate
             # the desired file.
             if not os.path.exists(cssfile):
-                css_src = self.dict_path.replace(self._filename+u'.mdx', f)
+                css_src = self.dict_path.replace(self._filename + u'.mdx', f)
                 if os.path.exists(css_src):
                     shutil.copy(css_src, cssfile)
                 else:    
@@ -700,17 +703,19 @@ class MdxService(LocalService):
         if os.path.exists(savepath):
             return savepath
         try:
-            src_fn = self.dict_path.replace(self._filename+u'.mdx', basename)
+            src_fn = self.dict_path.replace(self._filename + u'.mdx', basename)
             if os.path.exists(src_fn):
                 shutil.copy(src_fn, savepath)
                 return savepath
             else:
-                bytes_list = self.builder.mdd_lookup(filepath_in_mdx, ignorecase=config.ignore_mdx_wordcase)
+                ignorecase = config.ignore_mdx_wordcase and (filepath_in_mdx != filepath_in_mdx.lower() or filepath_in_mdx != filepath_in_mdx.upper())
+                bytes_list = self.builder.mdd_lookup(filepath_in_mdx, ignorecase=ignorecase)
                 if bytes_list:
                     with open(savepath, 'wb') as f:
                         f.write(bytes_list[0])
                     return savepath
         except sqlite3.OperationalError as e:
+            print('save default file error', e)
             pass
 
     def save_media_files(self, data):
@@ -752,7 +757,7 @@ class StardictService(LocalService):
                 dict_path,
                 service_wrap(StardictBuilder, dict_path, in_memory=False)
             )
-            #if self.builder:
+            # if self.builder:
             #    self.builder.get_header()
 
     @staticmethod
@@ -772,7 +777,7 @@ class StardictService(LocalService):
 
     @export([u'默认', u'Default'])
     def fld_whole(self):
-        #self.builder.check_build()
+        # self.builder.check_build()
         try:
             result = self.builder[self.word]
             result = result.strip().replace('\r\n', '<br />')\
@@ -788,7 +793,7 @@ class QueryResult(MapDict):
     def __init__(self, *args, **kwargs):
         super(QueryResult, self).__init__(*args, **kwargs)
         # avoid return None
-        if self['result'] == None:
+        if self['result'] is None:
             self['result'] = ""
 
     def set_styles(self, **kwargs):

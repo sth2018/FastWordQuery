@@ -1,4 +1,4 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 #
 # Copyright (C) 2018 sthoo <sth201807@gmail.com>
 #
@@ -18,10 +18,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import sys
+
 from anki.utils import isMac
 from aqt.qt import *
-from ..context import APP_ICON
 
+from ..context import APP_ICON
 
 __all__ = ['Dialog', 'WIDGET_SIZE']
 
@@ -37,20 +38,15 @@ class Dialog(QDialog):
         return value of the _ui() method, and sets a default title.
         '''
 
-        self._title = title
+        self._title = title if "FastWQ" in title else "FastWQ - " + title
         self._parent = parent
         super(Dialog, self).__init__(parent)
 
         self.setModal(True)
         self.setWindowFlags(
-            self.windowFlags() &
-            ~Qt.WindowContextHelpButtonHint
-        )
+            self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setWindowIcon(APP_ICON)
-        self.setWindowTitle(
-            title if "FastWQ" in title
-            else "FastWQ - " + title
-        )
+        self.setWindowTitle(self._title)
         # 2 & 3 & mac compatible
         if isMac and sys.hexversion >= 0x03000000:
             QApplication.setStyle('Fusion')

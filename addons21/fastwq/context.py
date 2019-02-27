@@ -1,4 +1,4 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 #
 # Copyright (C) 2018 sthoo <sth201807@gmail.com>
 #
@@ -19,25 +19,24 @@
 
 import json
 import os
-from aqt import mw
+
 from anki.hooks import runHook
+from aqt import mw
+
 from .constants import VERSION
 from .utils import get_icon
 
-
 __all__ = ['APP_ICON', 'config']
 
-
-APP_ICON = get_icon('wqicon.png')       #Addon Icon
+APP_ICON = get_icon('wqicon.png')  # Addon Icon
 
 
 class Config(object):
-
     """
     Addon Config
     """
 
-    _CONFIG_FILENAME = 'fastwqcfg.json'     #Config File Path
+    _CONFIG_FILENAME = 'fastwqcfg.json'  # Config File Path
 
     def __init__(self, window):
         self.path = u'_' + self._CONFIG_FILENAME
@@ -55,10 +54,12 @@ class Config(object):
         Update && Save
         """
         data['version'] = VERSION
-        data['%s_last' % self.pmname] = data.get('last_model', self.last_model_id)
+        data['%s_last' % self.pmname] = data.get('last_model',
+                                                 self.last_model_id)
         self.data.update(data)
         with open(self.path, 'w', encoding='utf-8') as f:
-            json.dump(self.data, f, indent=4, sort_keys=True, ensure_ascii=False)
+            json.dump(
+                self.data, f, indent=4, sort_keys=True, ensure_ascii=False)
             f.close()
         runHook('config.update')
 
@@ -69,13 +70,15 @@ class Config(object):
         if self.data:
             return self.data
         try:
-            path = self.path if os.path.exists(self.path) else u'.' + self._CONFIG_FILENAME
+            path = self.path if os.path.exists(
+                self.path) else u'.' + self._CONFIG_FILENAME
             with open(path, 'r', encoding="utf-8") as f:
                 self.data = json.load(f)
                 f.close()
             if not os.path.exists(self.path):
                 self.update(self.data)
-        except:
+        except Exception as e:
+            print('can not find config file', e)
             self.data = dict()
 
     def get_maps(self, model_id):
@@ -107,7 +110,7 @@ class Config(object):
     @property
     def force_update(self):
         return self.data.get('force_update', False)
-    
+
     @property
     def ignore_mdx_wordcase(self):
         return self.data.get('ignore_mdx_wordcase', False)
@@ -122,7 +125,7 @@ class Config(object):
     @property
     def last_folder(self):
         """
-        last file dialog open path 
+        last file dialog open path
         """
         return self.data.get('last_folder', '')
 
@@ -132,14 +135,12 @@ class Config(object):
         return self.data.get('ignore_accents', False)
 
     @property
-    def auto_update(self):
-        '''auto check new version'''
-        return self.data.get('auto_update', True)
-
-    @property
     def cloze_str(self):
         '''cloze formater string'''
-        return self.data.get('cloze_str', '{{c1::%s}}')
+        tmpstr = self.data.get('cloze_str', '{{c1::%s}}')
+        if len(tmpstr.split('%s')) != 2:
+            tmpstr = '{{c1::%s}}'
+        return tmpstr
 
 
 config = Config(mw)

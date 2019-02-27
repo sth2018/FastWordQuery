@@ -1,4 +1,4 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 #
 # Copyright (C) 2018 sthoo <sth201807@gmail.com>
 #
@@ -18,22 +18,23 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import sys
+
 import anki
 import aqt
 import aqt.models
 import sip
+from anki.utils import isMac
 from aqt import mw
 from aqt.qt import *
 from aqt.studydeck import StudyDeck
-from anki.utils import isMac
-from .base import Dialog, WIDGET_SIZE
-from .setting import SettingDialog
+
+from ..constants import Endpoint
 from ..context import config
 from ..lang import _, _sl
 from ..service import service_manager, service_pool
-from ..utils import get_model_byId, get_icon
-from ..constants import Endpoint
-
+from ..utils import get_icon, get_model_byId
+from .base import WIDGET_SIZE, Dialog
+from .setting import SettingDialog
 
 __all__ = ['OptionsDialog']
 
@@ -44,16 +45,13 @@ class OptionsDialog(Dialog):
     setting query dictionary and fileds
     '''
 
-    __slot__ = [
-        'begore_build',
-        'after_build'
-    ]
+    __slot__ = ['begore_build', 'after_build']
     _signal = pyqtSignal(str)
 
     _NULL_ICON = get_icon('null.png')
     _OK_ICON = get_icon('ok.png')
 
-    def __init__(self, parent, title=u'Options', model_id = -1):
+    def __init__(self, parent, title=u'Options', model_id=-1):
         super(OptionsDialog, self).__init__(parent, title)
         self._signal.connect(self._before_build)
         self._signal.connect(self._after_build)
@@ -61,32 +59,34 @@ class OptionsDialog(Dialog):
         self.main_layout = QVBoxLayout()
         self.loading_label = QLabel(_('INITLIZING_DICT'))
         self.main_layout.addWidget(self.loading_label, 0, Qt.AlignCenter)
-        #self.loading_layout.addLayout(models_layout)
+        # self.loading_layout.addLayout(models_layout)
         self.setLayout(self.main_layout)
-        #initlize properties
+        # initlize properties
         self.model_id = model_id if model_id != -1 else config.last_model_id
         self.current_model = None
         self.tabs = []
         self.dict_services = None
         # size and signal
-        self.resize(WIDGET_SIZE.dialog_width, 4 * WIDGET_SIZE.map_max_height + WIDGET_SIZE.dialog_height_margin)
+        self.resize(
+            WIDGET_SIZE.dialog_width,
+            4 * WIDGET_SIZE.map_max_height + WIDGET_SIZE.dialog_height_margin)
         self._signal.emit('before_build')
-    
+
     def _before_build(self, s):
         if s != 'before_build':
             return
         # dict service list
         dicts = config.dicts
         self.dict_services = {
-            'local': [],                                                #本地词典
-            'web': []                                                   #网络词典
+            'local': [],  # 本地词典
+            'web': []  # 网络词典
         }
         for clazz in service_manager.local_services:
             if dicts.get(clazz.__unique__, dict()).get('enabled', True):
                 service = service_pool.get(clazz.__unique__)
                 if service and service.support:
                     self.dict_services['local'].append({
-                        'title': service.title, 
+                        'title': service.title,
                         'unique': service.unique
                     })
                 service_pool.put(service)
@@ -95,7 +95,7 @@ class OptionsDialog(Dialog):
                 service = service_pool.get(clazz.__unique__)
                 if service and service.support:
                     self.dict_services['web'].append({
-                        'title': service.title, 
+                        'title': service.title,
                         'unique': service.unique
                     })
                 service_pool.put(service)
@@ -121,13 +121,11 @@ class OptionsDialog(Dialog):
         # tabs
         self.tab_widget = QTabWidget()
         self.tab_widget.setTabBar(CTabBar())
-        self.tab_widget.setStyleSheet(
-            """
+        self.tab_widget.setStyleSheet("""
             QTabWidget::pane { /* The tab widget frame */
                 border: 1px solid #c3c3c3;
             }
-            """
-        )
+            """)
         tab_corner = QWidget()
         tab_corner_layout = QHBoxLayout()
         tab_corner_layout.setSpacing(1)
@@ -160,8 +158,7 @@ class OptionsDialog(Dialog):
         # chk_update_btn = QPushButton(_('UPDATE'))
         # chk_update_btn.clicked.connect(self.check_updates)
         home_label = QLabel(
-            '<a href="{url}">User Guide</a>'.format(url=Endpoint.user_guide)
-        )
+            '<a href="{url}">User Guide</a>'.format(url=Endpoint.user_guide))
         home_label.setOpenExternalLinks(True)
         # buttons
         btnbox = QDialogButtonBox(QDialogButtonBox.Ok, Qt.Horizontal, self)
@@ -171,7 +168,7 @@ class OptionsDialog(Dialog):
         bottom_layout.addWidget(about_btn)
         bottom_layout.addWidget(home_label)
         bottom_layout.addWidget(btnbox)
-        #self.setLayout(self.main_layout)
+        # self.setLayout(self.main_layout)
         self.main_layout.addLayout(bottom_layout)
         # init from saved data
         self.current_model = None
@@ -179,7 +176,8 @@ class OptionsDialog(Dialog):
             self.current_model = get_model_byId(mw.col.models, self.model_id)
         if self.current_model:
             self.models_button.setText(
-                u'%s [%s]' % (_('CHOOSE_NOTE_TYPES'),  self.current_model['name']))
+                u'%s [%s]' % (_('CHOOSE_NOTE_TYPES'),
+                              self.current_model['name']))
             # build fields -- dicts layout
             self.build_tabs_layout()
 
@@ -198,7 +196,7 @@ class OptionsDialog(Dialog):
         '''open folder manager dialog'''
         self.accept()
         self.setResult(1001)
-    
+
     def show_dm_dialog(self):
         '''open dictionary manager dialog'''
         self.accept()
@@ -225,13 +223,18 @@ class OptionsDialog(Dialog):
         '''
         build dictionary、fields etc
         '''
-        try: self.tab_widget.currentChanged.disconnect()
-        except Exception: pass
+        try:
+            self.tab_widget.currentChanged.disconnect()
+        except Exception:
+            pass
         while len(self.tabs) > 0:
             self.removeTab(0, True)
         # tabs
         conf = config.get_maps(self.current_model['id'])
-        maps_list = {'list': [conf], 'def': 0} if isinstance(conf, list) else conf
+        maps_list = {
+            'list': [conf],
+            'def': 0
+        } if isinstance(conf, list) else conf
         for maps in maps_list['list']:
             self.addTab(maps, False)
         self.tab_widget.currentChanged.connect(self.changedTab)
@@ -240,28 +243,21 @@ class OptionsDialog(Dialog):
         self.tab_widget.setCurrentIndex(maps_list['def'])
         # size
         self.resize(
-            WIDGET_SIZE.dialog_width, 
-            min(max(3, len(self.current_model['flds'])+1), 14) * WIDGET_SIZE.map_max_height + WIDGET_SIZE.dialog_height_margin
-        )
+            WIDGET_SIZE.dialog_width,
+            min(max(3,
+                    len(self.current_model['flds']) + 1), 14) *
+            WIDGET_SIZE.map_max_height + WIDGET_SIZE.dialog_height_margin)
         self.save()
-    
+
     def addTab(self, maps=None, forcus=True):
         i = len(self.tabs)
         if isinstance(maps, list):
-            maps = {
-                'fields': maps,
-                'name': _('CONFIG_INDEX') % (i+1)
-            }
-        tab = TabContent(
-            self.current_model, 
-            maps['fields'] if maps else None, 
-            self.dict_services
-        )
+            maps = {'fields': maps, 'name': _('CONFIG_INDEX') % (i + 1)}
+        tab = TabContent(self.current_model, maps['fields'] if maps else None,
+                         self.dict_services)
         self.tabs.append(tab)
         self.tab_widget.addTab(
-            tab, 
-            maps['name'] if maps else _('CONFIG_INDEX') % (i+1)
-        )
+            tab, maps['name'] if maps else _('CONFIG_INDEX') % (i + 1))
         if forcus:
             self.tab_widget.setCurrentIndex(i)
 
@@ -273,7 +269,7 @@ class OptionsDialog(Dialog):
         del self.tabs[i]
         self.tab_widget.removeTab(i)
         tab.destroy()
-        #for k in range(0, len(self.tabs)):
+        # for k in range(0, len(self.tabs)):
         #    self.tab_widget.setTabText(k, _('CONFIG_INDEX') % (k+1))
 
     def changedTab(self, i):
@@ -289,12 +285,18 @@ class OptionsDialog(Dialog):
         '''
         show choose note type window
         '''
-        edit = QPushButton(anki.lang._("Manage"),
-                           clicked=lambda: aqt.models.Models(mw, self))
-        ret = StudyDeck(mw, names=lambda: sorted(mw.col.models.allNames()),
-                        accept=anki.lang._("Choose"), title=anki.lang._("Choose Note Type"),
-                        help="_notes", parent=self, buttons=[edit],
-                        cancel=True, geomKey="selectModel")
+        edit = QPushButton(
+            anki.lang._("Manage"), clicked=lambda: aqt.models.Models(mw, self))
+        ret = StudyDeck(
+            mw,
+            names=lambda: sorted(mw.col.models.allNames()),
+            accept=anki.lang._("Choose"),
+            title=anki.lang._("Choose Note Type"),
+            help="_notes",
+            parent=self,
+            buttons=[edit],
+            cancel=True,
+            geomKey="selectModel")
         if ret.name:
             model = mw.col.models.byName(ret.name)
             self.models_button.setText(
@@ -306,18 +308,17 @@ class OptionsDialog(Dialog):
         if not self.current_model:
             return
         data = dict()
-        maps_list = {
-            'list': [], 
-            'def': self.tab_widget.currentIndex()
-        }
+        maps_list = {'list': [], 'def': self.tab_widget.currentIndex()}
         for i, tab in enumerate(self.tabs):
             maps_list['list'].append({
-                'fields': tab.data,
-                'name': self.tab_widget.tabBar().tabText(i)
+                'fields':
+                tab.data,
+                'name':
+                self.tab_widget.tabBar().tabText(i)
             })
         current_model_id = str(self.current_model['id'])
         data[current_model_id] = maps_list
-        data['last_model'] = self.current_model['id']    
+        data['last_model'] = self.current_model['id']
         config.update(data)
 
 
@@ -339,7 +340,7 @@ class TabContent(QScrollArea):
         self.setWidgetResizable(True)
         self.setWidget(dicts)
         self.dicts_layout = dicts.layout()
-        #self.dicts_layout.setSizeConstraint(QLayout.SetFixedSize)
+        # self.dicts_layout.setSizeConstraint(QLayout.SetFixedSize)
 
     def build_layout(self):
         '''
@@ -352,7 +353,7 @@ class TabContent(QScrollArea):
         self._last_checkeds = None
         self._was_built = True
 
-        model = self._model 
+        model = self._model
         maps = self._conf
 
         # labels
@@ -372,7 +373,8 @@ class TabContent(QScrollArea):
         self.ignore_all_check_btn.setEnabled(True)
         self.ignore_all_check_btn.setChecked(True)
         self.dicts_layout.addWidget(self.ignore_all_check_btn, 0, 1)
-        self.ignore_all_check_btn.clicked.connect(self.ignore_all_check_changed)
+        self.ignore_all_check_btn.clicked.connect(
+            self.ignore_all_check_changed)
 
         # Skip valued all
         self.skip_all_check_btn = QCheckBox(_('SELECT_ALL'))
@@ -381,7 +383,7 @@ class TabContent(QScrollArea):
         self.skip_all_check_btn.setChecked(True)
         self.dicts_layout.addWidget(self.skip_all_check_btn, 0, 4)
         self.skip_all_check_btn.clicked.connect(self.skip_all_check_changed)
-        
+
         # dict & fields
         self.radio_group = QButtonGroup()
         for i, fld in enumerate(model['flds']):
@@ -389,16 +391,19 @@ class TabContent(QScrollArea):
             name = fld['name']
             if maps:
                 for j, each in enumerate(maps):
-                    if each.get('fld_ord', -1) == ord or each.get('fld_name', '') == name:
+                    if each.get('fld_ord', -1) == ord or each.get(
+                            'fld_name', '') == name:
                         each['fld_name'] = name
                         each['fld_ord'] = ord
                         self.add_dict_layout(j, **each)
                         break
                 else:
-                    self.add_dict_layout(i, fld_name=name, fld_ord=ord, word_checked=i==0)
+                    self.add_dict_layout(
+                        i, fld_name=name, fld_ord=ord, word_checked=i == 0)
             else:
-                self.add_dict_layout(i, fld_name=name, fld_ord=ord, word_checked=i==0)
-        
+                self.add_dict_layout(
+                    i, fld_name=name, fld_ord=ord, word_checked=i == 0)
+
         # update
         self.ignore_all_update()
         self.skip_all_update()
@@ -410,21 +415,21 @@ class TabContent(QScrollArea):
         word_checked = kwargs.get('word_checked', False)
 
         fld_name, fld_ord = (
-            kwargs.get('fld_name', ''),                                 #笔记类型的字段名
-            kwargs.get('fld_ord', ''),                                  #笔记类型的字段编号
+            kwargs.get('fld_name', ''),  # 笔记类型的字段名
+            kwargs.get('fld_ord', ''),  # 笔记类型的字段编号
         )
 
         dict_name, dict_unique, dict_fld_name, dict_fld_ord = (
-            kwargs.get('dict_name', ''),                                #字典名
-            kwargs.get('dict_unique', ''),                              #字典ID
-            kwargs.get('dict_fld_name', ''),                            #对应字典的字段名
-            kwargs.get('dcit_fld_ord', 0)                               #对应字典的字段编号
+            kwargs.get('dict_name', ''),  # 字典名
+            kwargs.get('dict_unique', ''),  # 字典ID
+            kwargs.get('dict_fld_name', ''),  # 对应字典的字段名
+            kwargs.get('dcit_fld_ord', 0)  # 对应字典的字段编号
         )
 
         ignore, skip, cloze = (
-            kwargs.get('ignore', True),                                 #忽略标志
-            kwargs.get('skip_valued', True),                            #略过有值项标志
-            kwargs.get('cloze_word', False),                            #单词填空
+            kwargs.get('ignore', True),  # 忽略标志
+            kwargs.get('skip_valued', True),  # 略过有值项标志
+            kwargs.get('cloze_word', False),  # 单词填空
         )
 
         # check
@@ -436,26 +441,23 @@ class TabContent(QScrollArea):
         # dict combox
         dict_combo = QComboBox()
         dict_combo.setMinimumSize(WIDGET_SIZE.map_dict_width, 0)
-        dict_combo.setMaximumSize(
-            WIDGET_SIZE.map_dict_width, 
-            WIDGET_SIZE.map_max_height
-        )
-        dict_combo.setFocusPolicy(
-            Qt.TabFocus | Qt.ClickFocus | Qt.StrongFocus | Qt.WheelFocus
-        )
-        ignore = not self.fill_dict_combo_options(dict_combo, dict_unique, self._services) or ignore
+        dict_combo.setMaximumSize(WIDGET_SIZE.map_dict_width,
+                                  WIDGET_SIZE.map_max_height)
+        dict_combo.setFocusPolicy(Qt.TabFocus | Qt.ClickFocus | Qt.StrongFocus
+                                  | Qt.WheelFocus)
+        ignore = not self.fill_dict_combo_options(dict_combo, dict_unique,
+                                                  self._services) or ignore
         dict_unique = dict_combo.itemData(dict_combo.currentIndex())
         dict_combo.setEnabled(not word_checked and not ignore)
         # field combox
         field_combo = QComboBox()
         field_combo.setMinimumSize(WIDGET_SIZE.map_field_width, 0)
-        field_combo.setMaximumSize(
-            WIDGET_SIZE.map_field_width, 
-            WIDGET_SIZE.map_max_height
-        )
+        field_combo.setMaximumSize(WIDGET_SIZE.map_field_width,
+                                   WIDGET_SIZE.map_max_height)
         field_combo.setEnabled(not word_checked and not ignore)
-        self.fill_field_combo_options(field_combo, dict_name, dict_unique, dict_fld_name, dict_fld_ord)
-        
+        self.fill_field_combo_options(field_combo, dict_name, dict_unique,
+                                      dict_fld_name, dict_fld_ord)
+
         # ignore
         ignore_check_btn = QCheckBox(_("NOT_DICT_FIELD"))
         ignore_check_btn.setEnabled(not word_checked)
@@ -489,13 +491,14 @@ class TabContent(QScrollArea):
             cloze_check_btn.setEnabled(not word_checked and not ignore)
             if word_checked:
                 self._last_checkeds = [
-                    ignore_check_btn, dict_combo, 
-                    field_combo, skip_check_btn
+                    ignore_check_btn, dict_combo, field_combo, skip_check_btn
                 ]
+
         word_check_btn.clicked.connect(radio_btn_checked)
-        if word_checked: 
+        if word_checked:
             self._last_checkeds = None
             radio_btn_checked()
+
         # ignor
         def ignore_check_changed():
             word_checked = word_check_btn.isChecked()
@@ -504,35 +507,38 @@ class TabContent(QScrollArea):
             field_combo.setEnabled(not word_checked and not ignore)
             skip_check_btn.setEnabled(not word_checked and not ignore)
             cloze_check_btn.setEnabled(not word_checked and not ignore)
+
         ignore_check_btn.stateChanged.connect(ignore_check_changed)
         ignore_check_btn.clicked.connect(self.ignore_all_update)
         # skip
         skip_check_btn.clicked.connect(self.skip_all_update)
+
         # dict
         def dict_combo_changed(index):
             '''dict combo box index changed'''
             self.fill_field_combo_options(
-                field_combo,
-                dict_combo.currentText(),
-                dict_combo.itemData(index),
-                field_combo.currentText(),
-                field_combo.itemData(field_combo.currentIndex())
-            )
+                field_combo, dict_combo.currentText(),
+                dict_combo.itemData(index), field_combo.currentText(),
+                field_combo.itemData(field_combo.currentIndex()))
+
         dict_combo.currentIndexChanged.connect(dict_combo_changed)
-        
+
         self.dicts_layout.addWidget(word_check_btn, i + 1, 0)
         self.dicts_layout.addWidget(ignore_check_btn, i + 1, 1)
         self.dicts_layout.addWidget(dict_combo, i + 1, 2)
         self.dicts_layout.addWidget(field_combo, i + 1, 3)
         self.dicts_layout.addWidget(skip_check_btn, i + 1, 4)
         self.dicts_layout.addWidget(cloze_check_btn, i + 1, 5)
-        
+
         self._options.append({
-            'model': {'fld_name': fld_name, 'fld_ord': fld_ord},
-            'word_check_btn': word_check_btn, 
-            'dict_combo': dict_combo, 
-            'field_combo': field_combo, 
-            'ignore_check_btn': ignore_check_btn, 
+            'model': {
+                'fld_name': fld_name,
+                'fld_ord': fld_ord
+            },
+            'word_check_btn': word_check_btn,
+            'dict_combo': dict_combo,
+            'field_combo': field_combo,
+            'ignore_check_btn': ignore_check_btn,
             'skip_check_btn': skip_check_btn,
             'cloze_check_btn': cloze_check_btn
         })
@@ -548,7 +554,7 @@ class TabContent(QScrollArea):
         # hr
         if len(services['local']) > 0:
             dict_combo.insertSeparator(dict_combo.count())
-        
+
         # web dict service
         for service in services['web']:
             dict_combo.addItem(service['title'], userData=service['unique'])
@@ -561,15 +567,18 @@ class TabContent(QScrollArea):
                         dict_combo.setCurrentIndex(i)
                         return True
             return False
+
         return set_dict_combo_index()
 
-    def fill_field_combo_options(self, field_combo, dict_combo_text, dict_combo_itemdata, dict_fld_name, dict_fld_ord):
+    def fill_field_combo_options(self, field_combo, dict_combo_text,
+                                 dict_combo_itemdata, dict_fld_name,
+                                 dict_fld_ord):
         '''setup field combobox'''
         field_combo.clear()
         field_combo.setEditable(False)
-        #if dict_combo_text in _sl('NOT_DICT_FIELD'):
+        # if dict_combo_text in _sl('NOT_DICT_FIELD'):
         #    field_combo.setEnabled(False)
-        #el
+        # el
         if dict_combo_text in _sl('MDX_SERVER'):
             text = dict_fld_name if dict_fld_name else 'http://'
             field_combo.setEditable(True)
@@ -594,16 +603,26 @@ class TabContent(QScrollArea):
         maps = []
         for row in self._options:
             maps.append({
-                'fld_name': row['model']['fld_name'],
-                'fld_ord': row['model']['fld_ord'],
-                'word_checked': row['word_check_btn'].isChecked(),
-                'dict_name': row['dict_combo'].currentText().strip(),
-                'dict_unique': row['dict_combo'].itemData(row['dict_combo'].currentIndex()),
-                'dict_fld_name': row['field_combo'].currentText().strip(),
-                'dict_fld_ord': row['field_combo'].itemData(row['field_combo'].currentIndex()),
-                'ignore': row['ignore_check_btn'].isChecked(),
-                'skip_valued': row['skip_check_btn'].isChecked(),
-                'cloze_word': row['cloze_check_btn'].isChecked()
+                'fld_name':
+                row['model']['fld_name'],
+                'fld_ord':
+                row['model']['fld_ord'],
+                'word_checked':
+                row['word_check_btn'].isChecked(),
+                'dict_name':
+                row['dict_combo'].currentText().strip(),
+                'dict_unique':
+                row['dict_combo'].itemData(row['dict_combo'].currentIndex()),
+                'dict_fld_name':
+                row['field_combo'].currentText().strip(),
+                'dict_fld_ord':
+                row['field_combo'].itemData(row['field_combo'].currentIndex()),
+                'ignore':
+                row['ignore_check_btn'].isChecked(),
+                'skip_valued':
+                row['skip_check_btn'].isChecked(),
+                'cloze_word':
+                row['cloze_check_btn'].isChecked()
             })
         return maps
 
@@ -624,7 +643,7 @@ class TabContent(QScrollArea):
                 b = False
                 break
         self.ignore_all_check_btn.setChecked(b)
-    
+
     def skip_all_update(self):
         b = True
         for row in self._options:
@@ -635,8 +654,7 @@ class TabContent(QScrollArea):
 
 
 class CTabBar(QTabBar):
-
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         super(CTabBar, self).__init__(parent)
         # style
         self.setTabsClosable(True)
@@ -651,14 +669,17 @@ class CTabBar(QTabBar):
         self._editor.installEventFilter(self)
 
     def eventFilter(self, widget, event):
-        if ((event.type() == QEvent.MouseButtonPress and \
-                not self._editor.geometry().contains(event.globalPos()) \
-            ) or \
-            (event.type() == QEvent.KeyPress and \
-                event.key() == Qt.Key_Escape)
-            ):
-                self.hideEditor()
-                return True
+        bhide = False
+        if event.type() == QEvent.MouseButtonPress:
+            if not self._editor.geometry().contains(event.globalPos()):
+                bhide = True
+        if not bhide:
+            if event.type() == QEvent.KeyPress:
+                if event.key() == Qt.Key_Escape:
+                    bhide = True
+        if bhide:
+            self.hideEditor()
+            return True
         return QTabBar.eventFilter(self, widget, event)
 
     def mouseDoubleClickEvent(self, event):
@@ -676,7 +697,7 @@ class CTabBar(QTabBar):
         self._editor.selectAll()
         self._editor.setEnabled(True)
         self._editor.setFocus()
-    
+
     def hideEditor(self):
         if self._editor.isVisible():
             self._editor.setEnabled(False)

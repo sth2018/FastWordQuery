@@ -1,4 +1,4 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 #
 # Copyright (C) 2018 sthoo <sth201807@gmail.com>
 #
@@ -18,10 +18,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from aqt.qt import *
-from .base import Dialog, WIDGET_SIZE
+
 from ..context import config
 from ..lang import _, _sl
-
+from .base import WIDGET_SIZE, Dialog
 
 __all__ = ['FoldersManageDialog']
 
@@ -33,7 +33,7 @@ class FoldersManageDialog(Dialog):
 
     def __init__(self, parent, title=u'Dictionary Folder Manager'):
         super(FoldersManageDialog, self).__init__(parent, title)
-        #self._dict_paths = []
+        # self._dict_paths = []
         self.build()
 
     def build(self):
@@ -65,10 +65,9 @@ class FoldersManageDialog(Dialog):
     def add_folder(self):
         dir_ = QFileDialog.getExistingDirectory(
             self,
-            caption=u"Select Folder", 
-            directory=config.last_folder, 
-            options=QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks
-        )
+            caption=u"Select Folder",
+            directory=config.last_folder,
+            options=QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks)
         if dir_:
             self.folders_lst.addItem(dir_)
             config.update({'last_folder': dir_})
@@ -80,8 +79,10 @@ class FoldersManageDialog(Dialog):
     @property
     def dirs(self):
         '''dictionary folders list'''
-        return [self.folders_lst.item(i).text()
-                for i in range(self.folders_lst.count())]
+        return [
+            self.folders_lst.item(i).text()
+            for i in range(self.folders_lst.count())
+        ]
 
     def accept(self):
         '''ok button clicked'''

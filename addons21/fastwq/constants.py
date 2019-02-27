@@ -1,4 +1,4 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 #
 # Copyright (C) 2018 sthoo <sth201807@gmail.com>
 #
@@ -17,13 +17,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-
 from .lang import _
-
 
 __all__ = ['VERSION', 'Endpoint', 'Template']
 
-VERSION = 'v1.3.5'
+VERSION = 'v2.0.0b'
+
 
 class Endpoint:
     repository = u'https://github.com/sth2018/FastWordQuery'
@@ -36,10 +35,13 @@ class Endpoint:
 
 class Template:
     tmpl_about = u'''<b>{t0}</b><br/>{version}<br/><b>{t1}</b><br/>
-        <a href="{url}">{url}</a><br/><b>{t2}</b><br/>
-        <a href="{feedback0}">{feedback0}</a><br/>
-        <a href="mailto:{feedback1}">{feedback1}</a>'''.format(
-        t0=_('VERSION'), version=VERSION,
-        t1=_('REPOSITORY'), url=Endpoint.repository,
-        t2=_('FEEDBACK'), feedback0=Endpoint.feedback_issue, feedback1=Endpoint.feedback_mail)
-    miss_css = u'MDX dictonary <b>{dict}</b> misses css file <b>{css}</b>. <br/>Please choose the file.'
+<a href="{url}">{url}</a><br/><b>{t2}</b><br/>
+<a href="{feedback0}">{feedback0}</a><br/>
+<a href="mailto:{feedback1}">{feedback1}</a>'''.format(
+        t0=_('VERSION'),
+        version=VERSION,
+        t1=_('REPOSITORY'),
+        url=Endpoint.repository,
+        t2=_('FEEDBACK'),
+        feedback0=Endpoint.feedback_issue,
+        feedback1=Endpoint.feedback_mail)

@@ -1,4 +1,4 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 #
 # Copyright (C) 2018 sthoo <sth201807@gmail.com>
 #
@@ -19,18 +19,19 @@
 
 import os
 import sys
-from aqt.qt import *
+
 from aqt.forms.editaddon import Ui_Dialog
-from .base import Dialog, WIDGET_SIZE
-from ..service import service_manager, service_pool
+from aqt.qt import *
+
 from ..context import config
 from ..lang import _, _sl
+from ..service import service_manager, service_pool
 from ..utils import get_icon
+from .base import WIDGET_SIZE, Dialog
 
 # 2x3 compatible
 if sys.hexversion >= 0x03000000:
     unicode = str
-
 
 __all__ = ['DictManageDialog']
 
@@ -45,14 +46,14 @@ class DictManageDialog(Dialog):
         self.main_layout = QVBoxLayout()
         self.setLayout(self.main_layout)
         self._options = list()
-        btnbox = QDialogButtonBox(QDialogButtonBox.Ok, Qt.Horizontal , self)
+        btnbox = QDialogButtonBox(QDialogButtonBox.Ok, Qt.Horizontal, self)
         btnbox.accepted.connect(self.accept)
         # add dicts mapping
         self.dicts_layout = QGridLayout()
         self.main_layout.addLayout(self.dicts_layout)
         self.main_layout.addWidget(btnbox)
         self.build()
-        
+
     def build(self):
         ''' '''
         # labels
@@ -80,10 +81,14 @@ class DictManageDialog(Dialog):
         services = service_manager.local_custom_services + service_manager.web_services
         for clazz in services:
             dicts.append({
-                'title': clazz.__title__, 
-                'unique': clazz.__unique__, 
-                'path': clazz.__path__,
-                'enabled': confs.get(clazz.__unique__, dict()).get('enabled', True)
+                'title':
+                clazz.__title__,
+                'unique':
+                clazz.__unique__,
+                'path':
+                clazz.__path__,
+                'enabled':
+                confs.get(clazz.__unique__, dict()).get('enabled', True)
             })
         # add dict
         for i, d in enumerate(dicts):
@@ -102,7 +107,7 @@ class DictManageDialog(Dialog):
         )
         # button
         check_btn = QCheckBox(title)
-        check_btn.setMinimumSize(WIDGET_SIZE.map_dict_width*1.5, 0)
+        check_btn.setMinimumSize(WIDGET_SIZE.map_dict_width * 1.5, 0)
         check_btn.setEnabled(True)
         check_btn.setChecked(enabled)
         edit_btn = QToolButton(self)
@@ -114,9 +119,9 @@ class DictManageDialog(Dialog):
         self.dicts_layout.addWidget(check_btn, i + 1, 0)
         self.dicts_layout.addWidget(edit_btn, i + 1, 1)
         self._options.append({
-            'unique': unique, 
-            'check_btn': check_btn, 
-            'edit_btn': edit_btn, 
+            'unique': unique,
+            'check_btn': check_btn,
+            'edit_btn': edit_btn,
         })
 
     def enabled_all_update(self):
@@ -126,7 +131,7 @@ class DictManageDialog(Dialog):
                 b = False
                 break
         self.enabled_all_check_btn.setChecked(b)
-    
+
     def enabled_all_changed(self):
         b = self.enabled_all_check_btn.isChecked()
         for row in self._options:

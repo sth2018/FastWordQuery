@@ -1,4 +1,4 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 #
 # Copyright (C) 2018 sthoo <sth201807@gmail.com>
 #
@@ -18,38 +18,22 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import types
+
 from aqt import mw
 from aqt.qt import *
-from aqt.utils import showInfo
-from .options import OptionsDialog
-from .foldermanager import FoldersManageDialog
-from .dictmanager import DictManageDialog
-from ..libs import ankihub
+
+from ..constants import Template
 from ..context import config
 from ..lang import _
-from ..constants import Endpoint, Template
 from ..service import service_manager, service_pool
+from .dictmanager import DictManageDialog
+from .foldermanager import FoldersManageDialog
+from .options import OptionsDialog
+
+__all__ = ['show_options', 'show_fm_dialog', 'show_about_dialog']
 
 
-__all__ = ['show_options', 'show_fm_dialog', 'show_about_dialog'] #'check_updates',
-
-
-# def check_updates(background=False, parent=None):
-#     '''check add-on last version'''
-#     try:
-#         parent = mw if parent is None else parent
-#         state = ankihub.update([Endpoint.check_version], Endpoint.version, background, parent)
-#         if not background:
-#             if state == 0:
-#                 showInfo(_('LATEST_VERSION'))
-#             elif state == -1:
-#                 showInfo(_('CHECK_FAILURE'))
-#     except:
-#         if not background:
-#             showInfo(_('CHECK_FAILURE'))
-
-
-def show_fm_dialog(browser = None):
+def show_fm_dialog(browser=None):
     '''open dictionary folder manager window'''
     parent = mw if browser is None else browser
     fm_dialog = FoldersManageDialog(parent, u'Dictionary Folder Manager')
@@ -64,7 +48,7 @@ def show_fm_dialog(browser = None):
     show_options(browser)
 
 
-def show_dm_dialog(browser = None):
+def show_dm_dialog(browser=None):
     parent = mw if browser is None else browser
     dm_dialog = DictManageDialog(parent, u'Dictionary Manager')
     dm_dialog.activateWindow()
@@ -78,7 +62,7 @@ def show_dm_dialog(browser = None):
     show_options(browser)
 
 
-def show_options(browser = None, model_id = -1, callback = None, *args, **kwargs):
+def show_options(browser=None, model_id=-1, callback=None, *args, **kwargs):
     '''open options window'''
     parent = mw if browser is None else browser
     config.read()

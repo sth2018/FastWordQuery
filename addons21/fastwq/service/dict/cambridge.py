@@ -51,6 +51,9 @@ class Cambridge(WebService):
                                     if snd:
                                         result['pronunciation'][pn+'mp3'] = cambridge_url_base + snd.get('data-src-mp3')
                                     header_found = True
+                    # 词性
+                    pg = element.find('span', class_='posgram ico-bg')
+
                     #义
                     body = element.find('div', class_='pos-body')
                     if body:
@@ -63,9 +66,11 @@ class Cambridge(WebService):
                                 trans = tag.find('span', class_='trans')
                                 es = tag.find_all('div', class_='examp emphasized')
                                 l.append(
-                                    u'<li>{0}{1}{2}{3}</li>'.format(
+                                    u'<li>{0}{1}{2} {3}{4}</li>'.format(
+                                        '<span class="epp-xref">{0}</span>'.format(pg.get_text() if pg else ''),
                                         u'<span class="epp-xref">{0}</span>'.format(i.get_text()) if i else u'',
                                         u'<b class="def">{0}</b>'.format(d.get_text()) if d else u'',
+
                                         u'<span class="trans">{0}</span>'.format(trans.get_text()) if trans else u'',
                                         u''.join(
                                             u'<div class="examp">{0}</div>'.format(e.get_text()) if e else u''
