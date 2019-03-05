@@ -67,6 +67,9 @@ __all__ = [
     'Service', 'WebService', 'LocalService', 'MdxService', 'StardictService', 'QueryResult'
 ]
 
+_default_ua = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 ' \
+             '(KHTML, like Gecko) Chrome/70.0.3538.67 Safari/537.36'
+
 
 def get_hex_name(prefix, val, suffix):
     ''' get sha1 hax name '''
@@ -316,7 +319,7 @@ class WebService(Service):
 
     def get_response(self, url, data=None, headers=None, timeout=10):
         default_headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6'
+            'User-Agent': _default_ua
         }
         if headers:
             default_headers.update(headers)
@@ -338,8 +341,7 @@ class WebService(Service):
         try:
             with open(filename, "wb") as f:
                 f.write(requests.get(url, headers={
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 '
-                                  '(KHTML, like Gecko) Chrome/31.0.1623.0 Safari/537.36'
+                    'User-Agent': _default_ua
                 }).content)
             return True
         except Exception:
@@ -372,7 +374,6 @@ class WebService(Service):
         be added onto the stream returned. This is helpful for some web
         services that sometimes return MP3s that `mplayer` clips early.
         """
-        DEFAULT_UA = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.67 Safari/537.36'
         DEFAULT_TIMEOUT = 3
 
         PADDING = '\0' * 2**11
@@ -411,7 +412,7 @@ class WebService(Service):
             desc = "web request" if len(targets) == 1 \
                 else "web request (%d of %d)" % (number, len(targets))
 
-            headers = {'User-Agent': DEFAULT_UA}
+            headers = {'User-Agent': _default_ua}
             if custom_headers:
                 headers.update(custom_headers)
             
