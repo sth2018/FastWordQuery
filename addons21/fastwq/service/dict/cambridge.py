@@ -11,7 +11,7 @@ cambridge_download_img = True
 class Cambridge(WebService):
 
     def __init__(self):
-        super(Cambridge, self).__init__()
+        super().__init__()
 
     def _get_url(self):
         return cambridge_url_base
