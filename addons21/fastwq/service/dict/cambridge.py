@@ -8,6 +8,7 @@ cambridge_url_base = u'https://dictionary.cambridge.org/'
 cambridge_download_mp3 = True
 cambridge_download_img = True
 
+
 class Cambridge(WebService):
 
     def __init__(self):
@@ -27,15 +28,15 @@ class Cambridge(WebService):
             'def_list': []
         }
 
-        #english
+        # english
         element = soup.find('div', class_='di-body')
         if element:
-            #页
+            # 页
             elements = element.find_all('div', class_='entry-body__el clrd js-share-holder')
             header_found = False
             for element in elements:
                 if element:
-                    #音
+                    # 音
                     if not header_found:
                         header = element.find('div', class_='pos-header')
                         if header:
@@ -54,35 +55,37 @@ class Cambridge(WebService):
                     # 词性
                     pg = element.find('span', class_='posgram ico-bg')
 
-                    #义
-                    body = element.find('div', class_='pos-body')
-                    if body:
-                        tags = body.find_all('div', class_='def-block pad-indent')
-                        if tags:
-                            l = result['def_list']
-                            for tag in tags:
-                                i = tag.find('span', class_='def-info')
-                                d = tag.find('b', class_='def')
-                                trans = tag.find('span', class_='trans')
-                                es = tag.find_all('div', class_='examp emphasized')
-                                l.append(
-                                    u'<li>{0}{1}{2} {3}{4}</li>'.format(
-                                        '<span class="epp-xref">{0}</span>'.format(pg.get_text() if pg else ''),
-                                        u'<span class="epp-xref">{0}</span>'.format(i.get_text()) if i else u'',
-                                        u'<b class="def">{0}</b>'.format(d.get_text()) if d else u'',
+                    # 义
+                    senses = element.find_all('div', class_='sense-block')
+                    if senses:
+                        for sense in senses:
+                            dbs = sense.find_all('div', class_='def-block pad-indent')
+                            if dbs:
+                                l = result['def_list']
+                                for db in dbs:
+                                    i = sense.find('span', class_='def-info')
+                                    d = db.find('b', class_='def')
+                                    tran = db.find('span', class_='trans')
+                                    examps = db.find_all('div', class_='examp emphasized')
+                                    l.append(
+                                        u'<li>{0}{1}{2} {3}{4}</li>'.format(
+                                            '<span class="epp-xref">{0}</span>'.format(pg.get_text() if pg else ''),
 
-                                        u'<span class="trans">{0}</span>'.format(trans.get_text()) if trans else u'',
-                                        u''.join(
-                                            u'<div class="examp">{0}</div>'.format(e.get_text()) if e else u''
-                                            for e in es
+                                            u'<span class="epp-xref">{0}</span>'.format(i.get_text()) if i else u'',
+                                            u'<b class="def">{0}</b>'.format(d.get_text()) if d else u'',
+
+                                            u'<span class="trans">{0}</span>'.format(tran.get_text()) if tran else u'',
+                                            u''.join(
+                                                u'<div class="examp">{0}</div>'.format(e.get_text()) if e else u''
+                                                for e in examps
+                                            )
                                         )
                                     )
-                                )
-                            result['def'] = u'<ul>' + u''.join(s for s in l) + u'</ul>'
-                        img = body.find('img', class_='lightboxLink')
-                        if img:
-                            result['image'] = cambridge_url_base + img.get('data-image')
-                            result['thumb'] = cambridge_url_base + img.get('src')
+                                result['def'] = u'<ul>' + u''.join(s for s in l) + u'</ul>'
+                                img = sense.find('img', class_='lightboxLink')
+                                if img:
+                                    result['image'] = cambridge_url_base + img.get('data-image')
+                                    result['thumb'] = cambridge_url_base + img.get('src')
 
         return self.cache_this(result)
 
