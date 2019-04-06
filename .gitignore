@@ -116,3 +116,6 @@ User*/
 release*.zip
 README.txt
 .fastwq_*_ankihub.json
+
+# idea ide
+/.idea
