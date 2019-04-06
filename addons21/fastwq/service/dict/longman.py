@@ -1,11 +1,10 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 
 import os
 import re
 from bs4 import Tag
 from ..base import *
 from ...utils.misc import format_multi_query_word
-
 
 longman_download_mp3 = True
 longman_download_img = True
@@ -30,8 +29,8 @@ class Longman(WebService):
             assert isinstance(dic_link, Tag)
 
             # remove sound tag
-            am_s_tag = dic_link.find('span', title='Play American pronunciation of {}'.format(self.word))
-            br_s_tag = dic_link.find('span', title='Play British pronunciation of {}'.format(self.word))
+            am_s_tag = dic_link.find('span', {'class': 'speaker amefile fa fa-volume-up hideOnAmp'})
+            br_s_tag = dic_link.find('span', {'class': 'speaker brefile fa fa-volume-up hideOnAmp'})
             if am_s_tag:
                 word_info['am_mp3'] = am_s_tag.get('data-src-mp3', u'')
                 am_s_tag.decompose()
@@ -91,7 +90,7 @@ class Longman(WebService):
                 word_info['pos'] = POS
                 word_info['inflections'] = Inflections
                 head_finded = True
-                #self.cache_this(word_info)
+                # self.cache_this(word_info)
             if head_tag:
                 head_tag.decompose()
 
@@ -118,7 +117,7 @@ class Longman(WebService):
     @export('PHON')
     def fld_phonetic(self):
         return self._get_field('phonetic')
-    
+
     def _fld_mp3(self, fld):
         audio_url = self._get_field(fld)
         if longman_download_mp3 and audio_url:
