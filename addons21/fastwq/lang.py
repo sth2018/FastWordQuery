@@ -100,7 +100,9 @@ _arr = [
     ['DEF', u'释义', u'Definition'],
     ['PHON', u'音标', u'Phonetic Symbols'],
     ['BRE_PHON', u'英式音标', u'Phonetic Symbols (UK)'],
+    ['BRE_PHON_NO_PREFIX', u'英式音标无前缀', u'Phonetic Symbols (UK) no prefix'],
     ['AME_PHON', u'美式音标', u'Phonetic Symbols (US)'],
+    ['AME_PHON_NO_PREFIX', u'美式音标无前缀', u'Phonetic Symbols (US) no prefix'],
     ['IMAGE', u'图片', u'Images'],
 ]
 

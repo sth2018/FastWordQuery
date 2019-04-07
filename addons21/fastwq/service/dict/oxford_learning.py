@@ -1,5 +1,5 @@
 # coding=utf-8
-#from warnings import filterwarnings
+# from warnings import filterwarnings
 
 from bs4 import Tag
 from ..base import *
@@ -14,7 +14,7 @@ import sys
 
 @register([u'牛津学习词典', u'Oxford Learner'])
 class OxfordLearning(WebService):
-    
+
     def __init__(self):
         super(OxfordLearning, self).__init__()
 
@@ -42,9 +42,11 @@ class OxfordLearning(WebService):
             if web_word:
                 self.cache_this(
                     {
-                        'phonetic': '{} {}'.format(web_word.wd_phon_bre, web_word.wd_phon_nam),
+                        'phonetic': '{} {}'.format(web_word.wd_phon_bre, web_word.wd_phon_ame),
                         'phon_bre': '{}'.format(web_word.wd_phon_bre),
-                        'phon_ame': '{}'.format(web_word.wd_phon_nam),
+                        'phon_ame': '{}'.format(web_word.wd_phon_ame),
+                        'phon_bre_no_prefix': '{}'.format(web_word.wd_phon_bre_no_prefix),
+                        'phon_ame_no_prefix': '{}'.format(web_word.wd_phon_ame_no_prefix),
                         'pos': web_word.wd_pos,
                         'img_full': web_word.wd_image_full_url,
                         'img_thumb': web_word.wd_image_thumb_url,
@@ -80,6 +82,14 @@ class OxfordLearning(WebService):
     @export('BRE_PHON')
     def fld_phonetic_uk(self):
         return self._get_single_dict('phon_bre')
+
+    @export('BRE_PHON_NO_PREFIX')
+    def fld_phonetic_us_no_prefix(self):
+        return self._get_single_dict('phon_bre_no_prefix')
+
+    @export('AME_PHON_NO_PREFIX')
+    def fld_phonetic_uk_no_prefix(self):
+        return self._get_single_dict('phon_ame_no_prefix')
 
     @export([u'词性', u'POS'])
     def fld_pos(self):
@@ -211,6 +221,22 @@ class OxfordLearningDictWord:
 
     # endregion
 
+    def _pull_bre_phon(self):
+        try:
+            _tag_phn = self.tag_phon_bre.find('span', self._cls_dic('phon')).get_text().replace('/', '').replace('BrE', '')
+            phon = '/{}/'.format(_tag_phn.text if isinstance(_tag_phn, Tag) else _tag_phn)
+        except:
+            phon = ''
+        return phon
+
+    @property
+    def wd_phon_bre_no_prefix(self):
+        """
+
+        :return: phon
+        """
+        return self._pull_bre_phon()
+
     @property
     def wd_phon_bre(self):
         """
@@ -218,17 +244,12 @@ class OxfordLearningDictWord:
         :return: pre_fix, phon
         """
         try:
-            _tag_phn = self.tag_phon_bre.find('span', self._cls_dic('phon')).contents[3]
-            phon = '/{}/'.format(_tag_phn.text if isinstance(_tag_phn, Tag) else _tag_phn)
-        except:
-            phon = ''
-        try:
             prefix = self.tag_phon_bre.find('span', self._cls_dic('prefix')).string
         except:
             prefix = ''
         return "{} {}".format(
             prefix,
-            phon
+            self._pull_bre_phon()
         )
 
     @property
@@ -238,24 +259,35 @@ class OxfordLearningDictWord:
         except:
             return ''
 
+    def _pull_ame_phon(self):
+        try:
+            _tag_phn = self.tag_phon_nam.find('span', self._cls_dic('phon')).get_text().replace('/', '').replace('NAmE', '')
+            phon = '/{}/'.format(_tag_phn.text if isinstance(_tag_phn, Tag) else _tag_phn)
+        except:
+            phon = ''
+        return phon
+
     @property
-    def wd_phon_nam(self):
+    def wd_phon_ame_no_prefix(self):
+        """
+
+        :return: phon
+        """
+        return self._pull_ame_phon()
+
+    @property
+    def wd_phon_ame(self):
         """
 
         :return: pre_fix, phon
         """
-        try:
-            _tag_phn = self.tag_phon_nam.find('span', self._cls_dic('phon')).contents[3]
-            phon = '/{}/'.format(_tag_phn.text if isinstance(_tag_phn, Tag) else _tag_phn)
-        except:
-            phon = ''
         try:
             prefix = self.tag_phon_nam.find('span', self._cls_dic('prefix')).string
         except:
             prefix = ''
         return "{} {}".format(
             prefix,
-            phon
+            self._pull_ame_phon()
         )
 
     @property
