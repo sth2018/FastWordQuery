@@ -56,7 +56,7 @@ class Cambridge(WebService):
                     pg = element.find('span', class_='posgram ico-bg')
 
                     # 义
-                    senses = element.find_all('div', class_='sense-block')
+                    senses = element.find_all('div', class_='pos-body')
                     if senses:
                         for sense in senses:
                             dbs = sense.find_all('div', class_='def-block pad-indent')
