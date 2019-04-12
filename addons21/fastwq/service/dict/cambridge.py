@@ -69,11 +69,14 @@ class Cambridge(WebService):
                     if senses:
                         for sense in senses:
                             # 像ambivalent之类词语含有ambivalence解释，词性不同
+                            runon_title = None
                             if sense['class'][0] == 'runon':
                                 runon_pos = sense.find('span', class_='pos')
                                 runon_gram = sense.find('span', class_='gram')
                                 if runon_pos is not None:
-                                    pos_gram = (runon_pos.get_text() if runon_pos else '') + (runon_gram.get_text() if runon_gram else '')
+                                    pos_gram = runon_pos.get_text() + (runon_gram.get_text() if runon_gram else '')
+                                h3_rt = sense.find('h3', class_='runon-title')
+                                runon_title = (h3_rt.get_text() if h3_rt else None)
 
                             sense_body = sense.find('div', class_=re.compile("sense-body|runon-body pad-indent"))
 
@@ -102,8 +105,9 @@ class Cambridge(WebService):
                                     tran = block.find('span', class_='trans')
                                     examps = block.find_all('div', class_='examp emphasized')
                                     l.append(
-                                        u'<li>{0}{1}{2}{3} {4}{5}</li>'.format(
+                                        u'<li>{0}{1}{2}{3}{4} {5}{6}</li>'.format(
                                             '<span class="epp-xref">{0}</span>'.format(pos_gram) if pos_gram != '' else '',
+                                            '<span class="epp-xref">{0}</span>'.format(runon_title) if runon_title else '',
                                             '<span class="epp-xref">{0}</span>'.format(phrase) if phrase else '',
                                             '<span class="epp-xref">{0}</span>'.format(def_info) if def_info.strip() != '' else '',
                                             '<b class="def">{0}</b>'.format(d.get_text()) if d else u'',
