@@ -82,11 +82,11 @@ class Cambridge(WebService):
 
                             if sense_body:
                                 l = result['def_list']
-                                phrase = None
                                 for block in sense_body:
                                     if isinstance(block, Tag) is not True:
                                         continue
 
+                                    phrase = None
                                     block_type = block['class'][0]
                                     if block_type == 'def-block':
                                         pass
