@@ -96,15 +96,16 @@ class Cambridge(WebService):
                                     else:
                                         continue
 
-                                    i = block.find('span', class_='def-info')
+                                    span_df = block.find('span', class_='def-info')
+                                    def_info = (span_df.get_text().replace('›', '') if span_df else '')
                                     d = block.find('b', class_='def')
                                     tran = block.find('span', class_='trans')
                                     examps = block.find_all('div', class_='examp emphasized')
                                     l.append(
                                         u'<li>{0}{1}{2}{3} {4}{5}</li>'.format(
-                                            '<span class="epp-xref">{0}</span>'.format(pos_gram) if pos_gram != "" else '',
+                                            '<span class="epp-xref">{0}</span>'.format(pos_gram) if pos_gram != '' else '',
                                             '<span class="epp-xref">{0}</span>'.format(phrase) if phrase else '',
-                                            '<span class="epp-xref">{0}</span>'.format(i.get_text()) if i else '',
+                                            '<span class="epp-xref">{0}</span>'.format(def_info) if def_info.strip() != '' else '',
                                             '<b class="def">{0}</b>'.format(d.get_text()) if d else u'',
 
                                             '<span class="trans">{0}</span>'.format(tran.get_text()) if tran else '',
