@@ -62,6 +62,9 @@ class Cambridge(WebService):
                         senses = element.find_all('div', id=re.compile("english-chinese-traditional*"))
                     else:
                         senses = element.find_all('div', id=re.compile("cald4*"))
+                        # proficiency之类的词语
+                        if not senses:
+                            senses = element.find_all('div', id=re.compile("cbed*"))
                     # 词性
                     span_posgram = element.find('span', class_='posgram ico-bg')
                     pos_gram = (span_posgram.get_text() if span_posgram else '')
