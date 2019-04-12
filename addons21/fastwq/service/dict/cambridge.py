@@ -56,7 +56,12 @@ class Cambridge(WebService):
                                     header_found = True
 
                     # 义
-                    senses = element.find_all('div', id=re.compile("english-chinese-simplified*"))
+                    if 'english-chinese-simplified' in self._get_url():
+                        senses = element.find_all('div', id=re.compile("english-chinese-simplified*"))
+                    elif 'english-chinese-traditional' in self._get_url():
+                        senses = element.find_all('div', id=re.compile("english-chinese-traditional*"))
+                    else:
+                        senses = element.find_all('div', id=re.compile("cald4*"))
                     # 词性
                     pos = element.find('span', class_='pos')
                     gram = element.find('span', class_='gram')
@@ -68,9 +73,9 @@ class Cambridge(WebService):
                             pos_2 = sense.find('span', class_='pos')
                             gram_2 = sense.find('span', class_='gram')
                             if pos_2 is not None:
-                                pos_gram = (pos_2.get_text() if pos_2 else '') + (gram_2.get_text() if gram else '')
+                                pos_gram = (pos_2.get_text() if pos_2 else '') + (gram_2.get_text() if gram_2 else '')
 
-                            sense_body = sense.find('div', class_='sense-body')
+                            sense_body = sense.find('div', class_=re.compile("sense-body|runon-body pad-indent"))
 
                             if sense_body:
                                 l = result['def_list']
@@ -86,6 +91,8 @@ class Cambridge(WebService):
                                         phrase_title = block.find('span', class_='phrase-title')
                                         phrase_name = phrase_title.get_text() if phrase_title else None
                                         pass
+                                    elif block_type == 'runon-body':
+                                        pass
                                     else:
                                         continue
 
@@ -100,7 +107,7 @@ class Cambridge(WebService):
                                             '<span class="epp-xref">{0}</span>'.format(i.get_text()) if i else '',
                                             '<b class="def">{0}</b>'.format(d.get_text()) if d else u'',
 
-                                            u'<span class="trans">{0}</span>'.format(tran.get_text()) if tran else u'',
+                                            '<span class="trans">{0}</span>'.format(tran.get_text()) if tran else '',
                                             u''.join(
                                                 u'<div class="examp">{0}</div>'.format(e.get_text()) if e else u''
                                                 for e in examps
