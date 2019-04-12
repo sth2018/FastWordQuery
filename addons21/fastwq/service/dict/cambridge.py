@@ -1,6 +1,8 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 import os
 import re
+
+from bs4 import Tag
 
 from ..base import *
 
@@ -52,29 +54,71 @@ class Cambridge(WebService):
                                     if snd:
                                         result['pronunciation'][pn+'mp3'] = cambridge_url_base + snd.get('data-src-mp3')
                                     header_found = True
-                    # 词性
-                    pg = element.find('span', class_='posgram ico-bg')
 
                     # 义
-                    senses = element.find_all('div', class_='sense-block')
+                    if 'english-chinese-simplified' in self._get_url():
+                        senses = element.find_all('div', id=re.compile("english-chinese-simplified*"))
+                    elif 'english-chinese-traditional' in self._get_url():
+                        senses = element.find_all('div', id=re.compile("english-chinese-traditional*"))
+                    else:
+                        senses = element.find_all('div', id=re.compile("cald4*"))
+                        # proficiency之类的词语
+                        if not senses:
+                            senses = element.find_all('div', id=re.compile("cbed*"))
+                        # shoplift之类的词语
+                        if not senses:
+                            senses = element.find_all('div', id=re.compile("cacd*"))
+                    # 词性
+                    span_posgram = element.find('span', class_='posgram ico-bg')
+                    pos_gram = (span_posgram.get_text() if span_posgram else '')
+
                     if senses:
                         for sense in senses:
-                            dbs = sense.find_all('div', class_='def-block pad-indent')
-                            if dbs:
+                            # 像ambivalent之类词语含有ambivalence解释，词性不同
+                            runon_title = None
+                            if sense['class'][0] == 'runon':
+                                runon_pos = sense.find('span', class_='pos')
+                                runon_gram = sense.find('span', class_='gram')
+                                if runon_pos is not None:
+                                    pos_gram = runon_pos.get_text() + (runon_gram.get_text() if runon_gram else '')
+                                h3_rt = sense.find('h3', class_='runon-title')
+                                runon_title = (h3_rt.get_text() if h3_rt else None)
+
+                            sense_body = sense.find('div', class_=re.compile("sense-body|runon-body pad-indent"))
+
+                            if sense_body:
                                 l = result['def_list']
-                                for db in dbs:
-                                    i = sense.find('span', class_='def-info')
-                                    d = db.find('b', class_='def')
-                                    tran = db.find('span', class_='trans')
-                                    examps = db.find_all('div', class_='examp emphasized')
+                                for block in sense_body:
+                                    if isinstance(block, Tag) is not True:
+                                        continue
+
+                                    phrase = None
+                                    block_type = block['class'][0]
+                                    if block_type == 'def-block':
+                                        pass
+                                    elif block_type == 'phrase-block':
+                                        phrase_header = block.find('span', class_='phrase-head')
+                                        phrase = phrase_header.get_text() if phrase_header else None
+                                        pass
+                                    elif block_type == 'runon-body':
+                                        pass
+                                    else:
+                                        continue
+
+                                    span_df = block.find('span', class_='def-info')
+                                    def_info = (span_df.get_text().replace('›', '') if span_df else '')
+                                    d = block.find('b', class_='def')
+                                    tran = block.find('span', class_='trans')
+                                    examps = block.find_all('div', class_='examp emphasized')
                                     l.append(
-                                        u'<li>{0}{1}{2} {3}{4}</li>'.format(
-                                            '<span class="epp-xref">{0}</span>'.format(pg.get_text() if pg else ''),
+                                        u'<li>{0}{1}{2}{3}{4} {5}{6}</li>'.format(
+                                            '<span class="epp-xref">{0}</span>'.format(pos_gram) if pos_gram != '' else '',
+                                            '<span class="epp-xref">{0}</span>'.format(runon_title) if runon_title else '',
+                                            '<span class="epp-xref">{0}</span>'.format(phrase) if phrase else '',
+                                            '<span class="epp-xref">{0}</span>'.format(def_info) if def_info.strip() != '' else '',
+                                            '<b class="def">{0}</b>'.format(d.get_text()) if d else u'',
 
-                                            u'<span class="epp-xref">{0}</span>'.format(i.get_text()) if i else u'',
-                                            u'<b class="def">{0}</b>'.format(d.get_text()) if d else u'',
-
-                                            u'<span class="trans">{0}</span>'.format(tran.get_text()) if tran else u'',
+                                            '<span class="trans">{0}</span>'.format(tran.get_text()) if tran else '',
                                             u''.join(
                                                 u'<div class="examp">{0}</div>'.format(e.get_text()) if e else u''
                                                 for e in examps
