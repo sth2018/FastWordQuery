@@ -63,23 +63,23 @@ class Cambridge(WebService):
                     else:
                         senses = element.find_all('div', id=re.compile("cald4*"))
                     # 词性
-                    pos = element.find('span', class_='pos')
-                    gram = element.find('span', class_='gram')
-                    pos_gram = (pos.get_text() if pos else '') + (gram.get_text() if gram else '')
+                    span_posgram = element.find('span', class_='posgram ico-bg')
+                    pos_gram = (span_posgram.get_text() if span_posgram else '')
 
                     if senses:
                         for sense in senses:
                             # 像ambivalent之类词语含有ambivalence解释，词性不同
-                            pos_2 = sense.find('span', class_='pos')
-                            gram_2 = sense.find('span', class_='gram')
-                            if pos_2 is not None:
-                                pos_gram = (pos_2.get_text() if pos_2 else '') + (gram_2.get_text() if gram_2 else '')
+                            if sense['class'][0] == 'runon':
+                                runon_pos = sense.find('span', class_='pos')
+                                runon_gram = sense.find('span', class_='gram')
+                                if runon_pos is not None:
+                                    pos_gram = (runon_pos.get_text() if runon_pos else '') + (runon_gram.get_text() if runon_gram else '')
 
                             sense_body = sense.find('div', class_=re.compile("sense-body|runon-body pad-indent"))
 
                             if sense_body:
                                 l = result['def_list']
-                                phrase_name = None
+                                phrase = None
                                 for block in sense_body:
                                     if isinstance(block, Tag) is not True:
                                         continue
@@ -88,8 +88,8 @@ class Cambridge(WebService):
                                     if block_type == 'def-block':
                                         pass
                                     elif block_type == 'phrase-block':
-                                        phrase_title = block.find('span', class_='phrase-title')
-                                        phrase_name = phrase_title.get_text() if phrase_title else None
+                                        phrase_header = block.find('span', class_='phrase-head')
+                                        phrase = phrase_header.get_text() if phrase_header else None
                                         pass
                                     elif block_type == 'runon-body':
                                         pass
@@ -102,8 +102,8 @@ class Cambridge(WebService):
                                     examps = block.find_all('div', class_='examp emphasized')
                                     l.append(
                                         u'<li>{0}{1}{2}{3} {4}{5}</li>'.format(
-                                            '<span class="epp-xref">{0}</span>'.format(pos_gram),
-                                            '<span class="epp-xref">{0}</span>'.format(phrase_name) if phrase_name else '',
+                                            '<span class="epp-xref">{0}</span>'.format(pos_gram) if pos_gram != "" else '',
+                                            '<span class="epp-xref">{0}</span>'.format(phrase) if phrase else '',
                                             '<span class="epp-xref">{0}</span>'.format(i.get_text()) if i else '',
                                             '<b class="def">{0}</b>'.format(d.get_text()) if d else u'',
 
