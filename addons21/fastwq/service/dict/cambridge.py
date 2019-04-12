@@ -1,4 +1,4 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 import os
 import re
 
@@ -52,14 +52,24 @@ class Cambridge(WebService):
                                     if snd:
                                         result['pronunciation'][pn+'mp3'] = cambridge_url_base + snd.get('data-src-mp3')
                                     header_found = True
-                    # 词性
-                    pg = element.find('span', class_='posgram ico-bg')
 
                     # 义
-                    senses = element.find_all('div', class_='pos-body')
+                    senses = element.find_all('div', id=re.compile("english-chinese-simplified*"))
+                    # 词性
+                    pos = element.find('span', class_='pos')
+                    gram = element.find('span', class_='gram')
+                    pos_gram = (pos.get_text() if pos else '') + (gram.get_text() if gram else '')
+
                     if senses:
                         for sense in senses:
+                            # 像ambivalent之类词语含有ambivalence解释，词性不同
+                            pos_2 = sense.find('span', class_='pos')
+                            gram_2 = sense.find('span', class_='gram')
+                            if pos_2 is not None:
+                                pos_gram = (pos_2.get_text() if pos_2 else '') + (gram_2.get_text() if gram else '')
+
                             dbs = sense.find_all('div', class_='def-block pad-indent')
+
                             if dbs:
                                 l = result['def_list']
                                 for db in dbs:
@@ -69,7 +79,7 @@ class Cambridge(WebService):
                                     examps = db.find_all('div', class_='examp emphasized')
                                     l.append(
                                         u'<li>{0}{1}{2} {3}{4}</li>'.format(
-                                            '<span class="epp-xref">{0}</span>'.format(pg.get_text() if pg else ''),
+                                            '<span class="epp-xref">{0}</span>'.format(pos_gram),
 
                                             u'<span class="epp-xref">{0}</span>'.format(i.get_text()) if i else u'',
                                             u'<b class="def">{0}</b>'.format(d.get_text()) if d else u'',
