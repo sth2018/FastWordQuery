@@ -2,6 +2,8 @@
 import os
 import re
 
+from bs4 import Tag
+
 from ..base import *
 
 cambridge_url_base = u'https://dictionary.cambridge.org/'
@@ -68,21 +70,35 @@ class Cambridge(WebService):
                             if pos_2 is not None:
                                 pos_gram = (pos_2.get_text() if pos_2 else '') + (gram_2.get_text() if gram else '')
 
-                            dbs = sense.find_all('div', class_='def-block pad-indent')
+                            sense_body = sense.find('div', class_='sense-body')
 
-                            if dbs:
+                            if sense_body:
                                 l = result['def_list']
-                                for db in dbs:
-                                    i = sense.find('span', class_='def-info')
-                                    d = db.find('b', class_='def')
-                                    tran = db.find('span', class_='trans')
-                                    examps = db.find_all('div', class_='examp emphasized')
-                                    l.append(
-                                        u'<li>{0}{1}{2} {3}{4}</li>'.format(
-                                            '<span class="epp-xref">{0}</span>'.format(pos_gram),
+                                phrase_name = None
+                                for block in sense_body:
+                                    if isinstance(block, Tag) is not True:
+                                        continue
 
-                                            u'<span class="epp-xref">{0}</span>'.format(i.get_text()) if i else u'',
-                                            u'<b class="def">{0}</b>'.format(d.get_text()) if d else u'',
+                                    block_type = block['class'][0]
+                                    if block_type == 'def-block':
+                                        pass
+                                    elif block_type == 'phrase-block':
+                                        phrase_title = block.find('span', class_='phrase-title')
+                                        phrase_name = phrase_title.get_text() if phrase_title else None
+                                        pass
+                                    else:
+                                        continue
+
+                                    i = block.find('span', class_='def-info')
+                                    d = block.find('b', class_='def')
+                                    tran = block.find('span', class_='trans')
+                                    examps = block.find_all('div', class_='examp emphasized')
+                                    l.append(
+                                        u'<li>{0}{1}{2}{3} {4}{5}</li>'.format(
+                                            '<span class="epp-xref">{0}</span>'.format(pos_gram),
+                                            '<span class="epp-xref">{0}</span>'.format(phrase_name) if phrase_name else '',
+                                            '<span class="epp-xref">{0}</span>'.format(i.get_text()) if i else '',
+                                            '<b class="def">{0}</b>'.format(d.get_text()) if d else u'',
 
                                             u'<span class="trans">{0}</span>'.format(tran.get_text()) if tran else u'',
                                             u''.join(
