@@ -31,7 +31,7 @@ class Cambridge(WebService):
         }
 
         # english
-        element = soup.find('div', class_='page')
+        element = soup.find('div', class_='cdo-dblclick-area')
         if element:
             # 页
             elements = element.find_all('div', class_='entry-body__el clrd js-share-holder')
