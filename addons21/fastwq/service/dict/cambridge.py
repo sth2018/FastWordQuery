@@ -88,22 +88,25 @@ class Cambridge(WebService):
 
                             if sense_body:
                                 l = result['def_list']
-                                for block in sense_body:
-                                    if isinstance(block, Tag) is not True:
-                                        continue
 
-                                    phrase = None
+                                def extract_sense(block, phrase=None):
+                                    if isinstance(block, Tag) is not True:
+                                        return
+
                                     block_type = block['class'][0]
                                     if block_type == 'def-block':
                                         pass
                                     elif block_type == 'phrase-block':
-                                        phrase_header = block.find('span', class_='phrase-head')
-                                        phrase = phrase_header.get_text() if phrase_header else None
-                                        pass
+                                        _phrase_header = block.find('span', class_='phrase-head')
+                                        _phrase_body = block.find('div', class_='phrase-body pad-indent')
+                                        if _phrase_body:
+                                            for p_b in _phrase_body:
+                                                extract_sense(p_b, _phrase_header.get_text() if _phrase_header else None)
+                                        return
                                     elif block_type == 'runon-body':
                                         pass
                                     else:
-                                        continue
+                                        return
 
                                     span_df = block.find('span', class_='def-info')
                                     def_info = (span_df.get_text().replace('›', '') if span_df else '')
@@ -125,6 +128,9 @@ class Cambridge(WebService):
                                             )
                                         )
                                     )
+
+                                for b in sense_body:
+                                    extract_sense(b)
                                 result['def'] = u'<ul>' + u''.join(s for s in l) + u'</ul>'
                                 img = sense.find('img', class_='lightboxLink')
                                 if img:
