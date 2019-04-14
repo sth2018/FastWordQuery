@@ -31,7 +31,7 @@ class Cambridge(WebService):
         }
 
         # english
-        element = soup.find('div', class_='di-body')
+        element = soup.find('div', class_='cdo-dblclick-area')
         if element:
             # 页
             elements = element.find_all('div', class_='entry-body__el clrd js-share-holder')
@@ -56,18 +56,11 @@ class Cambridge(WebService):
                                     header_found = True
 
                     # 义
-                    if 'english-chinese-simplified' in self._get_url():
-                        senses = element.find_all('div', id=re.compile("english-chinese-simplified*"))
-                    elif 'english-chinese-traditional' in self._get_url():
-                        senses = element.find_all('div', id=re.compile("english-chinese-traditional*"))
-                    else:
-                        senses = element.find_all('div', id=re.compile("cald4*"))
-                        # proficiency之类的词语
-                        if not senses:
-                            senses = element.find_all('div', id=re.compile("cbed*"))
-                        # shoplift之类的词语
-                        if not senses:
-                            senses = element.find_all('div', id=re.compile("cacd*"))
+                    senses = element.find_all('div', id=re.compile("english-chinese-simplified*|"
+                                                                   "english-chinese-traditional*|"
+                                                                   "cald4*|"
+                                                                   "cbed*|"
+                                                                   "cacd*"))
                     # 词性
                     span_posgram = element.find('span', class_='posgram ico-bg')
                     pos_gram = (span_posgram.get_text() if span_posgram else '')
@@ -88,22 +81,25 @@ class Cambridge(WebService):
 
                             if sense_body:
                                 l = result['def_list']
-                                for block in sense_body:
-                                    if isinstance(block, Tag) is not True:
-                                        continue
 
-                                    phrase = None
+                                def extract_sense(block, phrase=None):
+                                    if isinstance(block, Tag) is not True:
+                                        return
+
                                     block_type = block['class'][0]
                                     if block_type == 'def-block':
                                         pass
                                     elif block_type == 'phrase-block':
-                                        phrase_header = block.find('span', class_='phrase-head')
-                                        phrase = phrase_header.get_text() if phrase_header else None
-                                        pass
+                                        _phrase_header = block.find('span', class_='phrase-head')
+                                        _phrase_body = block.find('div', class_='phrase-body pad-indent')
+                                        if _phrase_body:
+                                            for p_b in _phrase_body:
+                                                extract_sense(p_b, _phrase_header.get_text() if _phrase_header else None)
+                                        return
                                     elif block_type == 'runon-body':
                                         pass
                                     else:
-                                        continue
+                                        return
 
                                     span_df = block.find('span', class_='def-info')
                                     def_info = (span_df.get_text().replace('›', '') if span_df else '')
@@ -125,6 +121,9 @@ class Cambridge(WebService):
                                             )
                                         )
                                     )
+
+                                for b in sense_body:
+                                    extract_sense(b)
                                 result['def'] = u'<ul>' + u''.join(s for s in l) + u'</ul>'
                                 img = sense.find('img', class_='lightboxLink')
                                 if img:
