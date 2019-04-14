@@ -31,7 +31,7 @@ class Cambridge(WebService):
         }
 
         # english
-        element = soup.find('div', class_='di-body')
+        element = soup.find('div', class_='page')
         if element:
             # 页
             elements = element.find_all('div', class_='entry-body__el clrd js-share-holder')
@@ -56,18 +56,11 @@ class Cambridge(WebService):
                                     header_found = True
 
                     # 义
-                    if 'english-chinese-simplified' in self._get_url():
-                        senses = element.find_all('div', id=re.compile("english-chinese-simplified*"))
-                    elif 'english-chinese-traditional' in self._get_url():
-                        senses = element.find_all('div', id=re.compile("english-chinese-traditional*"))
-                    else:
-                        senses = element.find_all('div', id=re.compile("cald4*"))
-                        # proficiency之类的词语
-                        if not senses:
-                            senses = element.find_all('div', id=re.compile("cbed*"))
-                        # shoplift之类的词语
-                        if not senses:
-                            senses = element.find_all('div', id=re.compile("cacd*"))
+                    senses = element.find_all('div', id=re.compile("english-chinese-simplified*|"
+                                                                   "english-chinese-traditional*|"
+                                                                   "cald4*|"
+                                                                   "cbed*|"
+                                                                   "cacd*"))
                     # 词性
                     span_posgram = element.find('span', class_='posgram ico-bg')
                     pos_gram = (span_posgram.get_text() if span_posgram else '')
