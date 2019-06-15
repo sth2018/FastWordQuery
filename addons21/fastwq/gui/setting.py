@@ -79,6 +79,16 @@ class SettingDialog(Dialog):
         layout.addLayout(hbox)
 
         hbox = QHBoxLayout()
+        input_sound_str = QLineEdit()
+        input_sound_str.setText(config.sound_str)
+        input_label = QLabel(_("SOUND_FORMAT") + ":", parent=self)
+        hbox.addWidget(input_label)
+        hbox.setStretchFactor(input_label, 1)
+        hbox.addWidget(input_sound_str)
+        hbox.setStretchFactor(input_sound_str, 2)
+        layout.addLayout(hbox)
+
+        hbox = QHBoxLayout()
         okbtn = QDialogButtonBox(parent=self)
         okbtn.setStandardButtons(QDialogButtonBox.Ok)
         okbtn.clicked.connect(self.accept)
@@ -98,6 +108,7 @@ class SettingDialog(Dialog):
         self.check_ighore_mdx_wordcase = check_ighore_mdx_wordcase
         self.input_thread_number = input_thread_number
         self.input_cloze_str = input_cloze_str
+        self.input_sound_str = input_sound_str
 
         layout.setAlignment(Qt.AlignTop | Qt.AlignLeft)
         self.setLayout(layout)
@@ -112,7 +123,8 @@ class SettingDialog(Dialog):
             'ignore_accents': False,
             'ignore_mdx_wordcase': False,
             'thread_number': 16,
-            'cloze_str': '{{c1::%s}}'
+            'cloze_str': '{{c1::%s}}',
+            'sound_str': '[sound:{0}]'
         }
         config.update(data)
         self.check_force_update.setChecked(config.force_update)
@@ -120,6 +132,7 @@ class SettingDialog(Dialog):
         self.check_ighore_mdx_wordcase.setChecked(config.ignore_mdx_wordcase)
         self.input_thread_number.setValue(config.thread_number)
         self.input_cloze_str.setText(config.cloze_str)
+        self.input_sound_str.setText(config.sound_str)
 
     def save(self):
         data = {
@@ -127,6 +140,7 @@ class SettingDialog(Dialog):
             'ignore_accents': self.check_ignore_accents.isChecked(),
             'ignore_mdx_wordcase': self.check_ighore_mdx_wordcase.isChecked(),
             'thread_number': self.input_thread_number.value(),
-            'cloze_str': self.input_cloze_str.text()
+            'cloze_str': self.input_cloze_str.text(),
+            'sound_str': self.input_sound_str.text()
         }
         config.update(data)

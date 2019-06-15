@@ -295,7 +295,7 @@ class Service(object):
 
     @staticmethod
     def get_anki_label(filename, type_):
-        formats = {'audio': u'[sound:{0}]',
+        formats = {'audio': config.sound_str,
                    'img': u'<img src="{0}">',
                    'video': u'<video controls="controls" width="100%" height="auto" src="{0}"></video>'}
         return formats[type_].format(filename)

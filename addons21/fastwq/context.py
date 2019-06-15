@@ -142,5 +142,15 @@ class Config(object):
             tmpstr = '{{c1::%s}}'
         return tmpstr
 
+    @property
+    def sound_str(self):
+        '''sound formater string'''
+        # 设置音频播放按钮大小
+        # <span style="width:24px;height:24px;">[sound:{0}]</span>
+        tmpstr = self.data.get('sound_str', u'[sound:{0}]')
+        if len(tmpstr.split('{0}')) != 2:
+            tmpstr = u'[sound:{0}]'
+        return tmpstr
+
 
 config = Config(mw)

@@ -92,6 +92,7 @@ _arr = [
     ['OPTIONS', u'选项', u'Options'],
     ['CLOZE_WORD', u'单词填空', u'Cloze word'],
     ['CLOZE_WORD_FORMAT', '单词填空格式', 'Cloze word formater'],
+    ['SOUND_FORMAT', '发音格式化', 'Sound formater'],
     ['BRE_PRON', u'英式发音', u'British Pronunciation'],
     ['AME_PRON', u'美式发音', u'American Pronunciation'],
     ['PRON', u'发音', u'Audio Pronunciation'],
