@@ -45,10 +45,10 @@ class Eudict(WebService):
                     maps = []
                     for element in el_list:
                         # 例句
-                        i_str = ''
+                        i_str = str(element)
                         m = element.find('div', {'class': 'content'})
                         if m:
-                            i_str = str(m)
+                            # i_str = str(m)
                             # 声音
                             sound = url.format(
                                 element.get('source'),
@@ -102,12 +102,12 @@ class Eudict(WebService):
         return self._get_field('phonitic')
 
     @export([u'英汉-汉英词典', u'English-chinese/Chinese-english'])
-    @with_styles(css=css)
+    @with_styles(need_wrap_css=True, cssfile='_eudict.css')
     def fld_fccf(self):
         return self._get_field('fccf')
 
     @export([u'英语例句库', u'English examples'])
-    @with_styles(css=css)
+    @with_styles(need_wrap_css=True, cssfile='_eudict.css')
     def fld_example(self):
         return self._get_field('example')
 
@@ -116,11 +116,11 @@ class Eudict(WebService):
         return self._get_field('syn')
 
     @export([u'英英词典', u'English-english'])
-    @with_styles(css=css)
+    @with_styles(need_wrap_css=True, cssfile='_eudict.css')
     def fld_ff(self):
         return self._get_field('ff')
 
     @export([u'原声例句', u'Original examples'])
-    @with_styles(css=css)
+    @with_styles(need_wrap_css=True, cssfile='_eudict.css')
     def fld_oexample(self):
         return self._get_field('oexample')
