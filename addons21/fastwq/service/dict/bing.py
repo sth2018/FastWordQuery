@@ -12,7 +12,7 @@ class Bing(WebService):
         super(Bing, self).__init__()
 
     def _get_from_api(self):
-        data = self.get_response(u"http://cn.bing.com/dict/search?q={}&mkt=zh-cn".format(self.quote_word))
+        data = self.get_response(u"https://cn.bing.com/dict/search?q={}&mkt=zh-cn".format(self.quote_word))
         soup = parse_html(data)
         result = {
             'pronunciation': {'AmE': '', 'BrE': '', 'AmEmp3': '', 'BrEmp3': ''},
@@ -25,7 +25,7 @@ class Bing(WebService):
         if element:
             audios = element.find_all('a')
             #美式英标
-            tag = element.find('div', class_='hd_pr')
+            tag = element.find('div', class_='hd_prUS')
             if tag:
                 result['pronunciation']['AmE'] = str(tag)
                 #美音
@@ -36,7 +36,7 @@ class Bing(WebService):
                         result['pronunciation']['AmEmp3'] = u''.join(re.findall(r'https://.*\.mp3', audio_url))
 
             #英式音标
-            tag = element.find('div', class_='hd_prUS')
+            tag = element.find('div', class_='hd_pr')
             if tag:
                 result['pronunciation']['BrE'] = str(tag)
                 #英音
