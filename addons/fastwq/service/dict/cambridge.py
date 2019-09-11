@@ -25,19 +25,19 @@ class Cambridge(WebService):
             'def_list': []
         }
 
-        #english
-        element = soup.find('div', class_='di-body')
+        # english
+        element = soup.find('div', class_='page')
         if element:
-            #页
-            elements = element.find_all('div', class_='entry-body__el clrd js-share-holder')
+            # 页
+            elements = element.find_all('div', class_='entry-body__el')
             header_found = False
             for element in elements:
                 if element:
-                    #音
+                    # 音
                     if not header_found:
                         header = element.find('div', class_='pos-header')
                         if header:
-                            tags = header.find_all('span', class_='pron-info')
+                            tags = header.find_all('span', class_='dpron-i')
                             if tags:
                                 for tag in tags:
                                     r = tag.find('span', class_='region')
@@ -45,20 +45,20 @@ class Cambridge(WebService):
                                     pn = 'AmE' if reg=='us' else 'BrE'
                                     p = tag.find('span', class_='pron')
                                     result['pronunciation'][pn] = str(p.get_text()).decode('utf-8') if p else u''
-                                    snd = tag.find('span', class_='circle circle-btn sound audio_play_button')
+                                    snd = tag.find('source', type='audio/mpeg')
                                     if snd:
-                                        result['pronunciation'][pn+'mp3'] = cambridge_url_base + snd.get('data-src-mp3')
+                                        result['pronunciation'][pn + 'mp3'] = cambridge_url_base + snd.get('src')
                                     header_found = True
                     #义
                     body = element.find('div', class_='pos-body')
                     if body:
-                        tags = body.find_all('div', class_='def-block pad-indent')
+                        tags = body.find_all('div', class_='def-block')
                         if tags:
                             l = result['def_list']
                             for tag in tags:
                                 i = tag.find('span', class_='def-info')
-                                d = tag.find('b', class_='def')
-                                es = tag.find_all('div', class_='examp emphasized')
+                                d = tag.find('div', class_='def')
+                                es = tag.find_all('div', class_='examp dexamp')
                                 l.append(
                                     u'<li>{0}{1}{2}</li>'.format(
                                         u'<span class="epp-xref">{0}</span>'.format(str(i.get_text()).decode('utf-8')) if i else u'',
