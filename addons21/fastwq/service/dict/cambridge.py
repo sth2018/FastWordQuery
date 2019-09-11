@@ -31,10 +31,10 @@ class Cambridge(WebService):
         }
 
         # english
-        element = soup.find('div', class_='cdo-dblclick-area')
+        element = soup.find('div', class_='page')
         if element:
             # 页
-            elements = element.find_all('div', class_='entry-body__el clrd js-share-holder')
+            elements = element.find_all('div', class_='entry-body__el')
             header_found = False
             for element in elements:
                 if element:
@@ -42,7 +42,7 @@ class Cambridge(WebService):
                     if not header_found:
                         header = element.find('div', class_='pos-header')
                         if header:
-                            tags = header.find_all('span', class_=re.compile("uk|us"))
+                            tags = header.find_all('span', class_='dpron-i')
                             if tags:
                                 for tag in tags:
                                     r = tag.find('span', class_='region')
@@ -50,19 +50,15 @@ class Cambridge(WebService):
                                     pn = 'AmE' if reg=='us' else 'BrE'
                                     p = tag.find('span', class_='pron')
                                     result['pronunciation'][pn] = p.get_text() if p else u''
-                                    snd = tag.find('span', class_='circle circle-btn sound audio_play_button')
+                                    snd = tag.find('source', type='audio/mpeg')
                                     if snd:
-                                        result['pronunciation'][pn+'mp3'] = cambridge_url_base + snd.get('data-src-mp3')
+                                        result['pronunciation'][pn+'mp3'] = cambridge_url_base + snd.get('src')
                                     header_found = True
 
                     # 义
-                    senses = element.find_all('div', id=re.compile("english-chinese-simplified*|"
-                                                                   "english-chinese-traditional*|"
-                                                                   "cald4*|"
-                                                                   "cbed*|"
-                                                                   "cacd*"))
+                    senses = element.find_all('div', class_='pos-body')
                     # 词性
-                    span_posgram = element.find('span', class_='posgram ico-bg')
+                    span_posgram = element.find('div', class_='posgram')
                     pos_gram = (span_posgram.get_text() if span_posgram else '')
 
                     if senses:
@@ -103,9 +99,9 @@ class Cambridge(WebService):
 
                                     span_df = block.find('span', class_='def-info')
                                     def_info = (span_df.get_text().replace('›', '') if span_df else '')
-                                    d = block.find('b', class_='def')
+                                    d = block.find('div', class_='def')
                                     tran = block.find('span', class_='trans')
-                                    examps = block.find_all('div', class_='examp emphasized')
+                                    examps = block.find_all('span', class_='eg deg')
                                     l.append(
                                         u'<li>{0}{1}{2}{3}{4} {5}{6}</li>'.format(
                                             '<span class="epp-xref">{0}</span>'.format(pos_gram) if pos_gram != '' else '',
