@@ -31,7 +31,8 @@ class Cambridge(WebService):
         }
 
         # english
-        element = soup.find('div', class_='page')
+        page = 'page' if type(self).__name__ == 'CambridgeEE' else 'di-body'
+        element = soup.find('div', class_=page)
         if element:
             # 页
             elements = element.find_all('div', class_='entry-body__el')
@@ -101,7 +102,7 @@ class Cambridge(WebService):
                                     def_info = (span_df.get_text().replace('›', '') if span_df else '')
                                     d = block.find('div', class_='def')
                                     tran = block.find('span', class_='trans')
-                                    examps = block.find_all('span', class_='eg deg')
+                                    examps = block.find_all('div', class_='examp dexamp')
                                     l.append(
                                         u'<li>{0}{1}{2}{3}{4} {5}{6}</li>'.format(
                                             '<span class="epp-xref">{0}</span>'.format(pos_gram) if pos_gram != '' else '',
