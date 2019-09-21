@@ -102,13 +102,16 @@ class Ldoce5plus(MdxService):
                     i_str = e[1]
                     sound = e[0]
                     mp3 = self._fld_audio(sound.groups()[0])
-                    i_str = re.sub(r'<a[^>]+?href=\"sound\:\/.*?\.mp3\".*<\/a>', '', i_str).strip()
+                    i_str = re.sub('<[^<]+?>', '', i_str)
+                    i_str = re.sub('\xa0', '', i_str)
+                    # i_str = re.sub(r'<a[^>]+?href=\"sound\:\/.*?\.mp3\".*<\/a>', '', i_str).strip()
                     # chinese text
-                    cn_text = re.search(r'<div class="cn_txt">(\s*\S*)<\/div><\/span>', i_str)
-                    cn_text_strip = " "
-                    if cn_text:
-                        cn_text_strip = cn_text.groups()[0]
-                    i_str = re.sub(r'(<div class="cn_txt">\s*\S*<\/div>)<\/span>', '', i_str).strip()
-                    my_str = my_str + mp3 + ' ' + i_str  + cn_text_strip + '<br>'
+                    # cn_text = re.search(r'<div class="cn_txt">(\s*\S*)<\/div><\/span>', i_str)
+                    # cn_text_strip = " "
+                    # if cn_text:
+                    #     cn_text_strip = cn_text.groups()[0]
+                    # i_str = re.sub(r'(<div class="cn_txt">\s*\S*<\/div>)<\/span>', '', i_str).strip()
+                    # my_str = my_str + mp3 + ' ' + i_str  + cn_text_strip + '<br>'
+                    my_str = my_str + mp3 + ' ' + i_str  + '<br>'
             return my_str
         return ''
