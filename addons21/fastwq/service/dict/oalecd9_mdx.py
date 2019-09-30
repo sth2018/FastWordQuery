@@ -29,7 +29,7 @@ class oalecd9_mdx(MdxService):
                 service = service_pool.get(clazz.__unique__)
                 title = service.builder._title if service and service.support else u''
                 service_pool.put(service)
-                if title.startswith(u'牛津高阶'):
+                if title.startswith(u'牛津高阶英汉双解词典'):
                     dict_path = service.dict_path
                     break
         super(oalecd9_mdx, self).__init__(dict_path)
@@ -41,9 +41,19 @@ class oalecd9_mdx(MdxService):
     def _fld_voice(self, html, voice):
         """获取发音字段"""
         for regexp in LANG_TO_REGEXPS[voice]:
-            match = regexp.search(html)
+            original_word = self.word
+            if html.startswith('@@@LINK='):
+                self.word = html[8:]
+                html = self.get_html()
+            match = regexp.findall(html)
             if match:
-                val = '/' + match.group(1)
+                selected_voice = match[0]
+                for voice in match:
+                    if original_word in voice:
+                        selected_voice = voice
+                        break
+                self.word = original_word
+                val = '/' + selected_voice
                 name = get_hex_name('mdx-'+self.unique.lower(), val, 'mp3')
                 name = self.save_file(val, name)
                 if name:
@@ -95,28 +105,35 @@ class oalecd9_mdx(MdxService):
                         us_sound = None
                         en_text = cn_text = ''
                         for sound in sounds:
-                            if sound.find('audio-gbs-liju'):
+                            if sound.find(['audio-gbs-liju','audio-brs-liju']):
                                 br_sound = sound['href'][7:]
-                            elif sound.find('audio-uss-liju'):
+                            elif sound.find(['audio-uss-liju','audio-ams-liju']):
                                 us_sound = sound['href'][7:]
-                        en_text = element.x['wd']
-                        cn_text = element.chn.contents[1]
+                        try:
+                            en_text = element.x['wd']
+                            cn_text = element.x.chn.contents[1]
+                        except:
+                            continue
                         if us_sound: # I mainly use us_sound
                             maps.append([br_sound, us_sound,en_text,cn_text])
 
             my_str = ''
             range_arr = range_arr if range_arr else [random.randrange(0, len(maps) - 1, 1)]
-            for i, e in enumerate(maps):
-                if i in range_arr:
-                    br_sound = e[0]
-                    us_sound = e[1]
-                    en_text = e[2]
-                    cn_text = e[3]
-                    us_mp3 = self._fld_audio(us_sound)
-                    # if br_sound != 'None':
-                    #     br_mp3 = self._fld_audio(br_sound)
-                    # please modify the code here to get br_mp3
-                    # my_str = my_str + br_mp3 + ' ' + en_text  + cn_text + '<br>'
-                    my_str = my_str + us_mp3 + ' ' + en_text  + cn_text + '<br>'
+            if maps:
+                for i, e in enumerate(maps):
+                    if i in range_arr:
+                        br_sound = e[0]
+                        us_sound = e[1]
+                        en_text = e[2]
+                        cn_text = e[3]
+                        us_mp3 = self._fld_audio(us_sound)
+                        if br_sound != 'None':
+                            br_mp3 = self._fld_audio(br_sound)
+                        else:
+                            br_mp3 = ''
+                        # please modify the code here to get br_mp3
+                        # my_str = my_str + br_mp3 + ' ' + en_text  + cn_text + '<br>'
+                        # my_str = my_str + us_mp3 + en_text  + cn_text + '<br>'
+                        my_str = my_str + br_mp3 + us_mp3 + en_text  + cn_text + '<br>'
             return my_str
         return ''
