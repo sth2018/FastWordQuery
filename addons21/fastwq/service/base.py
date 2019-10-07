@@ -63,7 +63,7 @@ except ImportError:
 
 
 __all__ = [
-    'register', 'export', 'copy_static_file', 'with_styles', 'parse_html', 'service_wrap', 'get_hex_name', 
+    'register', 'export', 'copy_static_file', 'with_styles', 'parse_html', 'service_wrap', 'get_hex_name',
     'Service', 'WebService', 'LocalService', 'MdxService', 'StardictService', 'QueryResult'
 ]
 
@@ -88,7 +88,7 @@ def register(labels):
     """
     def _deco(cls):
         cls.__register_label__ = _cl(labels)
-        
+
         methods = inspect.getmembers(cls, predicate=_is_method_or_func)
         exports = []
         for method in methods:
@@ -250,7 +250,7 @@ class Service(object):
     @property
     def word(self):
         return self._word
-    
+
     @word.setter
     def word(self, value):
         value = re.sub(r'</?\w+[^>]*>', '', value)
@@ -259,11 +259,11 @@ class Service(object):
     @property
     def quote_word(self):
         return urllib2.quote(self.word)
-    
+
     @property
     def support(self):
         return True
-        
+
     @property
     def fields(self):
         return self._fields
@@ -415,7 +415,7 @@ class WebService(Service):
             headers = {'User-Agent': _default_ua}
             if custom_headers:
                 headers.update(custom_headers)
-            
+
             response = urllib2.urlopen(
                 urllib2.Request(
                     url=('?'.join([url, params]) if params and method == 'GET'
@@ -672,8 +672,8 @@ class MdxService(LocalService):
             html = html.replace(each, u'_' + each.split('/')[-1])
         # find sounds
         p = re.compile(
-            r'<a[^>]+?href=\"(sound:_.*?\.(?:mp3|wav))\"[^>]*?>(.*?)</a>')
-        html = p.sub(u"[\\1]\\2", html)
+            r'<a[^>]+?href=\"sound:_(.*?\.(?:mp3|wav))\"[^>]*?>(.*?)</a>')
+        html = p.sub("[sound:mdx-"+self.title+"-"+u"\\1]\\2", html)
         self.save_media_files(media_files_set)
         for f in mcss:
             cssfile = u'_{}'.format(os.path.basename(f.replace('\\', os.path.sep)))
@@ -684,7 +684,7 @@ class MdxService(LocalService):
                 css_src = self.dict_path.replace(self._filename + u'.mdx', f)
                 if os.path.exists(css_src):
                     shutil.copy(css_src, cssfile)
-                else:    
+                else:
                     self.missed_css.add(cssfile[1:])
             new_css_file, wrap_class_name = wrap_css(cssfile)
             html = html.replace(cssfile, new_css_file)
@@ -701,6 +701,8 @@ class MdxService(LocalService):
         basename = os.path.basename(filepath_in_mdx.replace('\\', os.path.sep))
         if savepath is None:
             savepath = '_' + basename
+            if basename.lower().endswith(("mp3","wav")):
+                savepath = "mdx-" + self.title + "-" + basename
         if os.path.exists(savepath):
             return savepath
         try:
@@ -739,6 +741,7 @@ class MdxService(LocalService):
                     lst.extend(keys)
             for each in lst:
                 self.save_default_file(each)
+
         except AttributeError:
             pass
 
