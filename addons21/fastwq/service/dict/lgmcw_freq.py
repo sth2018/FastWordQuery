@@ -28,13 +28,23 @@ class lgmcw_Sound(MdxService):
     def title(self):
         return getattr(self, '__register_label__', self.unique)
 
-
-
+    def get_html_all(self):
+        html = self.get_html()
+        if not html:
+            self.word = self.word.lower()
+            html = self.get_html()
+            if not html:
+                self.word = self.word.capitalize()
+                html = self.get_html()
+                if not html:
+                    self.word = self.word.upper()
+                    html = self.get_html()
+        return html
 
 
     @export('BNC_freq')
     def bnc_freq(self):
-        html = self.get_html()
+        html = self.get_html_all()
         if html:
             freq = re.search(r'<BNC-R>(.*?)</BNC-R>', html)
             if freq:
@@ -43,8 +53,9 @@ class lgmcw_Sound(MdxService):
 
     @export('IWEB_freq')
     def iweb_freq(self):
-        html = self.get_html()
+        html = self.get_html_all()
         if html:
+            print(html)
             freq = re.search(r'<iWeb-R>(.*?)</iWeb-R>', html)
             if freq:
                 return freq[1].strip()
@@ -52,7 +63,7 @@ class lgmcw_Sound(MdxService):
 
     @export('ECO_freq')
     def eco_freq(self):
-        html = self.get_html()
+        html = self.get_html_all()
         if html:
             freq = re.search(r'<ECO-R>(.*?)</ECO-R>', html)
             if freq:
@@ -61,7 +72,7 @@ class lgmcw_Sound(MdxService):
 
     @export('COCA_freq')
     def coca_freq(self):
-        html = self.get_html()
+        html = self.get_html_all()
         if html:
             freq = re.search(r'<COCA-R>(.*?)</COCA-R>', html)
             if freq:
