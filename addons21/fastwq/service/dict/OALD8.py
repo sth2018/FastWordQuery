@@ -1,8 +1,10 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 import os
 import re
 import random
 from ..base import *
+grand_father_dir=os.path.join( os.path.dirname(__file__),'../..')
+from ..base import config
 
 VOICE_PATTERN = r'<a href="sound://([\w/]+\w*\.mp3)"><img src="img/spkr_%s.png"></a>'
 VOICE_PATTERN_WQ = r'<span class="%s"><a href="sound://([\w/]+\w*\.mp3)">(.*?)</span %s>'
@@ -14,7 +16,7 @@ MAPPINGS = [
 ]
 LANG_TO_REGEXPS = {lang: regexps for lang, regexps in MAPPINGS}
 # u'E:\\BaiduYunDownload\\mdx\\L6mp3.mdx'
-DICT_PATH = u'C:\\dict\\OALD8\\牛津高阶8简体.mdx'
+DICT_PATH = u'E:\\BaiduYunDownload\\mdx\\L6mp3.mdx'
 
 
 @register([u'本地词典-OALD8', u'MDX-OALD8'])
