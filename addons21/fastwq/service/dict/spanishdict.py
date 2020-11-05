@@ -25,7 +25,8 @@ class SpanishDict(WebService):
     def fld_image(self):
         #image_url = "https://d25rq8gxcq0p71.cloudfront.net/dictionary-images/300/c5453acf-e0f1-4fe4-9534-607c9aa21e85.jpg"
         image_url = self._get_field('image_url')
-        filename = get_hex_name(self.unique.lower(), image_url, 'jpg')
+        file_extension = os.path.splitext(image_url)[1][1:].strip().lower()
+        filename = get_hex_name(self.unique.lower(), image_url, file_extension)
         if os.path.exists(filename) or self.download(image_url, filename):
             return self.get_anki_label(filename, 'img')
         return ''
