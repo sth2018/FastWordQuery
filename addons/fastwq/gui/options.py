@@ -45,7 +45,7 @@ class OptionsDialog(Dialog):
     '''
 
     __slot__ = [
-        'begore_build',
+        'before_build',
         'after_build'
     ]
     _signal = pyqtSignal(str)
