@@ -45,7 +45,7 @@ class OptionsDialog(Dialog):
     setting query dictionary and fileds
     '''
 
-    __slot__ = ['begore_build', 'after_build']
+    __slot__ = ['before_build', 'after_build']
     _signal = pyqtSignal(str)
 
     _NULL_ICON = get_icon('null.png')
