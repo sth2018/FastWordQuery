@@ -153,4 +153,10 @@ class Config(object):
         return tmpstr
 
 
+wp = mw.pm.profileFolder()
+mediaPath = os.path.join(wp, "collection.media")
+os.chdir(mediaPath)
 config = Config(mw)
+# credit to https://github.com/AnkiStudio, https://github.com/sth2018/FastWordQuery/issues/259
+# fix the `OSError: [Errno 30] Read-only file system: '_fastwqcfg.json'` problem when modifying the configurations
+# by changing the root to a path with w permission
